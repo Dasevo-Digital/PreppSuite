@@ -190,7 +190,12 @@ in-memory list. A background isolate ends after every run.
 Acknowledgement compares the complete stored warning to the version actually
 sent, in one transaction. Source and external id alone are insufficient: a
 foreground poll and a background poll can overlap, and an escalation must
-stay pending even when its source reuses a timestamp.
+stay pending even when its source reuses a timestamp. A row that continues
+an announced version of the same warning at the same or a lower level
+takes over that version's `notified` when it is written (#395) -- the same
+rule that lets an unchanged row keep its own, not an acknowledgement --
+and the other areas of an announced MeteoAlarm message are acknowledged
+together with the one that was announced.
 
 **A watched query cannot say "now".** drift binds a value once, when the
 query is built, and runs the query again with that value on every change.
@@ -242,7 +247,11 @@ the pets behind. "Replace" deletes this device's rows inside the move
 moving into — the folder read and checked, the other device's rows
 applied. Deleting first used to leave a device with nothing whenever the
 join or the handover then failed. Merging a handover still moves first,
-because the offer is read under the new id; that loses nothing.
+because the offer is read under the new id; that loses nothing. The move
+takes turns with `HouseholdProfileController.forHousehold` and `forget`
+(`HouseholdTurns`, #397): work for one household that starts on its own
+-- the built-in checklists -- never runs beside it, and work queued
+behind a move finds its household gone and does nothing.
 
 **A device only ever writes its own file in the shared folder.** That is
 what makes the whole design work without locking: two people editing at the
@@ -324,8 +333,11 @@ whose point is working without a network.
 **ZIM title search reads the archive's own order; full text is a separate
 index the app builds.** `searchTitles` binary-searches the title order the
 archive carries — version 6 keeps it in an `X/listing` entry, version 5 in
-the header — and capitalizes the query's first letter, because that order
-is by bytes and Wikipedia titles start with a capital.
+the header — by namespace and then title, because that is how the order is
+sorted and a version 5 table holds every entry, pictures and metadata
+included. The order is by bytes, so the query is looked for in each of
+`titleSpellings` — as typed, with a capital first letter, with every word
+capitalised — and the results are merged in that order (#407).
 
 **Full text has one index: the one the app builds.**
 `knowledgeFullTextProvider` asks `KnowledgeIndexDatabase`, the FTS5 index
@@ -391,7 +403,10 @@ a whole country possible at all: Germany flat at zoom 14 is 319,812
 tiles, staggered around Hannover it is 85,063 with every street in
 Niedersachsen still in it. A ring its neighbour already covers to the
 deepest level drops out, or the plan would hold a level back for a town
-that its state already contains.
+that its state already contains. The world base under the rings is
+fetched but is not the map's area: the plan's box, the header and the
+metadata's `bounds` are the rings' (#389). Whatever asks what a map
+covers reads `PmTilesArchive.bounds`, never the header fields.
 
 **The tile limit is a request budget, never a storage one.** The app must
 work offline, so the archive may be as large as the device allows; what
@@ -616,16 +631,25 @@ of converting there, and for why food and water are the only categories
 whose unit must name a measure. A null means the label did not say and is
 never stored as zero —
 the supply calculator adds these up, and a guessed zero is
-indistinguishable from a measured one. A nutrient heavier than the
-package it is in is rejected, which is what catches the common Open Food
-Facts error of a per-package figure typed into the per-100 g field.
+indistinguishable from a measured one. A figure that 100 of the basis
+cannot hold is refused (#402): more than 900 kcal (`maxKcalPer100`, pure
+fat), or a nutrient, or all four together, heavier than 100 g per 100 g
+or 150 g per 100 ml (`maxGramsPer100`; syrup is denser than water). That
+catches the common Open Food Facts error of a per-package figure typed
+into the per-100 g field. The form refuses it, a scan leaves the field
+empty and says so (`scannedNutritionOf`), and a stored row is not marked
+broken for it: the form asks for the correction the next time it is
+saved. Between 03fecf3 and #402 the form took any finite number: the
+earlier check had gone with `package_energy.dart`.
 
 **The home screen widget draws, it never computes** (#105). Android's
 `PreppSuiteWidgetProvider.kt` and the iOS extension in
 `ios/PreppSuiteWidget/` only show what `HomeWidgetPublisher` wrote: the
 overview's two lamps from the same `supplyStatus`/`situationStatus` and
-the same relevance rule, already translated, with an "as of" time. A
-widget that worked anything out on its own could disagree with the app.
+the same relevance rule, already translated, with the time of the last
+complete poll as its "as of" (#394), and a situation state `stale` while
+that is out of date, which both native widgets draw grey. A widget that
+worked anything out on its own could disagree with the app.
 On iOS the data travels through the App Group `group.de.dasevo.preppsuite`,
 named in both entitlements files and registered on the signing account
 once, in Xcode. Xcode writes the team ID into `project.pbxproj` when the
@@ -982,6 +1006,9 @@ Width only, never both axes: two of them stretch the picture to the
 target rectangle before `BoxFit.cover` crops it. And the number is taken
 from the picture's *short* side, because that is the one `cover` fills
 the box from — on a landscape photo in a square tile that is the height.
+The inventory list's thumbnail did both axes until #403 (96 by 96) and
+squeezed every 4:3 photo; it now decodes 160 across
+(`thumbnailCacheWidth`).
 
 **Work that does not change is not repeated every frame.** Decoding a
 warning's areas walks every coordinate pair it names; the situation map
@@ -1072,7 +1099,8 @@ same URL.
 are measured in gigabytes: a resumable HTTP download, where the files
 land, and the banner both features show. It knows nothing about maps or
 archives — the caller passes a callback for what to do with the finished
-file.
+file, and may pass one for what to let go of before the finished file
+replaces one of the same name (#408).
 
 `features/possessions/` is the household's inventory of what it owns,
 with a PDF export meant to be kept somewhere else.
@@ -1187,7 +1215,9 @@ tree; the test suite deliberately targets that layer rather than the UI.
   loop before its persisted value loads. Anything that *acts* on the setting
   rather than displaying it must `await ensureLoaded()` first.
 - Warning region filtering is coarse by design: BBK is Kreis-level at best,
-  MeteoAlarm's area is free text and is never matched. See
+  MeteoAlarm's area is free text that `DwdAreas` maps to a district where
+  it can, and "concerns everyone" where it cannot (see "A `regionKey`
+  must never be free text" below). See
   [`docs/warning-feeds.md`](docs/warning-feeds.md).
 - Background polling is dependable on Android (15-minute floor, a platform
   limit) and opportunistic on iOS. The app never promises the iOS case.
@@ -1214,7 +1244,10 @@ tree; the test suite deliberately targets that layer rather than the UI.
   method names on that channel must stay identical on both sides, and all
   implementations must produce the identical folder layout —
   `deviceFilePath` and friends in `sync_folder.dart` are the single
-  definition of it.
+  definition of it. A few methods are one platform's own: `release` only
+  on Android (#410; `releaseStorageGrant` calls it only for
+  `content://`), `excludeFromBackup` only on iOS, `resolvePath` and
+  `remember` only on macOS.
 - **The scheme in a stored location is what picks the reader.**
   `content://` is Android, `bookmark://` an iOS bookmark, anything else a
   path. Read from the value rather than from the running platform, because
@@ -1578,7 +1611,10 @@ tree; the test suite deliberately targets that layer rather than the UI.
   there — there is no error to notice. It also settles the upgrade: an
   index from before 0.15.0 answers null, is searched unstemmed, and goes
   on working instead of being thrown away, which for a whole Wikipedia
-  would be an hour of rebuilding.
+  would be an hour of rebuilding. The layout is recorded the same way, as
+  `format`: `fts5-ranked-v3` since #391, `fts5-terms-v2` for the unranked
+  layout of 23 September to #391, nothing for the indexes before it. An
+  outdated format is offered a rebuild, never rebuilt unasked.
 - **The stemmers are transcriptions, not approximations, and stay at
   Snowball 2.** `germanStem`, `englishStem`, `spanishStem` and
   `frenchStem` follow the `.sbl` sources word for word and are measured
@@ -1812,7 +1848,10 @@ tree; the test suite deliberately targets that layer rather than the UI.
     or a hotel's sign-in page times out or answers nonsense too.
   - When an offline map is taken into use, `OfflineNearbyPointsKeeper`
     asks QLever (Overpass as the way back) for every defibrillator, well,
-    help point and siren in the map's box and keeps them packed in the
+    help point and siren in the map's area (`PmTilesArchive.bounds`;
+    until #389 the header's box, which every map built in the app gave as
+    the whole world, so no points were ever taken along with one) and
+    keeps them packed in the
     support directory, only the tags the screens read
     (`osmPointKeys`). Germany's box was 49,804 points: 29 MB of table,
     3 MB packed on the way, in about six seconds on 13 November 2026, and
@@ -2038,7 +2077,9 @@ tree; the test suite deliberately targets that layer rather than the UI.
   `/Volumes/PREPP` tomorrow — without this it is a portable program with
   a broken library, which is worse than none; and **taking over an
   installed copy's data copies, never moves**, because that installation
-  is still somebody's. The pointer to a chosen folder lives in a file in
+  is still somebody's; and it happens once, into a folder that holds no
+  household yet, all or nothing and decrypted (`portable_takeover.dart`,
+  #392). The pointer to a chosen folder lives in a file in
   the platform's own Application Support and deliberately **not** in the
   preferences — the preferences are one of the things that move, so the
   way there cannot be kept inside them.
@@ -2767,11 +2808,11 @@ zum Antippen, nicht zum Lesen: Das Feld steht direkt hinter dem Dialog.
 ### Eine Ortung, die nicht kommt, heißt nicht „kein Standort"
 
 `getCurrentPosition` wartet auf eine **frische** Messung. In der Wohnung,
-am Rechner oder mit kaltem Empfänger reichen die fünfzehn Sekunden oft
-nicht — und das Gerät hält währenddessen eine völlig brauchbare Position
-von vor drei Minuten in der Hand. Wer in dieser Lage „Standort konnte
-nicht ermittelt werden" liest, geht eine Einstellung prüfen, die nie aus
-war.
+am Rechner oder mit kaltem Empfänger reichen die fünfzehn Sekunden (für
+eine genaue Messung dreißig) oft nicht — und das Gerät hält währenddessen
+eine völlig brauchbare Position von vor drei Minuten in der Hand. Wer in
+dieser Lage „Standort konnte nicht ermittelt werden" liest, geht eine
+Einstellung prüfen, die nie aus war.
 
 `GeolocationService._getPosition` fällt deshalb auf
 `getLastKnownPosition` zurück. Zwei Dinge daran sind wichtig:
@@ -2782,13 +2823,19 @@ war.
   gestellt hat, und eine verdecken, auf die er reagieren muss.
   `geolocation_fallback_test.dart` prüft genau das mit.
 * Eine alte Messung wird **als alt ausgewiesen**. `ReadablePosition`
-  trägt `takenAt`, und der Bildschirm, auf dem Koordinaten vorgelesen
-  werden, sagt ab zwei Minuten dazu, wie alt sie sind. Koordinaten über
-  Funk sind eine Aussage darüber, wo jemand *jetzt* ist.
+  trägt `takenAt`, und jeder Bildschirm, der von der Messung aus rechnet
+  oder sie weitergibt, sagt ab zwei Minuten dazu, von wann sie ist (#390):
+  Meine Position und die Umgebungssuche das Alter, die Lebenszeichen-SMS
+  „Position von hh:mm“, Weg zum Treffpunkt, Defibrillatoren und
+  Notfallpunkte eine Warnung, dass Entfernung und Richtung ab dort
+  gelten. Koordinaten über Funk sind eine Aussage darüber, wo jemand
+  *jetzt* ist.
 
-Das sitzt im Dienst und nicht in den Bildschirmen: fünf davon fragen nach
-dem Standort, und fünf Rückfälle wären vier Gelegenheiten, einen zu
-vergessen.
+Das sitzt im Dienst und nicht in den Bildschirmen: Inzwischen fragen zwölf
+Stellen nach dem Standort, und zwölf Rückfälle wären elf Gelegenheiten,
+einen zu vergessen. Genau (`high`, 30 s) fragt `getCurrentFix`, grob
+(`low`, 15 s) `getCurrentLatLng` und `determineBundesland`. Wer von seinem
+Standort aus misst, nimmt `getCurrentFix` (#390).
 
 ### Die dunkle Karte wird gedreht, nicht geschrieben
 
@@ -2990,7 +3037,9 @@ sie selbst noch irgendwie auf `.sqlite`. Eine Aufräumschleife über
 `.plaintext-recovery` liegen, und die App legte daneben einen leeren an.
 `_databaseBaseFiles` faltet die beiden Migrationsendungen auf den
 eigentlichen Namen zurück; `local_database_encryption_test.dart` stellt
-jeden Abbruchpunkt nach.
+jeden Abbruchpunkt nach. Das gilt auch ohne die Marke `migrating` (#393):
+Eine Kopie ohne ihre Datenbank wird beim Start zurückbenannt, und wo das
+nicht geht, ist der Zustand `recoveryRequired`.
 
 **Die Migration läuft in einem eigenen Isolate und ist wiederaufnehmbar.**
 `VACUUM INTO` kopiert die ganze Datei, und die Wissensindizes können
@@ -3001,7 +3050,9 @@ verwaisen lassen, was der erste Lauf geschafft hat.
 Ohne Schlüssel ist der Zustand `recoveryRequired`, und der hat seit 2.0.1
 einen Bildschirm: `lib/core/local_data_gate.dart` steht vor der App-Sperre,
 erklärt die Lage und bietet "Neu einrichten" an, das die unlesbaren Dateien
-**umbenennt statt löscht**.
+**umbenennt statt löscht** und einen noch lesbaren Schlüssel ebenso
+aufhebt (`….key.v1.locked-<Stempel>`, #393). Gespeichert wird
+`recoveryRequired` nie; jeder Start fragt den Schlüssel neu.
 
 
 ### Ein Hintergrundlauf, der nichts tun konnte, ist kein erledigter Lauf
@@ -3041,11 +3092,17 @@ geöffnet hat.
 
 **Ein mitgeführter Ordner wird nie versiegelt.** Er geht zum nächsten
 Rechner, der Schlüssel bleibt im Schlüsselbund dieses einen. Deshalb
-verschlüsselt weder `PrivatePreferences` noch die Datenbankschicht, wenn
-`portableLocation.isPortable` gilt, und die Einstellungskarte sagt warum.
-Ein verschlüsselter Ordner, der ohne seinen Schlüssel ankommt, führt nicht
-in einen SQLite-Fehler drei Bildschirme später, sondern in
-`recoveryRequired`.
+versiegeln weder `PrivatePreferences` noch `PhotoVault` etwas, und die
+Datenbankschicht legt keine Datei verschlüsselt an, wenn
+`portableLocation.isPortable` gilt; die Einstellungskarte sagt warum. Der
+Modus im Schlüsselspeicher des Rechners gehört der Installation und wird
+von dort weder gelesen noch geschrieben (#392; bis dahin las die
+Datenbankschicht ihn und legte neue Dateien verschlüsselt an). Was eine
+frühere Fassung im Ordner verschlüsselt oder versiegelt hat, öffnet der
+Schlüssel dieses Rechners, wo er passt; Einstellungen und Fotos werden
+dabei im Klartext zurückgeschrieben. Ein verschlüsselter Ordner, der ohne
+seinen Schlüssel ankommt, führt nicht in einen SQLite-Fehler drei
+Bildschirme später, sondern in `recoveryRequired`.
 
 **Was zwischen Geräten reist, reist im Klartext im verschlüsselten Kanal.**
 `carried_settings.dart` liest die privaten Schlüssel (`_privateSettings`)
@@ -3152,7 +3209,7 @@ nicht lesen.
   fertig, und beide Seiten sagen, was fehlt.
 
 Tests: `test/features/settings/backup_container_test.dart` (Format,
-Manipulation, Überspringen, Format 2) und
+Manipulation, beschädigte Blöcke (#405), Überspringen, Format 2) und
 `integration_test/native_backup_test.dart` (echter Fotospeicher und
 Download-Ordner auf dem Gerät).
 
@@ -3209,8 +3266,10 @@ Weg, auf dem die App sie sich gemerkt hat:
 
 `relinkMovedFiles` läuft deshalb beim Start nach dem Schlüssel und vor den
 Providern, nach einem Versionswechsel höchstens zehn Sekunden, sonst zwei
-(#302). Es läuft bei jedem Start: Auch eine Wiederherstellung aus einer
-Sicherung bringt ein iPhone in einen neuen Container, mit derselben Version.
+(#302). Danach schreibt er nichts mehr (#408): Ab dann gehören Karte und
+Bibliothek der App. Es läuft bei jedem Start: Auch eine Wiederherstellung
+aus einer Sicherung bringt ein iPhone in einen neuen Container, mit
+derselben Version.
 Es probiert Karte, Archive und eigene Dokumente. Was nicht aufgeht, sucht es in den Ordnern, die die App ohne
 Rückfrage erreicht (Download-Ordner, Datenordner, je zwei Ebenen tief): nach
 dem Namen, ein Archiv auch nach seiner genauen Größe, denn ein Archiv mit
@@ -3236,7 +3295,8 @@ die neue Auswahl. Kennung, Suchindex, Lesestelle und der Vermerk
 Nach einem Ereignis ist das mobile Internet zuerst überlastet. Eine SMS
 kommt oft noch durch: Sie ist klein und wird gespeichert und weitergereicht.
 `CheckInScreen` (#116) baut deshalb die Nachricht (Zustand, Uhrzeit, auf
-Wunsch Koordinaten mit Genauigkeit und ein OpenStreetMap-Link, ein Zusatz)
+Wunsch Koordinaten mit Genauigkeit, bei einer alten Messung „Position von
+hh:mm“ (#390), und ein OpenStreetMap-Link, ein Zusatz)
 und übergibt sie über einen `sms:`-Link der SMS-App des Telefons, je Empfänger
 einzeln. Gesendet wird erst, wenn die Person dort auf Senden drückt.
 
@@ -3305,6 +3365,10 @@ drei Regeln:
   Abschalten **zuletzt** entfernt. Andersherum sperrt ein fehlgeschlagener
   Schreibvorgang jemanden aus seinem eigenen Haushalt aus, für den es
   keine Passphrase gibt.
+
+Für einen mitgeführten Ordner gilt nichts davon: Er hat keine App-Sperre
+(`AppLockStore.available`), und die Sperre im Schlüsselspeicher dieses
+Rechners ist die der Installation (#392).
 
 Beide Weichen stehen im `MaterialApp.builder` vor dem gesamten Navigator,
 zuerst der Datenschlüssel, dann die App-Sperre. `ProtectedNavigation` nimmt
@@ -3630,8 +3694,11 @@ Kommandozeile nicht zusammen lesen könnte. Der Übersetzer fragt vorher,
 ob die Sprache da ist (`TesseractData.has`): Kyrillisch, Arabisch und
 Persisch werden ohne ihre Daten gar nicht gelesen, eine lateinische
 Schrift auf Wunsch mit Deutsch und Englisch, wobei ein ł zum l werden
-kann. Der Gerätetest liest unter Android und auf Apple-Systemen ein
-kyrillisches Schild (`native_text_recognition_test`).
+kann. Unter Windows antwortet `support` in diesem Fall
+`needsLanguagePack`; auf die Profilsprachen des Kontos fällt die
+Erkennung nur für lateinische Schrift zurück (#409). Der Gerätetest liest
+unter Android und auf Apple-Systemen ein kyrillisches Schild
+(`native_text_recognition_test`).
 
 **Kein Erkenner, der Daten an Dritte schickt.** Android liest deshalb mit
 Tesseract und nicht mit ML Kit, obwohl ML Kit in der Messung etwas besser
@@ -3684,7 +3751,9 @@ Standort, nichts aus dem Vorrat: Das Formular füllt nichts vor und sagt
 unter den Feldern, was der Code enthält. Wer den Bildschirm filmt, hat
 genau das. Empfangene Angebote werden vor dem Übernehmen gezeigt, das
 gleiche Angebot zweimal ist ein Angebot (gleiche Art, gleicher Text,
-gleicher Kontakt, gleicher Tag).
+gleicher Kontakt, gleicher Tag), auch auf zwei Geräten des Haushalts: Ein
+empfangenes Angebot trägt eine Kennung, die aus Haushalt und diesen vier
+Angaben berechnet ist (#399).
 
 **Beide Richtungen in einer Tabelle**, unterschieden durch `received`,
 und wie jede andere Tabelle mit den Geräten des Haushalts abgeglichen:
@@ -3894,13 +3963,19 @@ parallel one.
   file makes about itself, and a few kilobytes of gzip can expand into
   gigabytes. A refused tile is missing on the map and skipped by the nearby
   search and the coverage count (`tileOrNull`); it does not end either run.
+  A directory may not claim more entries than a quarter of its bytes, its
+  first entry may not have the relative offset 0, and a varint longer than
+  64 bits is refused; `tileOrNull` and the tile provider treat an
+  `ArgumentError` as a damaged tile too (#327).
 - The built-in article reader draws only pictures served from the archive's
   own origin, and hands links out only as `http`, `https` or `mailto`. The
   desktop article window refuses navigation off the archive on Windows; on
   Linux the plugin only reports it, so the load is stopped after the fact.
 - `ShelterSearch` starts both sources together and publishes partial results.
   Timeouts produce a source failure, not an empty successful search. A generation
-  counter rejects responses to superseded or canceled searches. Geocoding has
+  counter rejects responses to superseded or canceled searches. A search for
+  a new box starts from that box's cache entry or from an empty list, never
+  from the previous box's (`ShelterListing`, #404). Geocoding has
   a 15-second timeout; WWBOTA and Overpass requests have 20/30-second timeouts.
 - Inventory search combines terms across name, barcode, location and notes.
   Category, location and status filters can be combined; sorting supports name,
@@ -3951,6 +4026,9 @@ der privaten Warnregion; ein gesperrter Schlüssel ist ein blockierter Abruf.
 Mengen, Mindestbestände, Dosierungen und Nährwerte müssen endlich und nicht
 negativ sein. Ungültige Altwerte bleiben bearbeitbar, werden sichtbar markiert
 und nicht als verfügbare Vorräte gezählt. Ein Export verlangt eine Korrektur.
+Die Meldung nennt die betroffenen Einträge (`InventoryNeedsCorrection`), auch
+im Ordnerabgleich, der dann `invalidRows` meldet statt eines Fehlers, der sich
+von allein erledigt (#397).
 Gelöschte fehlerhafte Zeilen können als Tombstone mit neutralen Zahlen übertragen
 werden; das Original bleibt lokal für die Rücknahme erhalten. Kalenderdaten
 aus CSV müssen nach der Konstruktion mit Jahr, Monat und Tag übereinstimmen.
@@ -4137,8 +4215,10 @@ also, dass nichts neu ist; ein neuer beweist nichts. Bei einem Abruf alle
 ist aber kein Beweis: Eine neu ausgegebene Warnung hat oft dieselbe Länge,
 mit neuer Kennung und neuem Ablauf. Sie wird deshalb nicht verwendet.
 
-Ein abgebrochener Abruf zählt als beantwortet: Die Zeilen von MeteoAlarm
-enden über ihr eigenes `expires`, nicht durch Fehlen im Feed. Der Stempel
+Ein abgebrochener Abruf zählt als beantwortet: Er ist derselbe Feed wie
+beim letzten vollständigen Lesen, und was dem fehlte, wurde damals beendet.
+Was ein vollständig gelesener Feed nicht mehr hat, endet (#395); sonst
+enden MeteoAlarm-Zeilen über ihr eigenes `expires`. Der Stempel
 liegt je Land in `WarningPollStatusStore`, wird erst nach dem Speichern
 geschrieben und gilt nur, solange für das Land etwas gespeichert ist:
 sonst bliebe eine geleerte Tabelle bis zum nächsten Bau leer. Nach einer
@@ -4197,9 +4277,10 @@ Kennung über die vorhandene. Alle anderen Geräte hätten mit
 `differentHousehold` gestoppt, und in einem versiegelten Ordner wären Salz und
 `check` weg gewesen. Jetzt wirft `readHouseholdFile`, wenn die Datei da ist und
 sich nicht lesen lässt, in `IoSyncFolder` und über `read-failed` aus
-`MainActivity.kt` und `StorageBridge.swift`. Eine Gerätedatei darf weiter als
-fehlend gelten, sie kostet nur diese Datei. `joinFolder` gründet außerdem
-nichts, solange in `devices/` etwas liegt.
+`MainActivity.kt` und `StorageBridge.swift`, unter Android seit #410 auch,
+wenn der Anbieter das Verzeichnis gar nicht auflisten kann. Eine Gerätedatei
+darf weiter als fehlend gelten, sie kostet nur diese Datei. `joinFolder`
+gründet außerdem nichts, solange in `devices/` etwas liegt.
 
 **Eine Sicherung bekommt ihren Namen erst, wenn sie vollständig ist** (#314).
 `FilePicker.saveFile` schreibt die übergebenen Bytes, sobald eine Datei gewählt
@@ -4249,7 +4330,8 @@ auch nach dem nächsten Abruf nicht, denn für den war die Zeile unverändert.
 `refreshWarningWatchers` läuft bei der Rückkehr in die App und nach jedem
 Abruf im Vordergrund. Der Hintergrundlauf setzt auch die Lage im
 Startbildschirm-Widget; den Vorrat kann er nicht rechnen, ihm fehlt das
-Profil. Der Stand trägt immer das Datum.
+Profil. Der Stand trägt immer das Datum, und er ist der letzte vollständige
+Abruf, nicht der Lauf (#394).
 
 **Der Schalter sagt, was jemand will, das System, was geht** (#333).
 `systemAllowsNotifications` wird vor jedem Melden gefragt. Ohne Erlaubnis
@@ -4276,9 +4358,10 @@ Vorgabe des Plugins löscht jede Ausnahme beim Lesen unter Android den Eintrag
 oder alles. Ein Test verbietet weitere `FlutterSecureStorage(`-Aufrufe.
 
 **„Haushalt löschen“ nimmt auch mit, was neben den Zeilen liegt** (#336):
-die Marke in `sync_state`, die sonst beim erneuten Beitritt die eigene Datei
-ungelesen überschreiben ließ, alle sieben Arten von Erinnerungen, die letzten
-Suchen nach Defibrillatoren und Notfallpunkten, das Datum der letzten
+die Marken in `sync_state`, seit #397 die aller Haushalte, die sonst beim
+erneuten Beitritt die eigene Datei ungelesen überschreiben ließen, alle
+sieben Arten von Erinnerungen, die letzten Suchen nach Defibrillatoren und
+Notfallpunkten, das Datum der letzten
 Sicherung, alte Ordnerschlüssel, das Fehlerprotokoll und das Widget.
 
 **Der Taktgeber wartet auf die Beatmung** (#337), siehe oben. Solange er
@@ -4317,7 +4400,8 @@ beide Formulare weisen Schlüssel ab, die kein Kreis hat.
 nicht teilen, und ein langer Eintrag ließ das ganze Dokument scheitern.
 `lib/core/pdf_blocks.dart` setzt Zeilen, die auf die nächste Seite
 weiterlaufen, und hält eine Notfallkarte auf einer Seite, wo sie passt; eine
-längere nennt die Person in jeder Zeile.
+längere nennt die Person in jeder Zeile. Eine Tabellenzeile lässt sich nicht
+teilen; ihre Zellen kürzt `pdfCell` (#403).
 
 **Warnungen in der Sprache der Oberfläche** (#357). Das BBK schickt MoWaS- und
 DWD-Meldungen mit amtlichen Übersetzungen (Leichte Sprache, Englisch,
@@ -4443,3 +4527,590 @@ wird selbst statt über `If-Range`: Die Spiegel von Kiwix nennen dieselbe
 Datei mit verschiedenen ETags, und mit `If-Range` käme ein großes Archiv nie
 über einen Abbruch hinaus. Das Datum zählt vor dem ETag. Ein Server, der
 nichts davon nennt, wird wie bisher fortgesetzt.
+
+### Aus der Durchsicht vom 26. November (#388–#412)
+
+#### Warnungen
+
+**Eine Warnung ohne Ort wartet auf ihre Detailseite** (#395). DWD-, KATWARN-
+und BIWAPP-Kennungen nennen kein Land. Ohne Detailseite hatte die Zeile
+keinen Schlüssel, galt als „betrifft alle“ und ging mit leerem Text an jeden
+Haushalt in Deutschland. `pendingNotifications` hält eine solche BBK-Zeile
+zurück (`WarningPollService.waitsForItsDetail`), bis das Detail da ist,
+längstens `unplacedDetailWait` (30 Minuten ab `updatedAt`). Banner und Liste
+zeigen sie in der Zeit schon.
+
+**Eine MeteoAlarm-Meldung ist eine Zeile je Gebiet** (#395). Eine
+DWD-Meldung nennt im Feed oft Dutzende Gebiete unter einer Kennung, und nach
+der Kennung allein gespeichert gewann der letzte Eintrag. Die Zeile heißt
+jetzt `<identifier>#<EMMA_ID>` (`meteoAlarmExternalId`;
+`meteoAlarmMessageId` liest die Meldung daraus). Gemeldet wird je Meldung
+einmal, im Controller wie im Hintergrundlauf: `announcementsFor` nimmt das
+Gebiet, das dem Haushalt am nächsten ist, `markNotified` quittiert alle
+anstehenden Zeilen der Meldung. Eine Zeile aus der Zeit davor gibt ihr
+`notified` an die Gebietszeilen weiter und endet mit dem nächsten
+vollständigen Abruf.
+
+**MeteoAlarm endet auch durch Fehlen im Feed** (#395). Der DWD ersetzt eine
+Warnung durch eine Fassung mit neuer Kennung, und die alte verlässt den
+Feed. Nur über `expires` beendet, blieb sie neben der neuen stehen, auch
+nach einer Herabstufung oder vorzeitigen Aufhebung. Nach einem vollständig
+gelesenen Länder-Feed setzt `expireMissingWarnings(countryCode: …)` bei
+allem, was in Kraft ist und fehlt, `expires` auf jetzt, und zwar nach dem
+Einlesen, damit die neue Fassung die alte noch findet. Ein Feed, der wegen
+seines bekannten Stempels nach dem Kopf verlassen wurde, beendet nichts, ein
+abgebrochener oder kaputter ebenso wenig. Kehrt eine so beendete Zeile
+zurück, gilt ihr eigenes Ende wieder (`revives`, jetzt für beide Quellen).
+
+**Eine Aktualisierung derselben Warnung wird nicht noch einmal gemeldet**
+(#395). `_prepare` bekommt `predecessors`: Ist einer gemeldet und mindestens
+so hoch eingestuft, gilt die neue Zeile als gemeldet. Bei MeteoAlarm ist der
+Vorgänger dasselbe `cap:event` für dasselbe Gebiet und Land mit
+überlappender Zeit, denn der Feed nennt keinen. Beim BBK nennt ihn CAPs
+`references` (`bbkReferencedIds`), und das zählt nur für den DWD
+(`bbkIsDwd`), weil eine aktualisierte MoWaS-Warnung neue Anweisungen bringen
+kann. Eine Aufhebung (`Cancel`) erbt nichts. Grenzen: Ein umbenanntes
+Ereignis („heavy snowfall“ → „snowfall“) gilt bei MeteoAlarm als neu, und
+dieselbe DWD-Warnung kommt weiter je Quelle.
+
+**Rückkehr in die App fragt die Feeds, wenn es Zeit ist** (#396). Ein
+schlafendes Gerät hat keinen Takt. `WarningSyncController.resumed` liest den
+Abrufstand neu und ruft ab, wenn der letzte Versuch, auch einer des
+Hintergrundlaufs, älter als `warningForegroundPollInterval` ist.
+
+**Der Abrufstand des Hintergrundlaufs erreicht die offene App** (#396).
+SharedPreferences hält je Isolate eine Kopie; `WarningPollStatusStore.load`
+und `feedStamp` rufen deshalb zuerst `prefs.reload()` auf. Sonst stand
+„veraltet“ über frisch abgerufenen Warnungen, und MeteoAlarm wurde nach
+jedem Hintergrundlauf noch einmal ganz gelesen.
+
+**MeteoAlarm wird als UTF-8 gelesen** (#396). `response.body` nimmt ohne
+`charset` Latin-1, aus „Lörrach“ wurde „LÃ¶rrach“, und `DwdAreas` fand
+keinen Kreis. Gelesen wird mit
+`utf8.decode(response.bodyBytes, allowMalformed: true)`.
+
+**Den Warntag gibt es nur in Deutschland** (#396). `WarningDayScheduler`
+bekommt das Land des Haushalts und bestellt die Erinnerung anderswo ab.
+
+#### Übersicht und Erste Hilfe
+
+**„Keine Warnung“ nur bei aktuellem Stand, und nie in Grün** (#394).
+Lagekarte, Warnungskarte und Notfall-Reiter meldeten Ruhe, ohne nach dem
+Alter des Stands zu fragen. Jede Stelle, die das Fehlen einer Warnung
+meldet, fragt jetzt `warningFreshness` über `warningPollStatusProvider` und
+sagt bei veraltetem oder fehlendem Stand „Warnungen nicht aktuell“ mit der
+Zeit des letzten Abrufs; eine geltende Warnung nennt sie trotzdem. Ohne
+Warnung ist die Lagekarte neutral (`surfaceContainerHigh`; entschieden in
+`home/application/operational_briefing.dart`), und der Notfall-Reiter hat
+keinen Haken.
+
+**Das Widget stempelt den letzten vollständigen Abruf** (#394). Der
+Hintergrundlauf stempelte jeden Versuch, auch ohne Antwort, und ein Tag ohne
+Netz hieß „Stand: vor einer Minute“. Der Stempel ist jetzt `currentAt` des
+Feeds, der für den Haushalt zählt (`homeWidgetSnapshotAt`), in Ortszeit;
+veraltet und ohne Warnung trägt die Lage `stale`. Die nativen Widgets
+zeichnen alles außer einer Warnstufe grau. Eine eigene Farbe für `stale`
+darf nie Grün sein.
+
+**„Grundlagen angelegt“ muss verdient sein** (#394). Eine einzige Kerze im
+Vorrat genügte dafür. Jetzt braucht der Satz eine Vorratslampe auf
+„erreicht“ (`supplyStatus`), nichts aus `needsAttention` und eine erledigte
+Akku-Prüfung; bis dahin nennt die Karte den nächsten offenen Punkt.
+„Bereitschaft öffnen“ öffnet `ReadinessScreen`.
+
+**Die Warnungskarte nennt, was das Banner nennt** (#394). Sie nahm die erste
+relevante Warnung nach `sent` und zeigte unter „Extrem: Orkan“ den Frost,
+der eine Minute später kam. `overviewWarning` nimmt die erste aus
+`bannerWarnings`, sonst die relevanten nach Stufe, Nähe und Alter.
+
+**Der Wissenstest mischt die Antworten** (#400). Die Fragen sind mit der
+richtigen Antwort zuerst geschrieben und wurden so gezeigt, und erratene
+Runden zählten als Wissen. `knowledgeRound` mischt jede Frage in jeder Runde
+neu (`KnowledgeQuestion.withAnswersShuffled`). Die Fragendateien bleiben so,
+weil sie sich so gegen die Anleitung prüfen lassen.
+
+**Vorlesen endet, wenn die Stimme endet** (#412). `PlatformStepSpeech.speak`
+kehrte mit dem Beginn der Ausgabe zurück, und der Knopf blieb auf „Vorlesen
+beenden“. Es wartet jetzt mit `awaitSpeakCompletion(true)` auf das Ende;
+`stop` und das nächste `speak` beenden das Warten, weil iOS und macOS eine
+abgebrochene Ausgabe nie beantworten. Wer einen Stopp-Zustand zeigt, setzt
+ihn zurück, wenn `speak` zurückkehrt, und nur für das eigene Vorlesen (wie
+`SpeakWarningButton`).
+
+**Kleinere Punkte** (#412). Die Checklisten-Karte zählt nur Vorsorge-Listen,
+wie das PDF seit #290. Die Funk-Seite hat ihre Texte in den ARB-Dateien und
+schreibt Frequenzen mit `NumberFormat` der App-Sprache. Ein Kontakt im
+Notfallverzeichnis ohne Namen fiel beim Speichern still weg, die Nummer mit
+ihm; jetzt verlangt das Formular einen Namen. Der Senden-Knopf des
+Lebenszeichens steht unter Name und Nummer, weil er als `trailing` bei
+Krisenmodus-Schrift die Zeile sprengte. Ob SMS angeboten wird, fragt
+`CheckInScreen` über `defaultTargetPlatform`, damit `large_text_test` den
+Knopf auf jedem Rechner auslegt.
+
+#### Karte und Ortung
+
+**Eine Karte aus der App nennt als Gebiet ihre Ringe, nicht die Welt
+darunter** (#389). `MapDownloadPlan` nahm die Box über alle Schritte, auch
+über die Weltbasis aus `staggeredPlan`, und jede in der App gebaute Karte
+nannte die ganze Welt: keine Punkte zur Karte, jeder Ort „in der Karte“,
+„nichts gefunden“ statt „außerhalb“. Der Plan nimmt sein Gebiet nur aus den
+Ringen (`MapArea.coversWholeWorld`), der Download schreibt es zusätzlich als
+`bounds` in die Metadaten. `PmTilesArchive.bounds` nimmt den Kopf, wenn er
+eine Region nennt, sonst ein regionales `bounds`, sonst schließt es aus den
+Kacheln auf den äußersten Ring: die erste nicht ganz belegte Ebene, nach
+unten verfolgt, solange jede Ebene dieselbe Box in doppelter Auflösung hält.
+Gelesen werden nur Blätter bis Zoom 12 und höchstens 50.000 Einträge, und
+ganz belegt ab Zoom 5 bleibt Welt.
+
+**Ein Kartenverzeichnis glaubt seiner Eintragszahl nicht** (#327). Eine Zahl
+um 2^27 ließ den Leser bei jedem Start Listen von Gigabyte anlegen, und ein
+erster Offset 0 las `offsets[-1]`, ein RangeError, den niemand fing. Die
+Grenzen stehen unter „Resource and interaction limits“.
+
+**Wo jemand steht, wird genau gemessen, und eine alte Messung sagt, dass sie
+alt ist** (#390). Jede Ortung lief mit `LocationAccuracy.low`, unter iOS und
+macOS ein Kilometer genau. Wer wie genau fragt, steht unter „Eine Ortung,
+die nicht kommt“. `ReadablePosition.approximateOnly` meldet, wenn das System
+der App nur den ungefähren Standort gibt; „Meine Position“ nennt dann die
+Einstellung statt „draußen noch einmal messen“. Ist die Messung älter als
+`ReadablePosition.staleAfter`, sagt die SMS „Position von hh:mm“
+(`takenAtLabel`), die Listen sagen „an der Position von hh:mm“ statt „hier“,
+und der Weg zum Treffpunkt bietet „Neu messen“ an. Ein Höchstalter für den
+Rückfall gibt es weiter nicht: Eine gekennzeichnete alte Position ist mehr
+wert als keine.
+
+**Eine neue Schutzraumsuche zeigt ihre eigene Box oder nichts** (#404). Mit
+beiden Diensten gestört blieben nach einem Wechsel von Radius oder Ort die
+alten Treffer stehen, mit Entfernungen ab dem neuen Mittelpunkt.
+`ShelterListing.startingWith` beginnt jede Box mit ihrem eigenen
+Zwischenspeicher oder leer, `after` ersetzt nur, wo eine Quelle geantwortet
+hat. Eine gespeicherte Defibrillator- oder Notfallpunktsuche per Standort
+heißt „an der gespeicherten Position“ (`nearbyPlaceLabel`). Die Sirenenkarte
+nennt die Sirene, von der die Antwort kommt
+(`EmergencyPointSearch.audibleSiren`), und sagt, wenn eine andere näher
+steht.
+
+#### Wissen und Downloads
+
+**Die Volltextsuche ordnet wieder nach Relevanz** (#391). Der kompakte Index
+vom 23. September (`detail=none`) weiß nur, ob ein Wort vorkommt, nicht wie
+oft: Jeder bm25-Rang war 0, und `ORDER BY rank LIMIT 30` gab dreißig Treffer
+in URL-Reihenfolge. Neue Indizes behalten die Positionen und tragen
+`fts5-ranked-v3`; ohne Artikellängen fehlt bm25 nur die Längennormierung.
+Ein Index in `fts5-terms-v2` sucht weiter, `ranksResults()` sagt nein, und
+die Index-Karte bietet den Neuaufbau an. `titleMatchesFirst` stellt Treffer
+voran, deren Titel die Suche ist oder alle ihre Wörter enthält, verglichen
+wie der Index vergleicht. Wer das Layout ändert, schreibt ein neues Format
+in `index_state` und legt fest, welche alten als veraltet gelten.
+
+**Unter Android ersetzt ein fehlendes Bild nicht mehr den Artikel** (#407).
+`onHttpError` kommt für jede Ressource und ohne Angabe des Hauptframes; der
+404 eines Bildes zeigte die Fehlerseite. Die Artikelansicht führt die Seite,
+die gerade lädt, und `isPageHttpError` lässt nur deren Fehler gelten (ohne
+Fragment, Pfad dekodiert). WebKit meldet nur die Navigation selbst.
+
+**Ein Indexlauf endet mit seinem Archiv** (#407). Wurde das Archiv neu
+geöffnet, las ein laufender `buildIndex` aus dem geschlossenen Leser weiter,
+zählte jeden Fehler als unlesbaren Artikel und endete mit `markComplete`.
+Jetzt beendet `ZimArchive.isClosed` den Lauf, ebenso acht unlesbare Cluster
+in Folge (eine abgezogene Platte); der nächste setzt an, wo die Fehler
+begannen. Gezählt wird in Clustern, damit ein einzelner defekter Cluster mit
+hunderten Artikeln den Index nicht für immer aufhält. Als vollständig
+markiert nur ein Lauf, der bis zum Ende gelesen hat, und einer mit
+geschlossenem Archiv schreibt keinen Index-Zustand mehr. Ein unverändert
+erneut gewähltes offenes Archiv (`_isStill`) wird nicht neu geöffnet.
+
+**Die Titelsuche fragt mehrere Schreibweisen und liest Version 5 nach
+Namensraum und Titel** (#407), siehe die Invariante zur ZIM-Titelsuche.
+Vorher fand sie keine klein geschriebenen Titel (iFixit, Stack Exchange,
+zimit), und in Version 5 landete die Binärsuche für späte Wörter bei den
+Bildern in `I`. Gesucht wird in den Namensräumen `A` und `C`, die die
+Reihenfolge wirklich enthält.
+
+**Ein Archiv, das Windows offen hält, wird vor dem Ersetzen geschlossen**
+(#408). Windows benennt nicht auf eine offene Datei um, und das offene
+Archiv noch einmal herunterzuladen scheiterte jedes Mal am Umbenennen.
+`ArchiveDownloader.download` ruft `beforeReplace`, kurz bevor die fertige
+Datei eine gleichnamige ersetzt; über `onReplacing` schließt die
+Wissensbibliothek das Archiv, wenn es diese Datei ist (`release`). Es bleibt
+ausgewählt und öffnet sich mit der neuen Datei wieder.
+
+**Der Index eines entfernten Archivs wird erst geschlossen, dann gelöscht**
+(#408). Unter Windows scheiterte das Löschen der offenen Index-Datei still,
+und Gigabyte blieben liegen. `deleteFor` schließt zuerst (`close` ist
+idempotent), und die Bibliothek löscht erst nach dem Wegwechseln. Beim Start
+löscht `deleteAllBut` Index-Dateien ohne Archiv, aber nur
+`preppsuite_knowledge(_<hex>).sqlite` samt Journalen, keine offene, nichts
+während einer Verschlüsselungsumstellung und nichts, wenn
+`libraryIsReadable` nein sagt: Eine unlesbare Bibliothek liest sich als
+leer.
+
+**Die Teildatei eines ersten Downloads ist nicht mehr im iCloud-Backup**
+(#408). `excludeFromBackup` lief vor dem Anlegen der `.part`, und
+`StorageBridge.swift` antwortet für eine fehlende Datei still mit false. Die
+Teildatei wird jetzt vor dem ersten Byte angelegt und markiert.
+
+**Der Relinker schreibt nach seiner Zeitgrenze nichts mehr** (#408).
+Die Zeitgrenze aus #302 setzte `Future.timeout`, und das beendet nur das
+Warten: Der Lauf ging weiter und schrieb Karte und Bibliothek im Stand
+seines Beginns über die Änderungen der App. `FileRelinker.run(stopped:)`
+fragt vor jedem Schreiben, und
+`relinkMovedFiles` setzt das Signal mit einem Timer, der vor dem Timeout
+angelegt wird und deshalb vor ihm auslöst.
+
+**Der Ausweichleser behält, was in Tabellenzellen steht** (#408). Absätze,
+Listen und Bilder in Zellen fielen weg, und `querySelectorAll('tr')` mischte
+die Zeilen innerer Tabellen in die äußere. Jetzt werden die Blöcke einer
+Zelle ihre Zeilen, ein Bild steht als Alt-Text, eine innere Tabelle als
+Textzeilen, und gelesen werden nur die eigenen Zeilen der Tabelle.
+
+#### Verschlüsselung, Sicherung und mitgeführter Ordner
+
+**Ein Lesefehler des Schlüsselspeichers sperrt den Haushalt nicht für
+immer** (#393). Die Reparatur einer abgebrochenen Umstellung speicherte
+`recoveryRequired`, wenn der Schlüssel gerade nicht lesbar war, und kein
+Start prüfte das wieder; „Neu einrichten“ löschte dann den Schlüssel, der
+die Dateien geöffnet hätte. Jetzt wird `recoveryRequired` nie gespeichert
+(ein gespeichertes aus 3.0.3 gilt als `encrypted`), und jeder Start fragt
+den Schlüssel neu. „Neu einrichten“ hebt einen lesbaren Schlüssel unter
+`….key.v1.locked-<Stempel>` auf, mit dem Stempel der beiseitegelegten
+Dateien, und nimmt ihn vom alten Namen erst, wenn die Kopie lesbar ist. Eine
+neue Installation nimmt einen vorhandenen gültigen Schlüssel, statt ihn zu
+ersetzen.
+
+**Ein Umstellungsrest ohne seine Datenbank führt in die Wiederherstellung,
+nie in einen leeren Haushalt** (#393). Scheiterte die Rückbenennung
+`.plaintext-recovery` → Datenbank (unter Windows etwa an einem
+Virenscanner), legte der Start eine leere Datenbank an, und die nächste
+Umstellung löschte die Sicherungskopie. Ein Rest ohne Datenbank daneben wird
+jetzt auch ohne die Marke `migrating` repariert; geht das nicht, ist der
+Zustand `recoveryRequired`. Solange eine `.plaintext-recovery` da ist,
+beginnt keine Umstellung, und `_encryptFileSync` bricht ab, bevor es etwas
+anfasst.
+
+**Ein mitgeführter Ordner richtet sich nach seinen Dateien, nicht nach dem
+Schlüsselspeicher des Rechners** (#392). Installation und mitgeführte
+Fassung auf einem Rechner teilen Modus und Schlüssel. So entstanden auf dem
+Stick Dateien, die nur dieser Rechner öffnet, ein vom Ordner geschriebenes
+`plaintext` ließ die Installation ihren nächsten Haushalt unverschlüsselt
+anlegen, und „Neu einrichten“ im Ordner löschte den Schlüssel der
+Installation. `_initializeCarried` liest aus dem Schlüsselspeicher nur noch
+den Schlüssel und schreibt nichts. Der Ordner ist Klartext, solange keine
+seiner Datenbanken verschlüsselt ist; was eine frühere Fassung dort
+verschlüsselt hat, öffnet der Schlüssel dieses Rechners (`encrypted` nur für
+Dateien, die es schon sind: `_isEncryptedFileSync`), sonst gilt
+`recoveryRequired`. Neue Dateien entstehen immer im Klartext, und was 3.0.3
+versiegelt in den Ordner kopiert hat, schreiben `PrivatePreferences` und
+`PhotoVault` entsiegelt zurück.
+
+**Die Übernahme in einen mitgeführten Ordner geschieht einmal, ganz oder gar
+nicht und unverschlüsselt** (#392). Bisher kopierte jeder Start, was dem
+Ordner fehlte, auch Fotos eines fremden Haushalts, ein Journal neben die
+Datenbank des Sticks und verschlüsselte Dateien, die nirgends sonst
+aufgehen. `takeOverInstallation` (`portable_takeover.dart`) läuft, bevor
+etwas den Ordner öffnet, und nur, wenn er weder Datenbank noch Einstellung
+hat. Zusammengestellt wird in `.preppsuite-uebernahme` mit der Marke
+`vollstaendig` zuletzt, dann wird eingeräumt, `preppsuite.sqlite` zuletzt;
+eine vollständige Zusammenstellung räumt der nächste Start zuerst ein.
+Datenbanken gehen durch `copyDatabaseAsPlaintext`: `VACUUM INTO` behält die
+Verschlüsselung, danach folgen `PRAGMA rekey = ''` und ein Vergleich der
+Zeilenzahlen, nie ein Journal. Ohne lesbaren Schlüssel oder mitten in einer
+Umstellung wird nichts übernommen; das steht unter `portableTakeover.v1`,
+und die Karte „Datenordner“ sagt es. Die Installation wird nur gelesen, ihre
+Datenbank aber lesend und schreibend geöffnet, damit SQLite ein heißes
+Journal zurückrollt wie bei ihrem nächsten Start. In der mitgeführten
+Fassung sucht `resolvePhotoPath` ein Foto nur nach seinem Namen im eigenen
+Fotoordner: Der gespeicherte absolute Pfad war auf demselben Rechner die
+Datei der Installation, und „Haushalt löschen“ auf dem Stick löschte sie
+mit. Der Umzug aus dem Dokumentenordner nimmt ein Journal nur mit seiner
+Datenbank mit.
+
+**Ein mitgeführter Ordner hat keine App-Sperre** (#392). Der Prüfwert der
+Sperre liegt im Schlüsselspeicher, den beide Fassungen auf einem Rechner
+teilen: Die Sperre der Installation sperrte den Stick, eine dort gesetzte
+sperrte ihn auf jedem anderen Rechner, und „Neu einrichten“ oder „Sperre
+zurücksetzen“ im Ordner löschte den Prüfwert der Installation. Ihn in den
+Ordner zu legen, wurde verworfen: Die Daten dort sind absichtlich
+unverschlüsselt, und der Ordner bekäme einen Passphrase-Hash, den jeder
+offline raten kann. Mitgeführt gilt `AppLockStore.available == false`: keine
+Sperre, kein Zugriff auf den Schlüsselspeicher, und eine Marke
+`appLockConfigured.v1` im Ordner zählt nicht.
+
+**Ein beschädigter Block kostet in Format 3 nur seine Datei** (#405).
+Scheiterte die Authentifizierung eines Blocks, gab `copyEntry` mitten im
+Eintrag auf, `nextEntry` las eine Blocklänge als Kennung, und alles danach
+war verloren, auch die schon gelesenen Fotos des Stapels. Jetzt springt der
+Leser an den Anfang des Eintrags zurück und überspringt ihn samt Anhang, und
+die Datei steht in `failed`. Ein beschädigtes Längenfeld oder eine
+abgeschnittene Datei beendet die Wiederherstellung weiterhin: Die Längen
+sind nicht authentifiziert.
+
+**„Sicherung prüfen“ misst das Alter der Sicherung, nicht den Zeitpunkt der
+Prüfung** (#406). Eine Sicherung von vor einem Jahr gab die Umstellung für
+24 Stunden frei. `LocalEncryptionReadinessStore` speichert jetzt, wann die
+geprüfte Sicherung geschrieben wurde (`localEncryptionBackupWrittenAt.v1`);
+eine ältere als 24 Stunden wird mit ihrem Datum abgewiesen.
+
+**„Haushalt löschen“ nimmt die beiseitegelegte beschädigte Datenbank und die
+Foto-Prüfsummen mit** (#406). `preppsuite.sqlite.damaged-<Stempel>` aus
+`DatabaseSnapshots.restore` ist der ganze alte Haushalt,
+`photoContentHashes.v1` nennt jedes Foto; beides überlebte das Löschen.
+`DatabaseSnapshots.clear()` löscht die beschädigten Kopien samt Journalen
+(was „Neu einrichten“ als `.locked-` beiseitelegt, bleibt), und
+`PhotoContentIndex.clear()` leert Speicher und Eintrag. `takeIfDue` lässt
+nach einer gescheiterten Kopie keine `.part` zurück.
+
+#### Gemeinsamer Ordner und Übergabe
+
+**Wer einen Haushalt verlässt, vergisst, dass er dessen Ordnerdatei
+geschrieben hat** (#397). Die Marke
+`sharedFolderVersion2:<Haushalt>:<Gerät>` in `sync_state`, mit der ein Lauf
+die eigene Datei überspringt, überlebte einen Umzug. Kam ein Gerät, das
+allein mit Haushalt B in einem Ordner war, nach einem Umzug zu A dorthin
+zurück, übersprang es seine Datei und schrieb den fast leeren Stand über die
+einzige Kopie von B. Jetzt löscht `adoptHouseholdId` die Marken von `from`
+und `to` und `deleteHouseholdData` alle `sharedFolderVersion2:%`. Ohne Marke
+liest der nächste Lauf die eigene Datei zuerst.
+
+**Die eingebauten Checklisten werden nie neben einem Umzug geschrieben**
+(#397). Bei der Ersteinrichtung schrieb `HouseholdGate` die Listen, ohne zu
+warten, und „Ordner beitreten“ zog das Profil währenddessen um. Was danach
+geschrieben wurde, blieb unter der alten Kennung, unsichtbar für Abgleich,
+Zählung und „Haushalt löschen“, und der Seeder übersprang die Liste fortan.
+Jetzt kommen `moveInto`, `forHousehold` und `forget` der Reihe nach dran
+(`HouseholdTurns`, ein eigener Provider, weil der Controller bei jedem
+Neuaufbau neu entsteht). Der `ChecklistController` schreibt jede Zeile unter
+seinem eigenen Haushalt, nicht unter dem der Zeile: Eingebaute Zeilen werden
+nur nach ihrer Liste gefunden, eine unter alter Kennung sah aus wie jede
+andere.
+
+**Ein bei der Einrichtung vergessenes Profil nimmt seine unberührten Listen
+mit** (#397). Scheiterte der Beitritt, vergaß `forget()` das Profil und ließ
+seine eingebauten Listen liegen, die der nächste Seeder übersprang. Jetzt
+löscht `forget()` die eingebauten Zeilen der Kennung, die noch auf
+`ChecklistSeeder.seededAt` stehen (`deleteUntouchedChecklistRows`). Eine
+geänderte Zeile bleibt mit ihrer ganzen Liste: Der Seeder schreibt die
+Zeilen einer Liste nur, wenn die Liste fehlt.
+
+**Eingebaute Zeilen unter einer fremden Kennung werden die des aktuellen
+Haushalts, mit ihrem Stand** (#397). Eingebaute Listen und Zeilen haben in
+jedem Haushalt dieselbe Kennung, eine Datenbank hält sie also einmal. Der
+Seeder übernimmt zuerst jede solche Zeile unter einer anderen Kennung
+(`adoptChecklistRows`) und schreibt dabei nur `household_id` und `dirty`,
+nie `updatedAt`: Eine unberührte Kopie verliert gegen jede Änderung
+anderswo, ein Haken darauf reist als Änderung. Zeilen eines anderen
+Haushalts gibt es sonst nur zwischen dem Merge einer QR-Kette oder Übergabe
+und dem Umzug danach, und dann läuft der Seeder nicht, weil er über
+`forHousehold` läuft.
+
+**Ein Vorratseintrag, der nicht reisen kann, sagt, welcher er ist** (#397).
+`readHouseholdSnapshot` lehnt einen Haushalt mit einem lebenden ungültigen
+Eintrag ab. Der Ordnerabgleich meldete das alle zwei Minuten als Fehler, der
+sich von allein erledige, und die Ordnerwahl warf ungefangen. Jetzt wirft es
+`InventoryNeedsCorrection` mit den Namen (eine `InvalidInventoryNumbers`),
+der Ordnerlauf meldet `SharedFolderSyncError.invalidRows`, und die Karte
+sagt, dass dieses Gerät bis zur Korrektur nichts schreibt, aber weiter
+empfängt.
+
+**Eine beschädigte Gerätedatei kostet nur sich, auch ohne Schlüssel**
+(#399). Eine Ganzzahl `1e400`, eine Datei über 64 MiB oder ein Lesen über
+eine Minute ließ jeden Lauf auf jedem Gerät scheitern, Größe und Zeit schon
+vor der Siegelprüfung. `_int` nimmt nur endliche Zahlen, und
+`readDeviceFile` beantwortet `InputTooLarge` und `TimeoutException` mit
+„fehlt“. Eine Zeile mit `updatedAt` außerhalb von 1970 bis 9999 wird
+verworfen (`rowVersion`), weil sie am Ende des `DateTime`-Bereichs
+unbearbeitbar wäre: Jedes Schreiben stempelt die gespeicherte Sekunde plus
+eins. Die Grenze ist fest, damit alle Geräte gleich entscheiden.
+
+**Jede Seite einer Übergabe spricht nur für sich** (#399). Keine Seite weiß,
+was die andere aufgenommen hat; „schon auf demselben Stand“ hieß nur, dass
+hier nichts ankam. Beide nehmen jetzt `handoverResultText`, der nur sagt,
+was auf diesem Gerät ankam.
+
+**Die Frage nach zwei Haushalten zählt Einträge, keine Zeilen** (#399).
+`DeviceSnapshot.rowCount` zählte eingebaute Checklistenzeilen und
+Löschmarken mit, rund 230 für einen leeren Haushalt. `countOwnEntries` zählt
+lebende Zeilen ohne eingebaute Listen und ohne Zeilen auf
+`ChecklistSeeder.seededAt`, direkt aus den Tabellen, damit ein Eintrag, der
+nicht reisen kann, die Frage nicht verhindert.
+
+**Ein gescanntes Nachbarschaftsangebot hat auf jedem Gerät des Haushalts
+dieselbe Kennung** (#399). Zwei Telefone, die denselben Aushang filmten,
+machten mit zufälligen Kennungen zwei Zeilen daraus. Die Kennung ist jetzt
+eine UUIDv5 aus Haushalt, Art, Text, Kontakt und Tag
+(`NeighbourOfferController.receivedOfferClientId`); ihr Namensraum darf sich
+nie ändern. Wird ein gelöschtes Angebot wieder gefilmt, setzt der Empfang
+`deletedAt` ausdrücklich auf null, weil ein Update ungenannte Spalten stehen
+lässt.
+
+**„Ersetzen“ nimmt die Fassung des anderen Haushalts, auch bei geteilten
+Kennungen** (#341). Eingebaute Checklistenzeilen haben in jedem Haushalt
+dieselbe `clientId`, und QR-Kette und Übergabe führten beim Ersetzen erst
+zusammen und verwarfen danach die eigenen Zeilen: Gewann die eigene Fassung,
+fehlte die Zeile danach ganz. Jetzt löscht
+`applyHouseholdSnapshot(…, replacing: true)` in derselben Transaktion vor
+dem Merge die Zeilen anderer Haushalte, deren Kennung der Snapshot bringt
+(`deleteRowsGivingWay`). Der Ordnerweg verwirft schon vor dem Lesen.
+
+#### Vorrat
+
+**Eine Packung, die nicht länger reicht als die Vorlaufzeit, erinnert am
+Morgen nach der Zählung** (#401). Lag der Tag für das neue Rezept vor dem
+Zähltag (20 Tabletten, 2 am Tag, 14 Tage Vorlauf), war er beim Planen immer
+vorbei, und es kam nie eine Erinnerung. Geplant wird jetzt frühestens für
+den Tag nach der Zählung (`countedOn` + 1, 9 Uhr), gerechnet von der Zählung
+aus, nicht von „jetzt“, damit jedes Neuplanen denselben Zeitpunkt ergibt und
+die Erinnerung genau einmal kommt.
+
+**Nährwerte, die 100 g nicht fassen können, werden abgewiesen** (#402). Die
+Grenzen stehen unter „Nutrition figures are stored exactly as the label
+prints them“; ohne sie hoben Packungswerte im 100-g-Feld Reichweite,
+Vorratslampe und Autarkie. Scheitern nur die vier Nährstoffe zusammen, lässt
+ein Scan alle vier leer. `validInventoryNumbers` prüft die Grenze bewusst
+nicht, sonst fielen gespeicherte Zeilen und die anderer Geräte als
+fehlerhaft aus dem Vorrat.
+
+**Schreiben im Vorrat geht von der gespeicherten Zeile aus** (#403).
+`deleteItem`, `consumeQuantity`, `markCharged` und `countInMeasure`
+schrieben die Kopie, mit der Formular oder Dialog geöffnet wurde, über eine
+inzwischen abgeglichene Änderung, und nach „Rückgängig“ war die fremde
+Änderung überall weg. Sie lesen die Zeile jetzt in der Transaktion
+(`_stored`), wie `bookPurchases` und `restoreItem`; die übergebene Zeile
+nennt nur die Kennung. `countInMeasure` lässt eine Zeile in Ruhe, die nicht
+mehr in der gefragten Packung zählt, sonst nähme es Gramm mal Dosengröße.
+Nur `updateItem` schreibt, was das Formular zeigt.
+
+**Die Akku-Prüfung des Haushalts ist am Ortstag fällig** (#403).
+`ChargeCheck.dueAt` baute das Datum aus den UTC-Feldern, und eine Prüfung um
+00:30 MEZ war einen Tag zu früh fällig. Gerechnet wird jetzt von
+`lastChecked.toLocal()` aus.
+
+**Eine Tabellenzelle im PDF hält höchstens 200 Zeichen** (#403). pdf 3.13
+teilt keine Tabellenzeile, und die Prüfung, mit der `MultiPage` bei einem
+nie passenden Widget aufhört, steht in einem `assert`: Eine lange
+Hausrat-Notiz ließ im Release-Build dieselbe Seite endlos neu setzen, und
+die App hing; nur in Tests wirft es. `pdfCell` (`pdf_blocks.dart`) setzt
+eine Zelle einzeilig und kürzt nach `pdfCellCharacters`; die Hausratliste
+druckt das Gekürzte unter der Tabelle des Raums. Jede neue
+`TableHelper`-Tabelle mit Freitext nimmt `pdfCell`.
+
+**Der Verbrauchsdialog nimmt nur endliche Mengen** (#403). `double.tryParse`
+liest „NaN“, und NaN besteht jede Prüfung, weil kein Vergleich wahr ist.
+Gelesen wird mit `readNonNegativeNumber`.
+
+#### iOS und macOS nativ
+
+**Der Schlüsselbund ist unter iOS ab der ersten Entsperrung lesbar** (#388).
+Mit der Vorgabe des Plugins (nur bei entsperrtem Gerät) hatte die
+Hintergrundaufgabe auf dem gesperrten Telefon keinen Datenschlüssel und
+damit keine Warnung. `appSecureStorage` schreibt unter iOS mit
+`first_unlock`, nicht `_this_device`, damit eine verschlüsselte Sicherung
+den Schlüssel auf ein neues Telefon mitnimmt; macOS bleibt bei der Vorgabe.
+flutter_secure_storage_darwin 0.3 ändert die Zugänglichkeit eines
+vorhandenen Eintrags nicht (sie filtert jede Abfrage, ein zweiter Eintrag
+scheitert mit -25299). Deshalb verschiebt `moveKeychainToFirstUnlock` jeden
+Eintrag einmal über eine zurückgelesene Kopie
+(`preppsuite.keychainMove.copy.<Schlüssel>`) und setzt zuletzt
+`preppsuite.keychainMove.done.v1`. Dabei gilt:
+
+- Die Verschiebung läuft nur unter iOS in `main()`, vor allem, was den
+  Schlüsselspeicher liest, nie bei gesperrtem Gerät
+  (`isCupertinoProtectedDataAvailable`) oder im Hintergrund-Isolate, und
+  jeder Start versucht es, bis sie fertig ist.
+- Ein Lesen ohne eigene Optionen findet den Eintrag in jeder Zugänglichkeit
+  und, wo er fehlt, seine Kopie; der Datenschlüssel ist in jedem Augenblick
+  lesbar, auch nach einem Abbruch. Ein Löschen nimmt die Kopie zuerst mit.
+- Nach einem Abbruch wird ein alter Eintrag neben der Kopie neu verschoben
+  und ein fehlender aus der Kopie geschrieben; neben einem schon
+  verschobenen ist die Kopie überzählig.
+- Vor einem Update auf flutter_secure_storage_darwin 0.4 muss das neu
+  geprüft werden: 0.4 sucht über alle Zugänglichkeiten und schreibt durch
+  Löschen und Neuanlegen. Ein Test hält 0.3 fest.
+
+**Die Ordnerbrücke unter iOS und macOS schreibt nicht auf dem Hauptthread**
+(#410). Eine Gerätedatei bis 64 MB, atomar in iCloud Drive oder Nextcloud
+geschrieben, hielt die App an. `write`, `list`, `delete` und
+`ensureWritable` laufen jetzt wie `read` auf der seriellen Queue `fileReads`
+(`onFileQueue`) und antworten auf dem Hauptthread. Den Lesezeichenspeicher
+ändern eine Auswahl auf dem Hauptthread und ein Ordneraufruf auf der Queue,
+deshalb hält jede Änderung `bookmarksLock`. `readRange` teilt sich die
+Queue: Während ein Abgleich schreibt, warten die Kacheln.
+
+**Ein iCloud-Platzhalter wird unter dem Namen seiner Datei gemeldet**
+(#398). Unter iOS und macOS bis 13 liegt eine nicht geladene Datei als
+`.<Name>.icloud` im Ordner. `list` meldete diesen Namen, und die Dateien der
+anderen Geräte wurden nie gelesen, ohne dass ein Lauf scheiterte. Jetzt
+meldet `list` `<Name>`, ohne etwas herunterzuladen. `read` stößt den
+Download an und wartet höchstens 30 Sekunden (`downloadWait`), weil die
+Queue auch die Kacheln bedient; danach antwortet es `read-failed`, und der
+Download läuft weiter. Begrenzt ist nur das Warten auf iCloud: Andere
+Anbieter laden für das koordinierte Lesen selbst, und ein Abbruch könnte
+ihren Download jedes Mal neu beginnen lassen. Ein Platzhalter zählt als
+vorhanden, ein Lesefehler wird also nie `nil` (#312).
+
+**Die Berechtigungstexte gibt es unter iOS und macOS auf Deutsch, Englisch
+und Spanisch** (#411). Auf Englisch fehlten Face ID und das örtliche Netz,
+Spanisch gab es nur im Widget, und macOS hatte keine `InfoPlist.strings`.
+`apple_usage_strings_test` verlangt jeden `…UsageDescription`-Schlüssel der
+`Info.plist` in jeder Sprache: Ein neuer Berechtigungstext gehört in alle
+drei `InfoPlist.strings`.
+
+#### Android und Windows nativ
+
+**Windows liest fremde Schrift nur mit ihrem Sprachpaket** (#409).
+`EngineFor` (`windows/runner/text_recognition.cpp`) nahm ohne installierte
+Sprache die Profilsprachen des Kontos und las ein russisches Schild mit der
+deutschen Erkennung. Die Profilsprache gilt jetzt nur, wenn jede verlangte
+Sprache und die des Profils lateinisch geschrieben werden (`Language.Script`
+ist `Latn`, ohne Angabe zählt lateinisch). Sonst antwortet `support`
+`needsLanguagePack`.
+
+**Die Windows-App läuft mit UTF-8 als Codepage** (#409). Die mit mingw
+gebaute Übersetzer-DLL öffnet ihre Dateien über schmale Pfade
+(`std::filebuf::open` → `fopen`), die Windows in der ANSI-Codepage liest;
+mit einem Umlaut im Konto oder im Datenordner nannte der UTF-8-Pfad aus Dart
+eine andere Datei. `runner.exe.manifest` setzt
+`<activeCodePage>UTF-8</activeCodePage>`, wirksam ab Windows 10 1903, und
+`test/windows_runner_test.dart` hält den Eintrag fest. Runner und Plugins
+arbeiten mit breiten Zeichenketten oder `CP_UTF8`, und `Process.run`, dessen
+`systemEncoding` der ANSI-Codepage folgt, läuft nur unter Linux. Wer unter
+Windows Code hinzufügt, der schmale Zeichenketten als ANSI liest oder
+schreibt, muss das wissen.
+
+**Eine Windows-Erkennung überlebt das Fenster nicht als Zugriff auf ein
+totes Objekt** (#409). Die abgekoppelten Erkennungs-Threads hielten `this`
+und sperrten nach dem Schließen des Fensters einen freigegebenen Mutex.
+Threads und Objekt teilen jetzt einen `shared_ptr<State>`, der Destruktor
+löscht darin unter der Sperre das Fenster, und ein Thread ohne Fenster
+verwirft seine Antwort. Auf die Threads wird nicht gewartet.
+
+**Android fragt keinen Anbieter auf dem Hauptthread** (#410). `openFile` und
+`ensureWritable` liefen dort noch nach #376, und ein Cloud-Anbieter kann die
+ganze Datei laden, bevor er einen Deskriptor herausgibt. Beide laufen jetzt
+auf `fileReads` und antworten genau einmal über `runOnUiThread`; der
+Deskriptor kommt vor der Antwort in `openFiles`, damit der erste `readRange`
+ihn findet. `readRange` hat einen eigenen Thread (`rangeReads`), damit
+Kacheln nicht hinter einem Fotoabgleich warten, und `closeFile` schließt
+dort nach den eingereihten Lesungen.
+
+**Eine Datei im gemeinsamen Ordner kostet eine Abfrage je Verzeichnis, nicht
+eine je Datei** (#410). `DocumentFile.findFile` fragt jeden Eintrag einzeln;
+ein Durchlauf durch N Bilder kostete rund N² Binder-Aufrufe. `children()` in
+`MainActivity.kt` liest Name, Kennung und Typ aller Einträge eines
+Verzeichnisses in einer Abfrage; `findFile` und `listFiles` kommen in der
+Brücke nicht mehr vor. Ein Cursor `null` ist ein Fehler, kein leerer Ordner:
+`read` antwortet `read-failed` (#312), und `write` legt keine zweite Datei
+an.
+
+**Android behält dauerhafte Freigaben nur für Dateien, die die App sich
+merkt** (#410). Jede Dateiwahl nahm eine dauerhafte Freigabe für immer, und
+Android entfernt über 128 (ab Android 11: 512) still die älteste, oft die
+des gemeinsamen Ordners. Eine Sicherung zum Wiederherstellen oder Prüfen
+gilt nur für diesen Lauf (`pickBackup`). Eine Karte, ein Archiv oder ein
+Dokument, das entfernt, ersetzt oder abgelehnt wird, gibt seine Freigabe
+zurück (`releaseUnkeptFiles` in `downloads/application/kept_files.dart`),
+aber nur, wenn keine Liste in `keptFileLocations` die Datei noch nennt und
+sich alle lesen lassen. Wer eine weitere Stelle einführt, die sich eine
+gewählte Datei merkt, nimmt sie dort auf. Ordnerfreigaben gibt die native
+Seite nie zurück. `takePersistableUriPermission` steht in `try`: Ein
+Anbieter ohne dauerhafte Freigabe bringt die App nicht mehr zum Absturz.
