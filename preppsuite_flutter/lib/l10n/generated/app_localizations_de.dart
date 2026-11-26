@@ -4486,6 +4486,9 @@ class AppLocalizationsDe extends AppLocalizations {
   }
 
   @override
+  String get homeWidgetSituationNever => 'Noch nicht abgerufen';
+
+  @override
   String get searchTitle => 'Suchen';
 
   @override

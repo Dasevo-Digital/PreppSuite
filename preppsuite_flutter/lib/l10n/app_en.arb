@@ -2508,6 +2508,7 @@
       }
     }
   },
+  "homeWidgetSituationNever": "Not fetched yet",
   "@statusSupplyCovered": {
     "placeholders": {
       "days": {

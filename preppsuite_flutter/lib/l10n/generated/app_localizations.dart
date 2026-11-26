@@ -7426,6 +7426,12 @@ abstract class AppLocalizations {
   /// **'As of {time}'**
   String homeWidgetUpdated(String time);
 
+  /// No description provided for @homeWidgetSituationNever.
+  ///
+  /// In en, this message translates to:
+  /// **'Not fetched yet'**
+  String get homeWidgetSituationNever;
+
   /// No description provided for @searchTitle.
   ///
   /// In en, this message translates to:

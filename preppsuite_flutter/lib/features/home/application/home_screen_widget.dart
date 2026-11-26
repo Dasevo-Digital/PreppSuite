@@ -7,6 +7,13 @@
 /// line for the same reason: it is drawn from the last time the app ran,
 /// and a lamp that does not say how old it is reads as live.
 ///
+/// That line is the time of the last complete poll, not of the drawing
+/// (#394). The background run wrote "now" after every attempt, answered
+/// or not, so a telephone without a network for a day showed "calm" with
+/// the stamp of a minute ago. And with the feeds out of date the
+/// situation lamp says so instead of "no official warning", as the lamp
+/// in the app has since #138.
+///
 /// The texts are built here, already translated, and the platform side
 /// only draws them. That keeps the wording in the ARB files with every
 /// other string and spares the native widget a translation of its own.
@@ -23,6 +30,8 @@ import '../../../core/app_language.dart';
 import '../../../l10n/generated/app_localizations.dart';
 import '../../../local_db/database.dart';
 import '../../../model/categories.dart';
+import '../../warnings/application/warning_freshness.dart';
+import '../../warnings/application/warning_poll_status_store.dart';
 import '../../warnings/application/warning_region_filter.dart';
 import '../../warnings/application/warning_relevance.dart';
 import 'status_lights.dart';
@@ -42,11 +51,14 @@ class HomeWidgetSnapshot {
   final String supplyState;
   final String supplyText;
 
-  /// `none`, or the highest relevant severity's name.
+  /// The highest relevant severity's name; without a warning `none`, or
+  /// `stale` while the feeds are out of date. The native widgets draw
+  /// anything but a severity grey.
   final String situationState;
   final String situationText;
 
-  /// "Stand: 9.11., 14:05", so the widget never passes for live.
+  /// "Stand: 9.11., 14:05", the last complete poll, so the widget never
+  /// passes for live. Empty before the first one.
   final String updatedText;
 
   Map<String, String> toData() => {
@@ -78,13 +90,15 @@ class HomeWidgetSnapshot {
 
 /// Builds the snapshot from the two lamps, in [l10n]'s language.
 ///
-/// [time] is the formatted moment the data was read, so tests need no
-/// clock and the widget no formatting.
+/// [freshness] is that of the household's feed, and [warningsAsOf] the
+/// formatted time of its last complete poll, null when there has been
+/// none -- so tests need no clock and the widget no formatting.
 HomeWidgetSnapshot buildHomeWidgetSnapshot({
   required SupplyStatus supply,
   required SituationStatus situation,
   required AppLocalizations l10n,
-  required String time,
+  required WarningFreshness freshness,
+  required String? warningsAsOf,
 }) {
   final days = supply.daysCovered;
   final supplyText = switch (supply.light) {
@@ -93,23 +107,55 @@ HomeWidgetSnapshot buildHomeWidgetSnapshot({
     SupplyLight.short => l10n.statusSupplyShort(days ?? 0, statusLightDays),
   };
   final highest = situation.highest;
-  final situationText = highest == null
-      ? l10n.statusSituationQuiet
-      : '${l10n.statusSituationActive(situation.count)} · '
-            '${_severity(l10n, highest)}';
+  // A warning in force is named however old the feeds are; only "none"
+  // needs them to be current.
+  final situationText = highest != null
+      ? '${l10n.statusSituationActive(situation.count)} · '
+            '${_severity(l10n, highest)}'
+      : switch (freshness) {
+          WarningFreshness.current => l10n.statusSituationQuiet,
+          WarningFreshness.stale => l10n.statusSituationStale,
+          WarningFreshness.never => l10n.homeWidgetSituationNever,
+        };
   return HomeWidgetSnapshot(
     supplyState: supply.light.name,
     supplyText: '${l10n.statusSupplyTitle}: $supplyText',
-    situationState: highest?.name ?? 'none',
+    situationState:
+        highest?.name ??
+        (freshness == WarningFreshness.current ? 'none' : 'stale'),
     situationText: '${l10n.statusSituationTitle}: $situationText',
-    updatedText: l10n.homeWidgetUpdated(time),
+    updatedText: warningsAsOf == null
+        ? ''
+        : l10n.homeWidgetUpdated(warningsAsOf),
   );
 }
 
 /// The moment in the widget's "as of" line: always with the day, or a line
-/// written on Monday reads on Thursday as if it were today (#332).
+/// written on Monday reads on Thursday as if it were today (#332). In
+/// local time; the poll's bookkeeping is in UTC.
 String homeWidgetStamp(DateTime moment, String localeName) =>
-    DateFormat.Md(localeName).add_jm().format(moment);
+    DateFormat.Md(localeName).add_jm().format(moment.toLocal());
+
+/// The snapshot of [supply] and the [relevant] warnings, with the
+/// situation and its stamp taken from the poll's [status] at [now].
+HomeWidgetSnapshot homeWidgetSnapshotAt({
+  required SupplyStatus supply,
+  required List<Warning> relevant,
+  required WarningPollStatus status,
+  required String countryCode,
+  required AppLocalizations l10n,
+  required DateTime now,
+}) {
+  final fresh = warningFreshness(status, countryCode: countryCode, now: now);
+  final at = fresh.at;
+  return buildHomeWidgetSnapshot(
+    supply: supply,
+    situation: situationStatus(relevant),
+    l10n: l10n,
+    freshness: fresh.freshness,
+    warningsAsOf: at == null ? null : homeWidgetStamp(at, l10n.localeName),
+  );
+}
 
 /// The situation lamp as the background worker can write it (#332).
 ///
@@ -117,11 +163,15 @@ String homeWidgetStamp(DateTime moment, String localeName) =>
 /// profile, which a background isolate does not have, and it is not what
 /// changes while nobody has the app open. A warning is. Without this the
 /// widget said "calm" under a notification announcing an extreme warning.
+///
+/// The stamp is the last complete poll in [status], read from the store
+/// when not given: the run that calls this may have reached no feed.
 Future<void> publishHomeWidgetSituation({
   required AppDatabase database,
   required WarningRegionFilter filter,
   HomeWidgetPublisher? publisher,
   DateTime? now,
+  WarningPollStatus? status,
 }) async {
   final out = publisher ?? HomeWidgetPublisher();
   if (!out.isActive) return;
@@ -135,11 +185,13 @@ Future<void> publishHomeWidgetSituation({
     ];
     final l10n = await _workerLocalizations();
     await initializeDateFormatting(l10n.localeName);
-    final snapshot = buildHomeWidgetSnapshot(
+    final snapshot = homeWidgetSnapshotAt(
       supply: const SupplyStatus(light: SupplyLight.unknown),
-      situation: situationStatus(relevant),
+      relevant: relevant,
+      status: status ?? await const WarningPollStatusStore().load(),
+      countryCode: filter.countryCode,
       l10n: l10n,
-      time: homeWidgetStamp(moment, l10n.localeName),
+      now: moment,
     );
     await out.publishSituation(snapshot);
   } on Object {

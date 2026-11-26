@@ -4493,6 +4493,9 @@ class AppLocalizationsEs extends AppLocalizations {
   }
 
   @override
+  String get homeWidgetSituationNever => 'Aún sin descargar';
+
+  @override
   String get searchTitle => 'Buscar';
 
   @override

@@ -7,6 +7,7 @@ import '../../../l10n/generated/app_localizations.dart';
 import '../../../model/household_profile.dart';
 import '../../inventory/application/inventory_providers.dart';
 import '../../inventory/application/supply_calculator.dart';
+import '../../warnings/application/warning_freshness.dart';
 import '../../warnings/application/warning_providers.dart';
 import '../../warnings/application/warning_relevance.dart';
 import '../application/home_screen_widget.dart';
@@ -37,9 +38,12 @@ class _HomeScreenWidgetSyncState extends ConsumerState<HomeScreenWidgetSync> {
     final profile = widget.profile;
     final items = ref.watch(inventoryItemsProvider(profile.id)).value;
     final active = ref.watch(activeWarningsProvider).value;
-    // Nothing until both have arrived: a first frame with an empty list
-    // would put "nothing entered" on the home screen for a moment.
-    if (items != null && active != null) {
+    // Read again after every poll, so the stamp is the last complete one
+    // and the lamp knows when the feeds have gone quiet (#394).
+    final polled = ref.watch(warningPollStatusProvider).value;
+    // Nothing until all three have arrived: a first frame with an empty
+    // list would put "nothing entered" on the home screen for a moment.
+    if (items != null && active != null && polled != null) {
       final supply = supplyStatus(
         items: items,
         household: SupplyHousehold(
@@ -49,22 +53,20 @@ class _HomeScreenWidgetSyncState extends ConsumerState<HomeScreenWidgetSync> {
           cats: profile.cats,
         ),
       );
-      final situation = situationStatus([
-        for (final warning in active)
-          if (isWarningRelevant(
-            warning: warning,
-            filter: profile.warningFilter,
-          ))
-            warning,
-      ]);
-      final snapshot = buildHomeWidgetSnapshot(
+      final snapshot = homeWidgetSnapshotAt(
         supply: supply,
-        situation: situation,
+        relevant: [
+          for (final warning in active)
+            if (isWarningRelevant(
+              warning: warning,
+              filter: profile.warningFilter,
+            ))
+              warning,
+        ],
+        status: polled,
+        countryCode: profile.countryCode,
         l10n: AppLocalizations.of(context)!,
-        time: homeWidgetStamp(
-          DateTime.now(),
-          AppLocalizations.of(context)!.localeName,
-        ),
+        now: DateTime.now(),
       );
       unawaited(_publisher.publish(snapshot));
     }

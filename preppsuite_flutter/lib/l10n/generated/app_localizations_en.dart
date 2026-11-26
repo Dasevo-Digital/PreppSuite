@@ -4460,6 +4460,9 @@ class AppLocalizationsEn extends AppLocalizations {
   }
 
   @override
+  String get homeWidgetSituationNever => 'Not fetched yet';
+
+  @override
   String get searchTitle => 'Search';
 
   @override
