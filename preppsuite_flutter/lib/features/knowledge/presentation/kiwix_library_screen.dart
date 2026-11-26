@@ -210,6 +210,11 @@ class _KiwixLibraryScreenState extends ConsumerState<KiwixLibraryScreen> {
             // Asked for again: fetched, not the copy on disk reopened.
             replace: again,
           ),
+          // The copy being replaced is usually the one open in the reader,
+          // and Windows will not rename onto an open file (#408).
+          onReplacing: (downloadRef, path) => downloadRef
+              .read(knowledgeProvider.notifier)
+              .release(path: path, fileName: entry.fileName),
           // Taking it into use straight away is the point of downloading
           // it; there is no second step worth asking about.
           //

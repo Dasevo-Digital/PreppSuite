@@ -350,6 +350,65 @@ void main() {
     expect(server.requestedRanges.length, 3, reason: 'one try and two more');
   });
 
+  group('a file of the same name already there (#408)', () {
+    // Windows does not rename onto a file that is open, and the archive
+    // downloaded again is usually the one open in the reader: every
+    // attempt fetched the last byte and failed on the rename.
+    final old = Uint8List.fromList(List.filled(80, 7));
+
+    Future<List<int>?> replacing({required bool finishedBefore}) async {
+      await File(target).writeAsBytes(old);
+      if (finishedBefore) {
+        // The whole file is already on disk from an attempt whose rename
+        // failed; the server answers the next range with 416.
+        await File('$target${ArchiveDownloader.partialSuffix}').writeAsBytes(
+          body,
+        );
+      }
+      List<int>? seenBefore;
+      await ArchiveDownloader(
+            httpClient: _RangeServer(body),
+            reportEvery: Duration.zero,
+          )
+          .download(
+            url: Uri.parse('https://example.invalid/archive.zim'),
+            targetPath: target,
+            beforeReplace: () async {
+              seenBefore = await File(target).readAsBytes();
+            },
+          )
+          .drain<void>();
+      return seenBefore;
+    }
+
+    test('is let go of before the new one takes its place', () async {
+      expect(await replacing(finishedBefore: false), old);
+      expect(await File(target).readAsBytes(), body);
+    });
+
+    test('also when the new one was already complete', () async {
+      expect(await replacing(finishedBefore: true), old);
+      expect(await File(target).readAsBytes(), body);
+    });
+
+    test('nothing is let go of when nothing is there', () async {
+      var called = false;
+      await ArchiveDownloader(
+            httpClient: _RangeServer(body),
+            reportEvery: Duration.zero,
+          )
+          .download(
+            url: Uri.parse('https://example.invalid/archive.zim'),
+            targetPath: target,
+            beforeReplace: () async => called = true,
+          )
+          .drain<void>();
+
+      expect(called, isFalse);
+      expect(await File(target).readAsBytes(), body);
+    });
+  });
+
   test('a refusal is not asked again', () async {
     // Six more requests for something the mirror has already answered
     // would be rude and could not help.

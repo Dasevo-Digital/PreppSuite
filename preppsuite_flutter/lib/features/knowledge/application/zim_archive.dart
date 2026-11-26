@@ -60,7 +60,13 @@ class ZimArchive {
     }
   }
 
+  /// Whether [close] has been called. Whatever still holds this reader
+  /// afterwards gets nothing but errors from it.
+  bool get isClosed => _closed;
+  bool _closed = false;
+
   Future<void> close() {
+    _closed = true;
     clearClusterCache();
     return _source.close();
   }

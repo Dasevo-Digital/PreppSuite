@@ -131,10 +131,18 @@ class ArchiveDownloader {
   /// new bytes in: a download that is making progress may drop as often
   /// as the mirror likes, while one that cannot get a single byte gives
   /// up after [_retryDelays] tries.
+  ///
+  /// [beforeReplace] runs once the new file is complete and a file of the
+  /// same name is still in its place, right before it is replaced (#408).
+  /// Windows does not rename onto a file that is open, and an archive
+  /// downloaded again is usually the one open in the reader: every attempt
+  /// fetched the last byte and then failed on the rename. The caller
+  /// closes it there.
   Stream<DownloadProgress> download({
     required Uri url,
     required String targetPath,
     int? estimatedLength,
+    Future<void> Function()? beforeReplace,
   }) {
     // Each subscription owns its transport lifetime. Cancel is available
     // while headers or a retry delay are pending, not just at the next yield.
@@ -156,6 +164,7 @@ class ArchiveDownloader {
               url: url,
               targetPath: targetPath,
               estimatedLength: estimatedLength,
+              beforeReplace: beforeReplace,
             ).listen(
               controller.add,
               onError: controller.addError,
@@ -181,6 +190,7 @@ class ArchiveDownloader {
     required Uri url,
     required String targetPath,
     int? estimatedLength,
+    Future<void> Function()? beforeReplace,
   }) async* {
     final partial = File('$targetPath$partialSuffix');
     var failures = 0;
@@ -200,6 +210,7 @@ class ArchiveDownloader {
           url: url,
           targetPath: targetPath,
           estimatedLength: estimatedLength,
+          beforeReplace: beforeReplace,
         )) {
           last = progress;
           yield progress;
@@ -253,6 +264,7 @@ class ArchiveDownloader {
     required Uri url,
     required String targetPath,
     int? estimatedLength,
+    Future<void> Function()? beforeReplace,
   }) async* {
     final target = File(targetPath);
     final partial = File('$targetPath$partialSuffix');
@@ -325,7 +337,7 @@ class ArchiveDownloader {
           if (whole != null &&
               await partial.length() == whole &&
               (known == null || known.matches(answered))) {
-            await partial.rename(targetPath);
+            await _moveInto(partial, targetPath, beforeReplace);
             await _forget(identityFile);
             yield DownloadProgress(received: whole, total: whole);
             return;
@@ -379,7 +391,7 @@ class ArchiveDownloader {
         );
       }
 
-      await partial.rename(targetPath);
+      await _moveInto(partial, targetPath, beforeReplace);
       await _forget(identityFile);
       // Again under the final name. The flag is an extended attribute and
       // survives a rename on the same volume, but this is the state that
@@ -401,6 +413,19 @@ class ArchiveDownloader {
         attemptAbort.complete();
       }
     }
+  }
+
+  /// Gives the finished [partial] its final name, letting the caller
+  /// release a file of that name first.
+  static Future<void> _moveInto(
+    File partial,
+    String targetPath,
+    Future<void> Function()? beforeReplace,
+  ) async {
+    if (beforeReplace != null && await File(targetPath).exists()) {
+      await beforeReplace();
+    }
+    await partial.rename(targetPath);
   }
 
   /// `bytes 200-1023/1024` — the 200.

@@ -126,10 +126,16 @@ class ArchiveDownloadController extends Notifier<ArchiveDownloadState> {
   /// arrived. Nothing caught it, so the banner announced a finished
   /// download and the archive was never taken into use. That is how a
   /// download folder came to hold nine archives and the library none.
+  ///
+  /// [onReplacing] is called with the same [Ref] when the finished file is
+  /// about to take the place of one of the same name -- a download asked
+  /// for again -- so that whatever has that file open can let go of it
+  /// (#408).
   Future<void> start(
     ArchiveDownloadRequest request, {
     required Future<String?> Function(Ref ref, String path, String label)
     onFinished,
+    Future<void> Function(Ref ref, String path)? onReplacing,
   }) async {
     if (state.isRunning) return;
 
@@ -167,6 +173,9 @@ class ArchiveDownloadController extends Notifier<ArchiveDownloadState> {
           url: request.url,
           targetPath: target,
           estimatedLength: request.estimatedLength,
+          beforeReplace: onReplacing == null
+              ? null
+              : () => onReplacing(ref, target),
         )
         .listen(
           (progress) {

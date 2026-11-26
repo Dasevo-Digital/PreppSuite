@@ -181,6 +181,35 @@ class KnowledgeController extends AsyncNotifier<KnowledgeState> {
     return null;
   }
 
+  /// Closes the open archive if it is the file at [path], so that a fresh
+  /// download can take its place (#408).
+  ///
+  /// Windows does not rename onto a file that is open, so downloading the
+  /// open archive again failed on the last step, every time. Matched by
+  /// [fileName] as well, because on a Mac the open entry is a bookmark
+  /// that names no path. It stays selected; taking the new file up opens
+  /// it again, and until then the library offers it as one that is not
+  /// open.
+  Future<void> release({required String path, String? fileName}) async {
+    final current = state.value;
+    final open = current?.selected;
+    if (current == null || open == null || !current.isReady) return;
+    final same =
+        open.location == path ||
+        (fileName != null && open.fileName == fileName);
+    if (!same) return;
+
+    final server = _currentServer;
+    final archive = _currentArchive;
+    _currentServer = null;
+    _currentArchive = null;
+    state = AsyncData(
+      KnowledgeState(library: current.library, selectedId: current.selectedId),
+    );
+    await server?.close();
+    await archive?.close();
+  }
+
   /// The entry pointing at [location], or null.
   static StoredArchive? _entryAt(
     List<StoredArchive> library,

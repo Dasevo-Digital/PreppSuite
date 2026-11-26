@@ -126,6 +126,66 @@ void main() {
     );
   });
 
+  test('a download of the open archive gets it closed first (#408)', () async {
+    // Windows does not rename onto an open file, so a download of the open
+    // archive asks for it to be let go before it takes its place.
+    final container = ProviderContainer();
+    addTearDown(container.dispose);
+    await load(container);
+
+    final notifier = container.read(knowledgeProvider.notifier);
+    final path = writeArchive('Wikibooks', 'wikibooks.zim');
+    await notifier.useArchive(
+      location: path,
+      label: 'Wikibooks',
+      fileName: 'wikibooks.zim',
+    );
+    final before = container.read(knowledgeProvider).requireValue;
+
+    await notifier.release(path: '${workspace.path}/other.zim');
+    expect(container.read(knowledgeProvider).requireValue.isReady, isTrue);
+
+    await notifier.release(path: path);
+    final released = container.read(knowledgeProvider).requireValue;
+    expect(released.isReady, isFalse);
+    expect(before.archive!.isClosed, isTrue);
+    expect(released.selectedId, before.selectedId, reason: 'still chosen');
+    expect(released.library, hasLength(1));
+
+    // The new file taken up opens it again, under the same entry.
+    expect(
+      await notifier.useArchive(
+        location: path,
+        label: 'Wikibooks',
+        fileName: 'wikibooks.zim',
+      ),
+      isNull,
+    );
+    final reopened = container.read(knowledgeProvider).requireValue;
+    expect(reopened.isReady, isTrue);
+    expect(reopened.selectedId, before.selectedId);
+  });
+
+  test('on a Mac the open archive is known by its file name (#408)', () async {
+    final container = ProviderContainer();
+    addTearDown(container.dispose);
+    await load(container);
+
+    final notifier = container.read(knowledgeProvider.notifier);
+    await notifier.useArchive(
+      location: writeArchive('Wikibooks', 'wikibooks.zim'),
+      label: 'Wikibooks',
+      fileName: 'wikibooks.zim',
+    );
+
+    // The library holds a bookmark there, which names no path.
+    await notifier.release(
+      path: '/Users/someone/Downloads/wikibooks.zim',
+      fileName: 'wikibooks.zim',
+    );
+    expect(container.read(knowledgeProvider).requireValue.isReady, isFalse);
+  });
+
   test('removing the open archive falls back to what is left', () async {
     final container = ProviderContainer();
     addTearDown(container.dispose);
