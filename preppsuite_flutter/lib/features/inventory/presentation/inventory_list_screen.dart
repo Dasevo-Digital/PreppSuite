@@ -756,6 +756,11 @@ class _SupplyCalculatorCardState extends ConsumerState<_SupplyCalculatorCard> {
   }
 }
 
+/// How wide the list decodes an item's photo: the 40-point tile at
+/// triple density, from the short side of a 4:3 picture.
+@visibleForTesting
+const thumbnailCacheWidth = 160;
+
 /// The first photo of an item, with a small count of the others (#211).
 ///
 /// The count is how the list says there is more to see without making
@@ -778,9 +783,13 @@ class _ItemThumbnail extends StatelessWidget {
           borderRadius: BorderRadius.circular(AppRadius.small),
           image: DecorationImage(
             fit: BoxFit.cover,
+            // Decoded small, by width only (#403): both axes squeezed a
+            // 4:3 photo into a square before `cover` could crop it. 160
+            // across leaves 120 down on a landscape photo, the 40 points
+            // of the tile at triple density; see `possessions_screen`.
             image: ResizeImage.resizeIfNeeded(
-              96,
-              96,
+              thumbnailCacheWidth,
+              null,
               StoredPhotoImage(
                 InventoryPhotoService.resolvePhotoPath(photos.first),
               ),

@@ -215,6 +215,25 @@ void main() {
     expect(find.text('+0'), findsNothing);
   });
 
+  testWidgets('a photo is decoded by its width alone (#403)', (tester) async {
+    // Both axes squeezed a 4:3 photo into a square before `cover` could
+    // crop it, and the thumbnail came out distorted.
+    await pumpList(tester, [
+      item(clientId: 'a').copyWith(photoPath: const Value('p/a.jpg')),
+    ]);
+
+    final images = [
+      for (final box in tester.widgetList<DecoratedBox>(
+        find.byType(DecoratedBox),
+      ))
+        if (box.decoration case BoxDecoration(:final image?)) image.image,
+    ];
+    expect(images, hasLength(1));
+    final resized = images.single as ResizeImage;
+    expect(resized.width, thumbnailCacheWidth);
+    expect(resized.height, isNull);
+  });
+
   testWidgets('the food groups stand in the supply card and open (#212)', (
     tester,
   ) async {
