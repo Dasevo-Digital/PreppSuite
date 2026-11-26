@@ -7855,6 +7855,12 @@ class AppLocalizationsDe extends AppLocalizations {
   String get operationsOpenReadiness => 'Bereitschaft öffnen';
 
   @override
+  String get operationsOpenInventory => 'Vorrat öffnen';
+
+  @override
+  String get operationsOpenSettings => 'Einstellungen öffnen';
+
+  @override
   String operationsNextTask(String task) {
     return 'Als Nächstes: $task';
   }
@@ -7864,6 +7870,19 @@ class AppLocalizationsDe extends AppLocalizations {
 
   @override
   String get operationsInventoryMissing => 'Vorrat anlegen';
+
+  @override
+  String get operationsInventoryAttention =>
+      'Abgelaufenes und Fehlendes im Vorrat ersetzen';
+
+  @override
+  String operationsSupplyShort(int days) {
+    return 'Vorrat auf $days Tage ergänzen';
+  }
+
+  @override
+  String get operationsSupplyUnknown =>
+      'Wasser und Lebensmittel mit Menge eintragen';
 
   @override
   String get operationsReady =>

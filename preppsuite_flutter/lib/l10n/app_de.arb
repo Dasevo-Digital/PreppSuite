@@ -3379,6 +3379,8 @@
   "operationsQuiet": "Keine amtliche Warnung für deine Orte",
   "operationsOpenWarnings": "Warnungen prüfen",
   "operationsOpenReadiness": "Bereitschaft öffnen",
+  "operationsOpenInventory": "Vorrat öffnen",
+  "operationsOpenSettings": "Einstellungen öffnen",
   "operationsNextTask": "Als Nächstes: {task}",
   "@operationsNextTask": {
     "placeholders": {
@@ -3389,6 +3391,9 @@
   },
   "operationsChargeDue": "Akkus und Ausrüstung prüfen",
   "operationsInventoryMissing": "Vorrat anlegen",
+  "operationsInventoryAttention": "Abgelaufenes und Fehlendes im Vorrat ersetzen",
+  "operationsSupplyShort": "Vorrat auf {days} Tage ergänzen",
+  "operationsSupplyUnknown": "Wasser und Lebensmittel mit Menge eintragen",
   "operationsReady": "Grundlagen angelegt – Details bei Bedarf prüfen",
   "followedPlacesTitle": "Meine Warnorte",
   "followedPlacesIntro": "Warnungen für Zuhause und weitere wichtige Regionen. Bezeichnungen für weitere Orte bleiben auf diesem Gerät.",

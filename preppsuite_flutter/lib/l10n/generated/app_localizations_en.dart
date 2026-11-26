@@ -7820,6 +7820,12 @@ class AppLocalizationsEn extends AppLocalizations {
   String get operationsOpenReadiness => 'Open readiness';
 
   @override
+  String get operationsOpenInventory => 'Open inventory';
+
+  @override
+  String get operationsOpenSettings => 'Open settings';
+
+  @override
   String operationsNextTask(String task) {
     return 'Next: $task';
   }
@@ -7829,6 +7835,19 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get operationsInventoryMissing => 'Set up supplies';
+
+  @override
+  String get operationsInventoryAttention =>
+      'Replace what has expired or run low';
+
+  @override
+  String operationsSupplyShort(int days) {
+    return 'Stock up to $days days';
+  }
+
+  @override
+  String get operationsSupplyUnknown =>
+      'Enter water and food with their amounts';
 
   @override
   String get operationsReady =>

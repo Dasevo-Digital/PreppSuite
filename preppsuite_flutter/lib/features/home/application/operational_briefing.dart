@@ -3,6 +3,7 @@
 library;
 
 import '../../warnings/application/warning_freshness.dart';
+import 'status_lights.dart';
 
 /// The one answer the briefing card gives, in the order it is looked for.
 enum OperationalBriefing {
@@ -17,10 +18,20 @@ enum OperationalBriefing {
   /// Nothing recorded in the supply yet.
   inventoryMissing,
 
+  /// Something in the supply has expired or is below its own minimum.
+  inventoryAttention,
+
+  /// Recorded, but no water or food with an amount the lamp can count.
+  supplyUnknown,
+
+  /// Water and food recorded, and short of the BBK's ten days.
+  supplyShort,
+
   /// The rechargeable equipment is due for its check.
   chargeDue,
 
-  /// None of the above.
+  /// None of the above: the supply reaches the ten days, nothing in it
+  /// has expired or run low, and the equipment check is not due.
   ready,
 }
 
@@ -33,10 +44,18 @@ enum OperationalBriefing {
 /// does the same. Only the absence of one needs the feeds to have been
 /// heard from -- the rule `StatusLightsRow` has followed since #138, and
 /// this card did not until #394.
+///
+/// "Grundlagen angelegt" is [ready], and [ready] is earned (#394): it
+/// used to follow from a single entry in the supply, so one candle read
+/// "basics in place" above "lasts 0 of 10 days" and three expired tins.
+/// It now needs what the supply lamp calls covered, the attention card
+/// nothing to show, and the equipment check done.
 OperationalBriefing operationalBriefing({
   required int warnings,
   required WarningFreshness? freshness,
   required bool inventoryEmpty,
+  required int inventoryAttention,
+  required SupplyLight supply,
   required bool chargeDue,
 }) {
   if (warnings > 0) return OperationalBriefing.warning;
@@ -44,6 +63,15 @@ OperationalBriefing operationalBriefing({
     return OperationalBriefing.unheard;
   }
   if (inventoryEmpty) return OperationalBriefing.inventoryMissing;
+  if (inventoryAttention > 0) return OperationalBriefing.inventoryAttention;
+  switch (supply) {
+    case SupplyLight.unknown:
+      return OperationalBriefing.supplyUnknown;
+    case SupplyLight.short:
+      return OperationalBriefing.supplyShort;
+    case SupplyLight.covered:
+      break;
+  }
   if (chargeDue) return OperationalBriefing.chargeDue;
   return OperationalBriefing.ready;
 }

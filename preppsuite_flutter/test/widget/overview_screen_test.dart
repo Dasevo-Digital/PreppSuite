@@ -5,6 +5,9 @@ import 'package:preppsuite_flutter/core/calendar_day.dart';
 import 'package:preppsuite_flutter/features/checklists/application/checklist_providers.dart';
 import 'package:preppsuite_flutter/features/home/application/shell_layout.dart';
 import 'package:preppsuite_flutter/features/home/presentation/overview_screen.dart';
+import 'package:preppsuite_flutter/features/home/presentation/readiness_screen.dart';
+import 'package:preppsuite_flutter/features/household/application/household_member_controller.dart';
+import 'package:preppsuite_flutter/features/household/application/household_plan_controller.dart';
 import 'package:preppsuite_flutter/features/inventory/application/charge_reminder_provider.dart';
 import 'package:preppsuite_flutter/features/inventory/application/inventory_providers.dart';
 import 'package:preppsuite_flutter/features/warnings/application/warning_freshness.dart';
@@ -99,6 +102,13 @@ void main() {
           allChecklistItemsProvider(
             householdId,
           ).overrideWith((ref) => Stream.value(checklistItems)),
+          // For the readiness overview the briefing opens.
+          householdPlanProvider(
+            householdId,
+          ).overrideWith((ref) => Stream.value(null)),
+          householdMembersProvider(
+            householdId,
+          ).overrideWith((ref) => Stream.value(const [])),
           // Heard from the feeds a minute ago unless a test says otherwise.
           warningPollStatusProvider.overrideWith(
             (ref) async =>
@@ -301,6 +311,87 @@ void main() {
       expect(card.color, isNot(scheme.primaryContainer));
       expect(card.color, isNot(scheme.secondaryContainer));
       expect(find.byIcon(Icons.verified_outlined), findsNothing);
+    });
+  });
+
+  group('"Grundlagen angelegt" (#394)', () {
+    const ready = 'Grundlagen angelegt – Details bei Bedarf prüfen';
+
+    // Two adults, ten days: 40 litres and 44,000 kcal.
+    final covered = [
+      item(clientId: 'w', category: 'water', quantity: 40, unit: 'L'),
+      item(clientId: 'f', quantity: 20, unit: 'kg', calories: 220),
+    ];
+
+    testWidgets('one candle is not the basics', (tester) async {
+      // It read "basics in place" above "lasts 0 of 10 days".
+      final navigated = await pumpOverview(
+        tester,
+        items: [item(clientId: 'candle', category: 'tools', unit: 'Stück')],
+      );
+
+      expect(find.text(ready), findsNothing);
+      expect(
+        find.text('Als Nächstes: Wasser und Lebensmittel mit Menge eintragen'),
+        findsOneWidget,
+      );
+      await tester.tap(find.text('Vorrat öffnen'));
+      await tester.pumpAndSettle();
+      expect(navigated, [ShellDestination.inventory]);
+    });
+
+    testWidgets('a supply short of the ten days says what is next', (
+      tester,
+    ) async {
+      await pumpOverview(
+        tester,
+        items: [
+          item(clientId: 'w', category: 'water', quantity: 10, unit: 'L'),
+        ],
+      );
+
+      expect(find.text(ready), findsNothing);
+      expect(
+        find.text('Als Nächstes: Vorrat auf 10 Tage ergänzen'),
+        findsOneWidget,
+      );
+    });
+
+    testWidgets('expired stock is not the basics either', (tester) async {
+      await pumpOverview(
+        tester,
+        items: [
+          ...covered,
+          item(
+            clientId: 'old',
+            expirationDate: now.subtract(const Duration(days: 3)),
+          ),
+        ],
+      );
+
+      expect(find.text(ready), findsNothing);
+      expect(
+        find.text(
+          'Als Nächstes: Abgelaufenes und Fehlendes im Vorrat ersetzen',
+        ),
+        findsOneWidget,
+      );
+    });
+
+    testWidgets('earned, and the button opens the readiness overview', (
+      tester,
+    ) async {
+      // The equipment check switched off, so nothing else is due.
+      SharedPreferences.setMockInitialValues({'chargeReminderDays': 0});
+      addTearDown(() => SharedPreferences.setMockInitialValues({}));
+      final navigated = await pumpOverview(tester, items: covered);
+
+      expect(find.text(ready), findsOneWidget);
+      await tester.tap(find.text('Bereitschaft öffnen'));
+      await tester.pumpAndSettle();
+
+      expect(find.byType(ReadinessScreen), findsOneWidget);
+      expect(navigated, isEmpty, reason: 'no tab of its own, a page');
     });
   });
 

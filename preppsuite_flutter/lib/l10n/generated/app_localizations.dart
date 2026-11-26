@@ -12919,6 +12919,18 @@ abstract class AppLocalizations {
   /// **'Open readiness'**
   String get operationsOpenReadiness;
 
+  /// No description provided for @operationsOpenInventory.
+  ///
+  /// In en, this message translates to:
+  /// **'Open inventory'**
+  String get operationsOpenInventory;
+
+  /// No description provided for @operationsOpenSettings.
+  ///
+  /// In en, this message translates to:
+  /// **'Open settings'**
+  String get operationsOpenSettings;
+
   /// No description provided for @operationsNextTask.
   ///
   /// In en, this message translates to:
@@ -12936,6 +12948,24 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Set up supplies'**
   String get operationsInventoryMissing;
+
+  /// No description provided for @operationsInventoryAttention.
+  ///
+  /// In en, this message translates to:
+  /// **'Replace what has expired or run low'**
+  String get operationsInventoryAttention;
+
+  /// No description provided for @operationsSupplyShort.
+  ///
+  /// In en, this message translates to:
+  /// **'Stock up to {days} days'**
+  String operationsSupplyShort(int days);
+
+  /// No description provided for @operationsSupplyUnknown.
+  ///
+  /// In en, this message translates to:
+  /// **'Enter water and food with their amounts'**
+  String get operationsSupplyUnknown;
 
   /// No description provided for @operationsReady.
   ///

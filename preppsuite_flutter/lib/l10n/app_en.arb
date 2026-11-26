@@ -4528,6 +4528,8 @@
   "operationsQuiet": "No official warning for your places",
   "operationsOpenWarnings": "Check warnings",
   "operationsOpenReadiness": "Open readiness",
+  "operationsOpenInventory": "Open inventory",
+  "operationsOpenSettings": "Open settings",
   "operationsNextTask": "Next: {task}",
   "@operationsNextTask": {
     "placeholders": {
@@ -4538,6 +4540,16 @@
   },
   "operationsChargeDue": "Check batteries and equipment",
   "operationsInventoryMissing": "Set up supplies",
+  "operationsInventoryAttention": "Replace what has expired or run low",
+  "operationsSupplyShort": "Stock up to {days} days",
+  "@operationsSupplyShort": {
+    "placeholders": {
+      "days": {
+        "type": "int"
+      }
+    }
+  },
+  "operationsSupplyUnknown": "Enter water and food with their amounts",
   "operationsReady": "Core preparation is in place – check details when needed",
   "followedPlacesTitle": "My warning places",
   "followedPlacesIntro": "Warnings for home and other important regions. Labels for additional places stay on this device.",

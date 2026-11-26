@@ -3,17 +3,22 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../core/app_theme.dart';
 import '../../../core/app_ui.dart';
+import '../../../core/calendar_day.dart';
 import '../../../l10n/generated/app_localizations.dart';
 import '../../../model/household_profile.dart';
 import '../../inventory/application/charge_reminder_provider.dart';
 import '../../inventory/application/inventory_providers.dart';
+import '../../inventory/application/supply_calculator.dart';
 import '../../knowledge/application/knowledge_providers.dart';
 import '../../maps/application/offline_map_providers.dart';
 import '../../warnings/application/warning_freshness.dart';
 import '../../warnings/application/warning_providers.dart';
 import '../../warnings/application/warning_relevance.dart';
+import '../application/home_overview.dart';
 import '../application/operational_briefing.dart';
 import '../application/shell_layout.dart';
+import '../application/status_lights.dart';
+import 'readiness_screen.dart';
 
 /// The single first answer on the overview: what needs attention now.
 ///
@@ -45,6 +50,20 @@ class OperationalBriefingCard extends ConsumerWidget {
     final theme = Theme.of(context);
     final inventory =
         ref.watch(inventoryItemsProvider(profile.id)).value ?? const [];
+    // Counted from today, like the attention card below (#262).
+    final today = ref.watch(calendarDayProvider);
+    final stock = summarizeInventory(inventory, now: today);
+    // The supply lamp's own figure, so the card cannot call the basics
+    // done while the lamp beside it says "lasts 0 of 10 days".
+    final supply = supplyStatus(
+      items: inventory,
+      household: SupplyHousehold(
+        adults: profile.personCount,
+        children: profile.children,
+        dogs: profile.dogs,
+        cats: profile.cats,
+      ),
+    );
     final equipment = ref.watch(chargeCheckProvider);
     final mapReady = ref.watch(offlineMapProvider).value?.isReady ?? false;
     final knowledgeReady = ref.watch(knowledgeProvider).value?.isReady ?? false;
@@ -71,22 +90,50 @@ class OperationalBriefingCard extends ConsumerWidget {
       warnings: warnings.length,
       freshness: fresh?.freshness,
       inventoryEmpty: inventory.isEmpty,
+      inventoryAttention: stock.needsAttention,
+      supply: supply.light,
       chargeDue:
           !equipment.isOff &&
           (equipment.lastChecked == null || equipment.isDue()),
+    );
+
+    void openWarnings() => onNavigate(ShellDestination.warnings);
+    void openInventory() => onNavigate(ShellDestination.inventory);
+    // "Bereitschaft öffnen" opens the readiness overview, every point
+    // with its state. It used to lead to the inventory, the settings or
+    // the emergency tab, whichever the card was talking about, and never
+    // there (#394).
+    void openReadiness() => Navigator.of(context).push(
+      MaterialPageRoute<void>(
+        builder: (_) => ReadinessScreen(profile: profile),
+      ),
     );
 
     // Neutral whenever no warning is in force: the green of the app's
     // primary colour would be the "all well" this card has no source for.
     final quietForeground = theme.colorScheme.onSurface;
     final quietBackground = theme.colorScheme.surfaceContainerHigh;
+    _Briefing quiet(
+      IconData icon,
+      String task,
+      String action,
+      void Function() open,
+    ) => _Briefing(
+      icon: icon,
+      title: l10n.operationsQuiet,
+      detail: l10n.operationsNextTask(task),
+      action: action,
+      open: open,
+      foreground: quietForeground,
+      background: quietBackground,
+    );
     final _Briefing briefing = switch (state) {
       OperationalBriefing.warning => _Briefing(
         icon: Icons.warning_amber_rounded,
         title: l10n.operationsWarning,
         detail: l10n.operationsWarningDetail,
         action: l10n.operationsOpenWarnings,
-        destination: ShellDestination.warnings,
+        open: openWarnings,
         foreground: theme.colorScheme.onErrorContainer,
         background: theme.colorScheme.errorContainer,
       ),
@@ -102,34 +149,47 @@ class OperationalBriefingCard extends ConsumerWidget {
           null => l10n.statusSituationNever,
         },
         action: l10n.operationsOpenWarnings,
-        destination: ShellDestination.warnings,
+        open: openWarnings,
         foreground: theme.colorScheme.onErrorContainer,
         background: theme.colorScheme.errorContainer,
       ),
-      OperationalBriefing.inventoryMissing => _Briefing(
-        icon: Icons.inventory_2_outlined,
-        title: l10n.operationsQuiet,
-        detail: l10n.operationsNextTask(l10n.operationsInventoryMissing),
-        action: l10n.operationsOpenReadiness,
-        destination: ShellDestination.inventory,
-        foreground: quietForeground,
-        background: quietBackground,
+      OperationalBriefing.inventoryMissing => quiet(
+        Icons.inventory_2_outlined,
+        l10n.operationsInventoryMissing,
+        l10n.operationsOpenInventory,
+        openInventory,
       ),
-      OperationalBriefing.chargeDue => _Briefing(
-        icon: Icons.battery_charging_full_outlined,
-        title: l10n.operationsQuiet,
-        detail: l10n.operationsNextTask(l10n.operationsChargeDue),
-        action: l10n.operationsOpenReadiness,
-        destination: ShellDestination.settings,
-        foreground: quietForeground,
-        background: quietBackground,
+      OperationalBriefing.inventoryAttention => quiet(
+        Icons.event_busy_outlined,
+        l10n.operationsInventoryAttention,
+        l10n.operationsOpenInventory,
+        openInventory,
+      ),
+      OperationalBriefing.supplyUnknown => quiet(
+        Icons.inventory_2_outlined,
+        l10n.operationsSupplyUnknown,
+        l10n.operationsOpenInventory,
+        openInventory,
+      ),
+      OperationalBriefing.supplyShort => quiet(
+        Icons.inventory_2_outlined,
+        l10n.operationsSupplyShort(statusLightDays),
+        l10n.operationsOpenInventory,
+        openInventory,
+      ),
+      // Where the check is confirmed and its interval set.
+      OperationalBriefing.chargeDue => quiet(
+        Icons.battery_charging_full_outlined,
+        l10n.operationsChargeDue,
+        l10n.operationsOpenSettings,
+        () => onNavigate(ShellDestination.settings),
       ),
       OperationalBriefing.ready => _Briefing(
         icon: Icons.notifications_none_outlined,
         title: l10n.operationsQuiet,
         detail: l10n.operationsReady,
         action: l10n.operationsOpenReadiness,
-        destination: ShellDestination.emergency,
+        open: openReadiness,
         foreground: quietForeground,
         background: quietBackground,
       ),
@@ -206,7 +266,7 @@ class OperationalBriefingCard extends ConsumerWidget {
                         foregroundColor: briefing.foreground,
                       ),
                       iconAlignment: IconAlignment.end,
-                      onPressed: () => onNavigate(briefing.destination),
+                      onPressed: briefing.open,
                       icon: const Icon(Icons.arrow_forward, size: 18),
                       label: Text(briefing.action),
                     ),
@@ -251,7 +311,7 @@ class _Briefing {
     required this.title,
     required this.detail,
     required this.action,
-    required this.destination,
+    required this.open,
     required this.foreground,
     required this.background,
   });
@@ -260,7 +320,7 @@ class _Briefing {
   final String title;
   final String detail;
   final String action;
-  final ShellDestination destination;
+  final VoidCallback open;
   final Color foreground;
   final Color background;
 }
