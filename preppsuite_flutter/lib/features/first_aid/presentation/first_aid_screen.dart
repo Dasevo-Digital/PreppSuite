@@ -72,6 +72,9 @@ class _FirstAidScreenState extends ConsumerState<FirstAidScreen> {
                 border: const OutlineInputBorder(),
                 suffixIcon: searching
                     ? IconButton(
+                        // Named, or a screen reader announces only
+                        // "button" (#412).
+                        tooltip: l10n.firstAidClearSearch,
                         icon: const Icon(Icons.clear),
                         onPressed: () {
                           _controller.clear();

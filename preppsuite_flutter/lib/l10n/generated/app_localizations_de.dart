@@ -6196,6 +6196,9 @@ class AppLocalizationsDe extends AppLocalizations {
   String get firstAidSearchEmpty => 'Dazu gibt es hier keine Anleitung.';
 
   @override
+  String get firstAidClearSearch => 'Suche leeren';
+
+  @override
   String get firstAidDisclaimer =>
       'Diese Anleitungen ersetzen keinen Erste-Hilfe-Kurs und keinen Notruf. Im Zweifel: 112 anrufen und am Telefon bleiben – die Leitstelle leitet dich an.';
 
@@ -6262,6 +6265,12 @@ class AppLocalizationsDe extends AppLocalizations {
 
   @override
   String get firstAidVideoRestart => 'Von vorn';
+
+  @override
+  String get firstAidVideoPlay => 'Abspielen';
+
+  @override
+  String get firstAidVideoPause => 'Anhalten';
 
   @override
   String get firstAidVideoSystemPlayer =>

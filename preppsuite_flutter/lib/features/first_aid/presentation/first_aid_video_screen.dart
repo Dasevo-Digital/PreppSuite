@@ -102,35 +102,7 @@ class _FirstAidVideoScreenState extends ConsumerState<FirstAidVideoScreen> {
                 ),
                 VideoProgressIndicator(controller, allowScrubbing: true),
                 const SizedBox(height: 8),
-                Row(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  children: [
-                    IconButton.filled(
-                      iconSize: 32,
-                      onPressed: () => setState(
-                        () => controller.value.isPlaying
-                            ? controller.pause()
-                            : controller.play(),
-                      ),
-                      icon: Icon(
-                        controller.value.isPlaying
-                            ? Icons.pause
-                            : Icons.play_arrow,
-                      ),
-                    ),
-                    const SizedBox(width: 16),
-                    IconButton.filledTonal(
-                      iconSize: 32,
-                      tooltip: l10n.firstAidVideoRestart,
-                      onPressed: () async {
-                        await controller.seekTo(Duration.zero);
-                        await controller.play();
-                        if (mounted) setState(() {});
-                      },
-                      icon: const Icon(Icons.replay),
-                    ),
-                  ],
-                ),
+                FirstAidVideoControls(controller: controller),
               ],
             )
           else if (file != null && !playsVideoInApp)
@@ -167,6 +139,56 @@ class _FirstAidVideoScreenState extends ConsumerState<FirstAidVideoScreen> {
           Text(l10n.firstAidVideoNotACourse, style: theme.textTheme.bodySmall),
         ],
       ),
+    );
+  }
+}
+
+/// Play or pause, and back to the start (#412).
+///
+/// Drawn from the player's own state. The button used to read
+/// `isPlaying` only when the screen happened to be built again, so a clip
+/// that had run to its end still offered "pause", and a tap then paused
+/// what had already stopped. Both buttons are named for a screen reader,
+/// and the toggle runs outside `setState`: its callback returned the
+/// future of `play` or `pause`, which a debug build asserts on.
+class FirstAidVideoControls extends StatelessWidget {
+  const FirstAidVideoControls({super.key, required this.controller});
+
+  final VideoPlayerController controller;
+
+  @override
+  Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
+    return ValueListenableBuilder<VideoPlayerValue>(
+      valueListenable: controller,
+      builder: (context, value, _) {
+        final playing = value.isPlaying;
+        return Row(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            IconButton.filled(
+              iconSize: 32,
+              tooltip: playing
+                  ? l10n.firstAidVideoPause
+                  : l10n.firstAidVideoPlay,
+              // `play` starts again from the beginning at the end.
+              onPressed: () =>
+                  unawaited(playing ? controller.pause() : controller.play()),
+              icon: Icon(playing ? Icons.pause : Icons.play_arrow),
+            ),
+            const SizedBox(width: 16),
+            IconButton.filledTonal(
+              iconSize: 32,
+              tooltip: l10n.firstAidVideoRestart,
+              onPressed: () async {
+                await controller.seekTo(Duration.zero);
+                await controller.play();
+              },
+              icon: const Icon(Icons.replay),
+            ),
+          ],
+        );
+      },
     );
   }
 }

@@ -6206,6 +6206,9 @@ class AppLocalizationsEs extends AppLocalizations {
   String get firstAidSearchEmpty => 'Aquí no hay ninguna guía para eso.';
 
   @override
+  String get firstAidClearSearch => 'Borrar búsqueda';
+
+  @override
   String get firstAidDisclaimer =>
       'Estas guías no sustituyen un curso de primeros auxilios ni una llamada de emergencia. En caso de duda: llama al 112 y no cuelgues; el operador te guiará.';
 
@@ -6272,6 +6275,12 @@ class AppLocalizationsEs extends AppLocalizations {
 
   @override
   String get firstAidVideoRestart => 'Desde el principio';
+
+  @override
+  String get firstAidVideoPlay => 'Reproducir';
+
+  @override
+  String get firstAidVideoPause => 'Pausar';
 
   @override
   String get firstAidVideoSystemPlayer =>

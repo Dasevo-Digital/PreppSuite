@@ -10234,6 +10234,12 @@ abstract class AppLocalizations {
   /// **'There is no guide here for that.'**
   String get firstAidSearchEmpty;
 
+  /// No description provided for @firstAidClearSearch.
+  ///
+  /// In en, this message translates to:
+  /// **'Clear search'**
+  String get firstAidClearSearch;
+
   /// No description provided for @firstAidDisclaimer.
   ///
   /// In en, this message translates to:
@@ -10359,6 +10365,18 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'From the start'**
   String get firstAidVideoRestart;
+
+  /// No description provided for @firstAidVideoPlay.
+  ///
+  /// In en, this message translates to:
+  /// **'Play'**
+  String get firstAidVideoPlay;
+
+  /// No description provided for @firstAidVideoPause.
+  ///
+  /// In en, this message translates to:
+  /// **'Pause'**
+  String get firstAidVideoPause;
 
   /// No description provided for @firstAidVideoSystemPlayer.
   ///
