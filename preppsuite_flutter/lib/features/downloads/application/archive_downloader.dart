@@ -67,11 +67,16 @@ class ArchiveDownloader {
     http.Client? httpClient,
     Duration? reportEvery,
     List<Duration>? retryDelays,
+    Future<void> Function(String path)? markExcludedFromBackup,
   }) : _providedClient = httpClient,
        _reportEvery = reportEvery ?? const Duration(milliseconds: 250),
-       _retryDelays = retryDelays ?? defaultRetryDelays;
+       _retryDelays = retryDelays ?? defaultRetryDelays,
+       _excludeFromBackup = markExcludedFromBackup ?? excludeFromBackup;
 
   final http.Client? _providedClient;
+
+  /// [excludeFromBackup] outside a test.
+  final Future<void> Function(String path) _excludeFromBackup;
 
   /// How long to wait before each retry, and — by its length — how many
   /// times in a row to bother.
@@ -272,9 +277,6 @@ class ArchiveDownloader {
     await target.parent.create(recursive: true);
 
     var received = await partial.exists() ? await partial.length() : 0;
-    // Marked before a byte is written, so an interrupted download is not
-    // backed up either — those are the large ones that sit around longest.
-    await excludeFromBackup(partial.path);
     final identityFile = File('$targetPath$identitySuffix');
     final known = received > 0 ? await _PartIdentity.read(identityFile) : null;
 
@@ -339,6 +341,9 @@ class ArchiveDownloader {
               (known == null || known.matches(answered))) {
             await _moveInto(partial, targetPath, beforeReplace);
             await _forget(identityFile);
+            // This attempt wrote nothing and marked nothing; a partial file
+            // from before #408 may never have been marked either.
+            await _excludeFromBackup(targetPath);
             yield DownloadProgress(received: whole, total: whole);
             return;
           }
@@ -349,6 +354,14 @@ class ArchiveDownloader {
       }
 
       final total = stated ?? estimatedLength;
+
+      // Marked before a byte is written, so an interrupted download is not
+      // backed up either — those are the large ones that sit around
+      // longest. Created first: the mark is set on a file, and on the first
+      // attempt there was none yet, so iOS answered no without a word and
+      // the partial file went into the iCloud backup (#408).
+      if (!await partial.exists()) await partial.create();
+      await _excludeFromBackup(partial.path);
 
       final sink = partial.openWrite(
         mode: append ? FileMode.append : FileMode.write,
@@ -396,7 +409,7 @@ class ArchiveDownloader {
       // Again under the final name. The flag is an extended attribute and
       // survives a rename on the same volume, but this is the state that
       // has to be right, and it costs one call.
-      await excludeFromBackup(targetPath);
+      await _excludeFromBackup(targetPath);
       yield DownloadProgress(received: onDisk, total: onDisk);
     } finally {
       // Status rejection and the 416 shortcut never enter the body loop.

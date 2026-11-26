@@ -350,6 +350,73 @@ void main() {
     expect(server.requestedRanges.length, 3, reason: 'one try and two more');
   });
 
+  group('kept out of the backup (#408)', () {
+    // iOS sets the flag on a file, and on the first attempt the partial
+    // file did not exist yet: the call answered no without a word, and the
+    // partial file of a first download went into the iCloud backup.
+    Future<List<(String, bool)>> marks({List<int>? onDisk}) async {
+      if (onDisk != null) {
+        await File(
+          '$target${ArchiveDownloader.partialSuffix}',
+        ).writeAsBytes(onDisk);
+      }
+      final marked = <(String, bool)>[];
+      await ArchiveDownloader(
+            httpClient: _RangeServer(body),
+            reportEvery: Duration.zero,
+            markExcludedFromBackup: (path) async =>
+                marked.add((path, File(path).existsSync())),
+          )
+          .download(
+            url: Uri.parse('https://example.invalid/archive.zim'),
+            targetPath: target,
+          )
+          .drain<void>();
+      return marked;
+    }
+
+    test(
+      'the partial file of a first download exists when it is marked',
+      () async {
+        expect(await marks(), [
+          ('$target${ArchiveDownloader.partialSuffix}', true),
+          (target, true),
+        ]);
+      },
+    );
+
+    test('a resumed one is marked again, and the finished file', () async {
+      expect(await marks(onDisk: body.sublist(0, 100)), [
+        ('$target${ArchiveDownloader.partialSuffix}', true),
+        (target, true),
+      ]);
+    });
+
+    test('one that was already complete is marked under its name', () async {
+      expect(await marks(onDisk: body), [(target, true)]);
+    });
+
+    test('a refused download leaves no empty partial file', () async {
+      await expectLater(
+        ArchiveDownloader(
+              httpClient: _RefusingServer(404),
+              reportEvery: Duration.zero,
+              markExcludedFromBackup: (_) async {},
+            )
+            .download(
+              url: Uri.parse('https://example.invalid/archive.zim'),
+              targetPath: target,
+            )
+            .drain<void>(),
+        throwsA(isA<DownloadException>()),
+      );
+      expect(
+        File('$target${ArchiveDownloader.partialSuffix}').existsSync(),
+        isFalse,
+      );
+    });
+  });
+
   group('a file of the same name already there (#408)', () {
     // Windows does not rename onto a file that is open, and the archive
     // downloaded again is usually the one open in the reader: every
