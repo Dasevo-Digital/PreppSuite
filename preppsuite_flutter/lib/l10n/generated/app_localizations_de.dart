@@ -1503,7 +1503,12 @@ class AppLocalizationsDe extends AppLocalizations {
 
   @override
   String get settingsLocalEncryptionBackupStale =>
-      'Die letzte Prüfung ist über einen Tag her.';
+      'Die geprüfte Sicherung ist über einen Tag alt.';
+
+  @override
+  String settingsLocalEncryptionBackupTooOld(String date) {
+    return 'Diese Sicherung ist vom $date. Vor dem Verschlüsseln muss eine Sicherung geprüft werden, die höchstens einen Tag alt ist.';
+  }
 
   @override
   String get settingsLocalEncryptionStart => 'Lokale Daten jetzt verschlüsseln';

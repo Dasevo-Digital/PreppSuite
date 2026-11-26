@@ -215,7 +215,9 @@ void main() {
     );
 
     await open(const SizedBox());
-    await const LocalEncryptionReadinessStore().recordVerified();
+    await const LocalEncryptionReadinessStore().recordVerified(
+      writtenAt: DateTime.now(),
+    );
     await const WarningPollStatusStore().record(complete: true);
 
     await open(app());

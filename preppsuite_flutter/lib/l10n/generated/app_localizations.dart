@@ -2599,8 +2599,14 @@ abstract class AppLocalizations {
   /// No description provided for @settingsLocalEncryptionBackupStale.
   ///
   /// In en, this message translates to:
-  /// **'The last test is more than a day old.'**
+  /// **'The tested backup is more than a day old.'**
   String get settingsLocalEncryptionBackupStale;
+
+  /// No description provided for @settingsLocalEncryptionBackupTooOld.
+  ///
+  /// In en, this message translates to:
+  /// **'This backup is from {date}. Before encrypting, test a backup that is at most a day old.'**
+  String settingsLocalEncryptionBackupTooOld(String date);
 
   /// No description provided for @settingsLocalEncryptionStart.
   ///

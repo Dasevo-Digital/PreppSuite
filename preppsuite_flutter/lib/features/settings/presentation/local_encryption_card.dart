@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:intl/intl.dart';
 
 import '../../../core/app_database_providers.dart';
 import '../../../core/error_text.dart';
@@ -223,7 +224,26 @@ class _LocalEncryptionCardState extends ConsumerState<LocalEncryptionCard> {
         return;
       }
       final check = service.verifyOpened(opened);
-      await const LocalEncryptionReadinessStore().recordVerified();
+      final writtenAt = opened.snapshot.writtenAt;
+      // The age of the backup counts, not the moment of the check (#406):
+      // a backup from last year read back today holds last year's
+      // household.
+      if (!await const LocalEncryptionReadinessStore().recordIfRecent(
+        writtenAt,
+      )) {
+        messenger.showSnackBar(
+          SnackBar(
+            content: Text(
+              l10n.settingsLocalEncryptionBackupTooOld(
+                DateFormat.yMMMd(
+                  l10n.localeName,
+                ).add_Hm().format(writtenAt.toLocal()),
+              ),
+            ),
+          ),
+        );
+        return;
+      }
       ref.invalidate(localEncryptionStatusProvider);
       messenger.showSnackBar(
         SnackBar(

@@ -1496,7 +1496,12 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get settingsLocalEncryptionBackupStale =>
-      'The last test is more than a day old.';
+      'The tested backup is more than a day old.';
+
+  @override
+  String settingsLocalEncryptionBackupTooOld(String date) {
+    return 'This backup is from $date. Before encrypting, test a backup that is at most a day old.';
+  }
 
   @override
   String get settingsLocalEncryptionStart => 'Encrypt local data now';

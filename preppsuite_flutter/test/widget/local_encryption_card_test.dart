@@ -73,9 +73,10 @@ void main() {
     expect(_startTile(tester).enabled, LocalDatabaseEncryption.cipherAvailable);
   });
 
-  testWidgets('a test from last week does not count', (tester) async {
+  testWidgets('a backup from last week does not count', (tester) async {
     // The household has moved on since. A backup is a safety net for the
-    // data as it is now, and an old one silently is not.
+    // data as it is now, and an old one silently is not. What is measured
+    // is when the backup was written, not when it was read (#406).
     await tester.pumpWidget(
       _card(
         mode: LocalDatabaseEncryptionMode.plaintext,
@@ -89,7 +90,7 @@ void main() {
 
     expect(_startTile(tester).enabled, isFalse);
     expect(
-      find.text('Die letzte Prüfung ist über einen Tag her.'),
+      find.text('Die geprüfte Sicherung ist über einen Tag alt.'),
       findsOneWidget,
     );
   });

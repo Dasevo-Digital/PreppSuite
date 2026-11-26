@@ -1507,7 +1507,12 @@ class AppLocalizationsEs extends AppLocalizations {
 
   @override
   String get settingsLocalEncryptionBackupStale =>
-      'La última prueba tiene más de un día.';
+      'La copia de seguridad probada tiene más de un día.';
+
+  @override
+  String settingsLocalEncryptionBackupTooOld(String date) {
+    return 'Esta copia de seguridad es del $date. Antes de cifrar hay que probar una copia de seguridad de como máximo un día.';
+  }
 
   @override
   String get settingsLocalEncryptionStart => 'Cifrar ahora los datos locales';
