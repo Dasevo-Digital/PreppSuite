@@ -76,8 +76,11 @@ class _ConsumeDialogState extends State<ConsumeDialog> {
   // back.
   String _format(double value) => fieldNumber(value, widget.l10n.localeName);
 
-  double? get _typed =>
-      double.tryParse(_controller.text.trim().replaceAll(',', '.'));
+  /// What was typed, if it is a number of anything at all. "NaN" and
+  /// "Infinity" are numbers to `double.tryParse` and passed every
+  /// comparison below, so the dialog handed them on and booking them
+  /// threw (#403).
+  double? get _typed => readNonNegativeNumber(_controller.text);
 
   /// What the field comes to in the item's unit, or null.
   double? get _amount {
@@ -108,7 +111,10 @@ class _ConsumeDialogState extends State<ConsumeDialog> {
     final amount = _amount;
     // A hair of tolerance: three jars of 370 g against a stock of 1110 g
     // must not be refused over the last bit of a floating-point product.
-    if (amount == null || amount <= 0 || amount > _quantity + 1e-6) {
+    if (amount == null ||
+        !amount.isFinite ||
+        amount <= 0 ||
+        amount > _quantity + 1e-6) {
       setState(() => _error = widget.l10n.consumeInvalidAmount);
       return;
     }

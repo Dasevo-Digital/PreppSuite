@@ -132,6 +132,27 @@ void main() {
     });
   }
 
+  // Numbers to `double.tryParse` that passed every comparison: the dialog
+  // handed them on, and booking them threw (#403).
+  for (final invalid in ['NaN', 'nan', 'Infinity', '-Infinity', '1e400']) {
+    testWidgets('says "$invalid" is no amount, and stays open', (
+      tester,
+    ) async {
+      final result = await openDialog(tester, item(quantity: 5));
+
+      await tester.enterText(find.byType(TextField), invalid);
+      await tester.tap(find.text('Abbuchen'));
+      await tester.pumpAndSettle();
+
+      expect(find.byType(ConsumeDialog), findsOneWidget);
+      expect(result.closed, isFalse);
+      expect(
+        find.text('Menge muss grösser als 0 und höchstens der Bestand sein.'),
+        findsOneWidget,
+      );
+    });
+  }
+
   testWidgets('"used up entirely" returns the whole stock', (tester) async {
     final result = await openDialog(tester, item(quantity: 3.5));
 
