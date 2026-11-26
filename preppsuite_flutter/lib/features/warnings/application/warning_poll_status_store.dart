@@ -29,9 +29,13 @@ class WarningPollStatusStore {
   /// ([warningStaleAfter]).
   static const feedStampValidFor = Duration(hours: 1);
 
+  /// Read afresh, not from this isolate's copy (#396). The background run
+  /// writes these keys in an isolate of its own, and the open app kept
+  /// what it had read at start: "stale, as of yesterday" over warnings
+  /// fetched at six that morning.
   Future<WarningPollStatus> load() async {
     try {
-      final prefs = await SharedPreferences.getInstance();
+      final prefs = await _fresh();
       return WarningPollStatus(
         lastAttempt: _parse(prefs.getString(_attemptKey)),
         lastComplete: _parse(prefs.getString(_completeKey)),
@@ -70,9 +74,13 @@ class WarningPollStatusStore {
 
   /// The stamp [feed] carried when it was last read to its end, or null
   /// when that is too long ago to go by.
+  ///
+  /// Read afresh like [load]: a stamp the background run saved is as good
+  /// as one of this isolate's, and without it the open app read the whole
+  /// feed again after every background run.
   Future<String?> feedStamp(String feed, {DateTime? now}) async {
     try {
-      final prefs = await SharedPreferences.getInstance();
+      final prefs = await _fresh();
       final saved = prefs.getStringList('$_stampPrefix$feed');
       if (saved == null || saved.length != 2) return null;
       final read = _parse(saved.first);
@@ -123,6 +131,14 @@ class WarningPollStatusStore {
     } on Object {
       // Same reasoning as above.
     }
+  }
+
+  /// The preferences as stored now, including what another isolate wrote
+  /// since this one first read them.
+  static Future<SharedPreferences> _fresh() async {
+    final prefs = await SharedPreferences.getInstance();
+    await prefs.reload();
+    return prefs;
   }
 
   DateTime? _parse(String? value) =>
