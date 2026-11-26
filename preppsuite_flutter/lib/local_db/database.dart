@@ -733,10 +733,32 @@ class AppDatabase extends _$AppDatabase {
     // Left behind it outlived the rows, and joining the same folder again
     // skipped reading that file and replaced it with the empty household:
     // for a device alone in the folder, the only copy (#336).
-    await (delete(
-      syncState,
-    )..where((t) => t.entity.like('sharedFolderVersion2:$householdId:%'))).go();
+    //
+    // Every household's, not only this one's (#397): a mark left from a
+    // household this device moved out of says the same about a file it no
+    // longer holds the rows of. Without a mark the next run in that
+    // folder reads the file first, which costs one read and loses nothing.
+    await _forgetPublishedFiles();
   });
+
+  /// Drops the marks that this database wrote its file in a shared folder
+  /// (`sharedFolderVersion2:<household>:<device>`), for [householdId] or,
+  /// without one, for every household.
+  ///
+  /// A mark lets a run skip this device's own file, on the grounds that it
+  /// holds nothing the database does not. That stops being true the moment
+  /// the rows leave the household -- deleted, or re-stamped onto another
+  /// one -- and a run that skips the file then writes what is left over
+  /// it (#311, #336, #397).
+  Future<void> _forgetPublishedFiles([String? householdId]) =>
+      (delete(syncState)..where(
+            (t) => t.entity.like(
+              householdId == null
+                  ? 'sharedFolderVersion2:%'
+                  : 'sharedFolderVersion2:$householdId:%',
+            ),
+          ))
+          .go();
 
   // --- Household members ------------------------------------------------
 
@@ -1742,6 +1764,18 @@ class AppDatabase extends _$AppDatabase {
           await into(householdPlans).insertOnConflictUpdate(moved);
         }
       }
+
+      // The marks that this database wrote its file in a folder of either
+      // household (#397). Under [from] the rows are gone from the file's
+      // household: a device alone in a folder that merged into another
+      // household and later came back found its mark, skipped its own
+      // file and wrote the nearly empty household over the only copy. And
+      // a mark under [to] is from an earlier stay, about a file whose rows
+      // this database may long have lost. Without a mark the next run
+      // reads the file first; a run already under way for [from] finds its
+      // mark gone and writes nothing (#336).
+      await _forgetPublishedFiles(from);
+      await _forgetPublishedFiles(to);
     });
   }
 
