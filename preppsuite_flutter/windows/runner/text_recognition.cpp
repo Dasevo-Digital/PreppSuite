@@ -106,7 +106,8 @@ std::string TextOf(const OcrResult& result) {
 
 TextRecognition::TextRecognition(flutter::BinaryMessenger* messenger,
                                  HWND window)
-    : window_(window) {
+    : state_(std::make_shared<State>()) {
+  state_->window = window;
   channel_ = std::make_unique<flutter::MethodChannel<EncodableValue>>(
       messenger, "de.dasevo.preppsuite/text_recognition",
       &flutter::StandardMethodCodec::GetInstance());
@@ -114,13 +115,31 @@ TextRecognition::TextRecognition(flutter::BinaryMessenger* messenger,
       [this](const auto& call, auto result) { Handle(call, std::move(result)); });
 }
 
-TextRecognition::~TextRecognition() { channel_->SetMethodCallHandler(nullptr); }
+TextRecognition::~TextRecognition() {
+  channel_->SetMethodCallHandler(nullptr);
+  // A thread still reading holds |state_| and finds no window when it is
+  // done. Answers already queued are dropped here, on the window's thread,
+  // with the engine they would have gone to.
+  std::vector<Reply> unanswered;
+  {
+    std::lock_guard<std::mutex> lock(state_->mutex);
+    state_->window = nullptr;
+    unanswered.swap(state_->ready);
+  }
+}
+
+void TextRecognition::Post(const std::shared_ptr<State>& state, Reply reply) {
+  std::lock_guard<std::mutex> lock(state->mutex);
+  if (!state->window) return;
+  state->ready.push_back(std::move(reply));
+  PostMessage(state->window, kDoneMessage, 0, 0);
+}
 
 void TextRecognition::Deliver() {
   std::vector<Reply> ready;
   {
-    std::lock_guard<std::mutex> lock(mutex_);
-    ready.swap(ready_);
+    std::lock_guard<std::mutex> lock(state_->mutex);
+    ready.swap(state_->ready);
   }
   for (auto& reply : ready) reply();
 }
@@ -135,7 +154,7 @@ void TextRecognition::Handle(
 
   if (call.method_name() == "support") {
     // Asked off the window's thread too: the engine's first use loads it.
-    std::thread([this, shared, languages]() {
+    std::thread([state = state_, shared, languages]() {
       winrt::init_apartment(winrt::apartment_type::multi_threaded);
       std::string answer = "needsLanguagePack";
       try {
@@ -143,13 +162,9 @@ void TextRecognition::Handle(
       } catch (...) {
         answer = "unsupported";
       }
-      {
-        std::lock_guard<std::mutex> lock(mutex_);
-        ready_.push_back([shared, answer]() {
-          shared->Success(EncodableValue(answer));
-        });
-      }
-      PostMessage(window_, kDoneMessage, 0, 0);
+      Post(state, [shared, answer]() {
+        shared->Success(EncodableValue(answer));
+      });
     }).detach();
     return;
   }
@@ -175,7 +190,8 @@ void TextRecognition::Handle(
     return;
   }
 
-  std::thread([this, shared, languages, page = *pixels, w = *w, h = *h]() {
+  std::thread([state = state_, shared, languages, page = *pixels, w = *w,
+               h = *h]() {
     winrt::init_apartment(winrt::apartment_type::multi_threaded);
     Reply reply;
     try {
@@ -201,10 +217,6 @@ void TextRecognition::Handle(
     } catch (...) {
       reply = [shared]() { shared->Error("recognition", "failed"); };
     }
-    {
-      std::lock_guard<std::mutex> lock(mutex_);
-      ready_.push_back(std::move(reply));
-    }
-    PostMessage(window_, kDoneMessage, 0, 0);
+    Post(state, std::move(reply));
   }).detach();
 }

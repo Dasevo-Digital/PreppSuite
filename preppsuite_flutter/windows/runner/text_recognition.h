@@ -22,6 +22,11 @@
 // are asynchronous and must not be waited on from the window's thread. The
 // answer comes back through a window message, because a method channel
 // may only be answered on that thread.
+//
+// The threads are not waited for when the window closes: a page can take
+// seconds. They share State with this object instead of pointing at it,
+// so one that finishes after the window is gone finds the window cleared
+// and drops its answer rather than touching a destroyed object (#409).
 class TextRecognition {
  public:
   // Posted to |window| when an answer is ready; FlutterWindow hands it
@@ -37,14 +42,24 @@ class TextRecognition {
  private:
   using Reply = std::function<void()>;
 
+  // What the recognition threads and the window share. |window| is
+  // cleared when this object goes, under |mutex|.
+  struct State {
+    std::mutex mutex;
+    HWND window = nullptr;
+    std::vector<Reply> ready;
+  };
+
+  // Queues |reply| for Deliver() and tells the window, unless it is gone.
+  // From a recognition thread.
+  static void Post(const std::shared_ptr<State>& state, Reply reply);
+
   void Handle(const flutter::MethodCall<flutter::EncodableValue>& call,
               std::unique_ptr<flutter::MethodResult<flutter::EncodableValue>>
                   result);
 
   std::unique_ptr<flutter::MethodChannel<flutter::EncodableValue>> channel_;
-  HWND window_;
-  std::mutex mutex_;
-  std::vector<Reply> ready_;
+  std::shared_ptr<State> state_;
 };
 
 #endif  // RUNNER_TEXT_RECOGNITION_H_

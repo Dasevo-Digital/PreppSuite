@@ -58,6 +58,28 @@ void main() {
       );
       expect(_body(recognition, 'bool WrittenInLatin('), contains('"Latn"'));
     });
+
+    test('a reading that outlasts the window touches nothing of it', () {
+      // The threads are detached. Closing the window during a recognition
+      // destroyed the object they pointed at, and the finished thread
+      // then locked its mutex and filled its list.
+      final threads = RegExp(
+        r'std::thread\(\[([^\]]*)\]',
+      ).allMatches(recognition).map((match) => match.group(1)!).toList();
+      expect(threads, hasLength(2));
+      for (final captures in threads) {
+        expect(captures, isNot(contains('this')));
+        expect(captures, contains('state = state_'));
+      }
+      expect(
+        _body(recognition, 'TextRecognition::~TextRecognition()'),
+        contains('state_->window = nullptr;'),
+      );
+      expect(
+        _body(recognition, 'void TextRecognition::Post('),
+        contains('if (!state->window) return;'),
+      );
+    });
   });
 }
 
