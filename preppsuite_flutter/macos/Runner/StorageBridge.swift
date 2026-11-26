@@ -29,6 +29,20 @@ final class StorageBridge: NSObject {
 
   private static let scheme = "bookmark://"
 
+  /// Held while the bookmark store is read and written back. A pick adds to
+  /// it on the main thread while a folder call on `fileReads` may write a
+  /// stale bookmark anew (#410), and either could otherwise drop the
+  /// other's entry.
+  private static let bookmarksLock = NSLock()
+
+  private static func updateBookmarks(_ change: (inout [String: Data]) -> Void) {
+    bookmarksLock.lock()
+    defer { bookmarksLock.unlock() }
+    var store = UserDefaults.standard.dictionary(forKey: bookmarksKey) as? [String: Data] ?? [:]
+    change(&store)
+    UserDefaults.standard.set(store, forKey: bookmarksKey)
+  }
+
   private let channel: FlutterMethodChannel
 
   /// Descriptors for archives being read in ranges, by uri.
@@ -47,10 +61,25 @@ final class StorageBridge: NSObject {
   /// into, instead of every write having to cross this channel.
   private var heldScopes: [String: URL] = [:]
 
-  /// Reads happen here rather than on the main thread: a map being panned
-  /// asks for tiles continuously, and file I/O in the middle of that is
-  /// what turns smooth scrolling into jank.
+  /// File work happens here rather than on the main thread, one call after
+  /// another in the order Dart made them. A map being panned asks for tiles
+  /// continuously, and file I/O in the middle of that is what turns smooth
+  /// scrolling into jank. The shared folder's calls came later (#410): a
+  /// device file of up to 64 MB or a picture of up to 24 MB written
+  /// atomically into iCloud Drive or Nextcloud on the main thread froze the
+  /// window.
   private let fileReads = DispatchQueue(label: "preppsuite.fileReads")
+
+  /// Runs [work] on `fileReads` and answers on the main thread.
+  ///
+  /// Serial, so a write and the list or read after it happen in the order
+  /// they were asked for, as they did on the main thread.
+  private func onFileQueue(_ result: @escaping FlutterResult, _ work: @escaping () -> Any?) {
+    fileReads.async {
+      let value = work()
+      DispatchQueue.main.async { result(value) }
+    }
+  }
 
   private final class OpenFile {
     init(url: URL, handle: FileHandle, scoped: Bool) {
@@ -114,28 +143,33 @@ final class StorageBridge: NSObject {
       closeFile(arguments["fileToken"] as? String ?? arguments["uri"] as? String ?? "")
       result(nil)
     case "ensureWritable":
-      result(ensureWritable(arguments["uri"] as? String ?? ""))
+      onFileQueue(result) { self.ensureWritable(arguments["uri"] as? String ?? "") }
     case "list":
-      result(list(arguments["uri"] as? String ?? "", arguments["path"] as? String ?? ""))
+      onFileQueue(result) {
+        self.list(arguments["uri"] as? String ?? "", arguments["path"] as? String ?? "")
+      }
     case "read":
-      fileReads.async {
-        let value = self.read(arguments["uri"] as? String ?? "", arguments["path"] as? String ?? "",
+      onFileQueue(result) {
+        self.read(arguments["uri"] as? String ?? "", arguments["path"] as? String ?? "",
           maxBytes: arguments["maxBytes"] as? Int ?? 64 * 1024 * 1024)
-        DispatchQueue.main.async { result(value) }
       }
     case "write":
-      do {
-        try write(
-          arguments["uri"] as? String ?? "",
-          path: arguments["path"] as? String ?? "",
-          contents: arguments["contents"] as? String ?? ""
-        )
-        result(nil)
-      } catch {
-        result(FlutterError(code: "write-failed", message: "The selected folder could not be written.", details: nil))
+      onFileQueue(result) {
+        do {
+          try self.write(
+            arguments["uri"] as? String ?? "",
+            path: arguments["path"] as? String ?? "",
+            contents: arguments["contents"] as? String ?? ""
+          )
+          return nil
+        } catch {
+          return FlutterError(code: "write-failed", message: "The selected folder could not be written.", details: nil)
+        }
       }
     case "delete":
-      result(delete(arguments["uri"] as? String ?? "", arguments["path"] as? String ?? ""))
+      onFileQueue(result) {
+        self.delete(arguments["uri"] as? String ?? "", arguments["path"] as? String ?? "")
+      }
     default:
       result(FlutterMethodNotImplemented)
     }
@@ -191,9 +225,7 @@ final class StorageBridge: NSObject {
     )
 
     let identifier = UUID().uuidString
-    var store = UserDefaults.standard.dictionary(forKey: Self.bookmarksKey) as? [String: Data] ?? [:]
-    store[identifier] = data
-    UserDefaults.standard.set(store, forKey: Self.bookmarksKey)
+    Self.updateBookmarks { $0[identifier] = data }
 
     // The path comes along because a caller may want to write into the
     // folder with ordinary file I/O; the handle alone is only good for
@@ -233,7 +265,7 @@ final class StorageBridge: NSObject {
     guard uri.hasPrefix(Self.scheme) else { return nil }
     let identifier = String(uri.dropFirst(Self.scheme.count))
 
-    var store = UserDefaults.standard.dictionary(forKey: Self.bookmarksKey) as? [String: Data] ?? [:]
+    let store = UserDefaults.standard.dictionary(forKey: Self.bookmarksKey) as? [String: Data] ?? [:]
     guard let data = store[identifier] else { return nil }
 
     var stale = false
@@ -255,8 +287,7 @@ final class StorageBridge: NSObject {
         includingResourceValuesForKeys: nil,
         relativeTo: nil
       ) {
-        store[identifier] = fresh
-        UserDefaults.standard.set(store, forKey: Self.bookmarksKey)
+        Self.updateBookmarks { $0[identifier] = fresh }
       }
     }
     return url
