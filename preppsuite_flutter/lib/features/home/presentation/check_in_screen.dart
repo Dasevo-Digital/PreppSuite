@@ -1,5 +1,3 @@
-import 'dart:io';
-
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
@@ -82,8 +80,16 @@ class _CheckInScreenState extends ConsumerState<CheckInScreen>
 
   /// Where messaging can be opened at all. Windows and Linux have no
   /// standard handler for `sms:`; there the text is copied or shared.
+  /// Asked of the target platform, which is the same thing in the app and
+  /// lets a widget test lay the buttons out on any machine.
   bool get _canText =>
-      !kIsWeb && (Platform.isAndroid || Platform.isIOS || Platform.isMacOS);
+      !kIsWeb &&
+      switch (defaultTargetPlatform) {
+        TargetPlatform.android ||
+        TargetPlatform.iOS ||
+        TargetPlatform.macOS => true,
+        _ => false,
+      };
 
   /// When [_fix] was taken, where that is worth saying, or null.
   String? _staleAt(AppLocalizations l10n, DateTime now) {
@@ -143,7 +149,11 @@ class _CheckInScreenState extends ConsumerState<CheckInScreen>
 
   Future<void> _send(CheckInContact contact, String text) async {
     final l10n = AppLocalizations.of(context)!;
-    final uri = smsUri(contact.phone, text, ios: !kIsWeb && Platform.isIOS);
+    final uri = smsUri(
+      contact.phone,
+      text,
+      ios: !kIsWeb && defaultTargetPlatform == TargetPlatform.iOS,
+    );
     bool opened;
     try {
       opened = await (widget.launch ?? launchUrl)(uri);
@@ -272,7 +282,7 @@ class _CheckInScreenState extends ConsumerState<CheckInScreen>
               padding: const EdgeInsets.symmetric(vertical: 8),
               child: Text(l10n.checkInNoRecipients),
             ),
-          for (final contact in _contacts)
+          for (final contact in _contacts) ...[
             ListTile(
               contentPadding: EdgeInsets.zero,
               title: Text(contact.name),
@@ -289,14 +299,25 @@ class _CheckInScreenState extends ConsumerState<CheckInScreen>
                   ],
                 ),
               ),
-              trailing: _canText
-                  ? FilledButton.icon(
-                      onPressed: () => _send(contact, text),
-                      icon: const Icon(Icons.sms_outlined),
-                      label: Text(l10n.checkInSendTo(contact.name)),
-                    )
-                  : null,
             ),
+            // Under the name and the number, not beside them (#412). As
+            // the tile's trailing widget the button carries the name too,
+            // and at the crisis mode's text size it took the whole row:
+            // the name stood one letter to a line, with a layout
+            // assertion behind it.
+            if (_canText)
+              Align(
+                alignment: AlignmentDirectional.centerStart,
+                child: Padding(
+                  padding: const EdgeInsetsDirectional.only(bottom: 8),
+                  child: FilledButton.icon(
+                    onPressed: () => _send(contact, text),
+                    icon: const Icon(Icons.sms_outlined),
+                    label: Text(l10n.checkInSendTo(contact.name)),
+                  ),
+                ),
+              ),
+          ],
           for (final suggestion in suggestions)
             if (!_contacts.any((c) => c.phone == suggestion.phone))
               ListTile(

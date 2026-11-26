@@ -182,8 +182,10 @@ void main() {
     await tester.tap(find.text('OK'));
     await tester.pumpAndSettle();
 
+    // Back up: the recipients and their buttons are further down than
+    // the list keeps built.
     final onMyWay = find.text('Ich bin auf dem Weg zum Treffpunkt.');
-    await tester.ensureVisible(onMyWay);
+    await tester.scrollUntilVisible(onMyWay, -200, scrollable: list);
     await tester.pumpAndSettle();
     await tester.tap(onMyWay);
     await tester.pumpAndSettle();
@@ -195,17 +197,18 @@ void main() {
       findsOneWidget,
     );
 
+    // Offered wherever the platform has a messaging app, which a widget
+    // test's target platform has.
     final send = find.text('SMS an Tante Inge');
-    if (send.evaluate().isNotEmpty) {
-      await tester.ensureVisible(send);
-      await tester.tap(send);
-      await tester.pumpAndSettle();
-      expect(launched.single.toString(), startsWith('sms:01712345678'));
-      expect(
-        Uri.decodeComponent(launched.single.toString()),
-        contains('Treffpunkt: Spielplatz'),
-      );
-    }
+    await tester.scrollUntilVisible(send, 200, scrollable: list);
+    await tester.pumpAndSettle();
+    await tester.tap(send);
+    await tester.pumpAndSettle();
+    expect(launched.single.toString(), startsWith('sms:01712345678'));
+    expect(
+      Uri.decodeComponent(launched.single.toString()),
+      contains('Treffpunkt: Spielplatz'),
+    );
     final kept = await tester.runAsync(const CheckInContactStore().load);
     expect(kept!.single.phone, '01712345678');
 

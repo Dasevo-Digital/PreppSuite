@@ -24,6 +24,8 @@ import 'package:preppsuite_flutter/features/first_aid/presentation/compression_p
 import 'package:preppsuite_flutter/features/first_aid/presentation/first_aid_guide_screen.dart';
 import 'package:preppsuite_flutter/features/first_aid/presentation/first_aid_screen.dart';
 import 'package:preppsuite_flutter/features/first_aid/presentation/first_aid_videos_screen.dart';
+import 'package:preppsuite_flutter/features/home/application/check_in.dart';
+import 'package:preppsuite_flutter/features/home/presentation/check_in_screen.dart';
 import 'package:preppsuite_flutter/features/energy/presentation/outage_screen.dart';
 import 'package:preppsuite_flutter/features/inventory/presentation/medication_range_screen.dart';
 import 'package:preppsuite_flutter/features/inventory/presentation/rotation_screen.dart';
@@ -48,6 +50,17 @@ class _FixedProfile extends HouseholdProfileController {
 
   @override
   Future<HouseholdProfile?> build() async => profile;
+}
+
+/// Two people to tell, without the encrypted store behind them.
+class _TwoRecipients extends CheckInContactStore {
+  const _TwoRecipients();
+
+  @override
+  Future<List<CheckInContact>> load() async => const [
+    CheckInContact(name: 'Tante Inge', phone: '+491712345678'),
+    CheckInContact(name: 'Onkel Friedrich-Wilhelm', phone: '+491601112223'),
+  ];
 }
 
 /// Every screen that has no widget test of its own, rendered at twice the
@@ -221,6 +234,31 @@ void _screens(Locale locale) {
 
   testWidgets('the video pack screen', (tester) async {
     await pump(tester, const FirstAidVideosScreen());
+  });
+
+  // The send button sat beside the name and the number, and at this size
+  // it took the whole row: the name stood one letter to a line (#412).
+  testWidgets('the check-in with its recipients', (tester) async {
+    await pump(
+      tester,
+      CheckInScreen(
+        householdId: householdId,
+        store: const _TwoRecipients(),
+        launch: (_) async => true,
+      ),
+    );
+    for (final person in ['Tante Inge', 'Onkel Friedrich-Wilhelm']) {
+      final name = find.text(person);
+      await tester.scrollUntilVisible(
+        name,
+        200,
+        scrollable: find.byType(Scrollable).first,
+      );
+      await tester.pumpAndSettle();
+      // On a line, not a letter to a line.
+      final size = tester.getSize(name);
+      expect(size.width, greaterThan(size.height * 2), reason: person);
+    }
   });
 
   testWidgets('the blackout clock', (tester) async {
