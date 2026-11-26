@@ -269,6 +269,49 @@ void main() {
       expect(after.dirty, isTrue);
     });
 
+    test('confirming a battery check keeps the rest of the edit', () async {
+      await addItem(quantity: 5);
+      final opened = await storedItem();
+      await laptopEdits(opened);
+
+      final at = DateTime.utc(2026, 11, 26, 9);
+      await controller.markCharged(opened, at: at);
+
+      final after = await storedItem();
+      expect(after.chargeCheckedAt?.toUtc(), at);
+      expect(after.name, 'Vollkornnudeln');
+      expect(after.quantity, 8);
+    });
+
+    test('counting in a measure converts what is stored', () async {
+      await addItem(quantity: 6);
+      await db.customStatement("UPDATE inventory_items SET unit = 'Dose'");
+      final opened = await storedItem();
+      await laptopEdits(opened);
+
+      await controller.countInMeasure(opened, perPackage: 400, measure: 'g');
+
+      final after = await storedItem();
+      expect(after.quantity, 3200);
+      expect(after.unit, 'g');
+      expect(after.name, 'Vollkornnudeln');
+    });
+
+    test('and not a second time once another device has', () async {
+      await addItem(quantity: 6);
+      await db.customStatement("UPDATE inventory_items SET unit = 'Dose'");
+      final opened = await storedItem();
+      await controller.countInMeasure(
+        await storedItem(),
+        perPackage: 400,
+        measure: 'g',
+      );
+
+      await controller.countInMeasure(opened, perPackage: 400, measure: 'g');
+
+      expect((await storedItem()).quantity, 2400);
+    });
+
     test('consuming what was deleted meanwhile brings nothing back', () async {
       await addItem(quantity: 5);
       final opened = await storedItem();

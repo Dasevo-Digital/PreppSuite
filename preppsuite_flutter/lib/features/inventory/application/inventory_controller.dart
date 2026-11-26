@@ -518,6 +518,12 @@ class InventoryController {
   /// the package as the way to say an amount at the shelf -- the old unit
   /// becomes its name -- so taking one tin still takes one tin, and the
   /// calories drop with it.
+  ///
+  /// On the row as stored, like [consumeQuantity] (#403): the sheet may
+  /// have been open while another device booked a tin. A row that is
+  /// gone, or no longer counted in the package the sheet asked about, is
+  /// left alone -- converting a second time would multiply grams by the
+  /// size of a tin.
   Future<void> countInMeasure(
     InventoryItem existing, {
     required double perPackage,
@@ -527,33 +533,40 @@ class InventoryController {
         hasInvalidInventoryNumbers(existing)) {
       throw const InvalidInventoryNumbers();
     }
-    final package = ItemPackage.from(existing.unit, perPackage);
-    if (package == null) return;
-    requireInventoryNumbers(
-      nutrition: PackageNutrition.ofItem(existing),
-      dailyDose: existing.dailyDose,
-      packageSize: package.size,
-      quantity: package.toUnits(existing.quantity),
-      minQuantity: existing.minQuantity == null
-          ? null
-          : package.toUnits(existing.minQuantity!),
-    );
-    final minimum = existing.minQuantity;
-    await _db.upsertInventoryItem(
-      existing
-          .toCompanion(false)
-          .copyWith(
-            quantity: Value(package.toUnits(existing.quantity)),
-            unit: Value(measure),
-            minQuantity: Value(
-              minimum == null ? null : package.toUnits(minimum),
+    await _db.transaction(() async {
+      final row = await _stored(existing.clientId);
+      if (row == null || row.deletedAt != null || row.unit != existing.unit) {
+        return;
+      }
+      if (hasInvalidInventoryNumbers(row)) {
+        throw const InvalidInventoryNumbers();
+      }
+      final package = ItemPackage.from(row.unit, perPackage);
+      if (package == null) return;
+      final minimum = row.minQuantity;
+      requireInventoryNumbers(
+        nutrition: PackageNutrition.ofItem(row),
+        dailyDose: row.dailyDose,
+        packageSize: package.size,
+        quantity: package.toUnits(row.quantity),
+        minQuantity: minimum == null ? null : package.toUnits(minimum),
+      );
+      await _db.upsertInventoryItem(
+        row
+            .toCompanion(false)
+            .copyWith(
+              quantity: Value(package.toUnits(row.quantity)),
+              unit: Value(measure),
+              minQuantity: Value(
+                minimum == null ? null : package.toUnits(minimum),
+              ),
+              packageName: Value(package.name),
+              packageSize: Value(package.size),
+              updatedAt: Value(DateTime.now().toUtc()),
+              dirty: const Value(true),
             ),
-            packageName: Value(package.name),
-            packageSize: Value(package.size),
-            updatedAt: Value(DateTime.now().toUtc()),
-            dirty: const Value(true),
-          ),
-    );
+      );
+    });
   }
 
   /// Records that [existing]'s battery was just charged and tested
@@ -561,18 +574,24 @@ class InventoryController {
   ///
   /// The whole row otherwise as stored, so a check confirmed from the
   /// list cannot undo an edit made on another device a moment earlier --
-  /// it is a write like any other, dirty and with a new version.
+  /// it is a write like any other, dirty and with a new version. Read
+  /// from the database, not from [existing], which is the row the list
+  /// drew (#403); a row deleted meanwhile is left alone.
   Future<void> markCharged(InventoryItem existing, {DateTime? at}) async {
     final now = DateTime.now().toUtc();
-    await _db.upsertInventoryItem(
-      existing
-          .toCompanion(false)
-          .copyWith(
-            chargeCheckedAt: Value((at ?? now).toUtc()),
-            updatedAt: Value(now),
-            dirty: const Value(true),
-          ),
-    );
+    await _db.transaction(() async {
+      final row = await _stored(existing.clientId);
+      if (row == null || row.deletedAt != null) return;
+      await _db.upsertInventoryItem(
+        row
+            .toCompanion(false)
+            .copyWith(
+              chargeCheckedAt: Value((at ?? now).toUtc()),
+              updatedAt: Value(now),
+              dirty: const Value(true),
+            ),
+      );
+    });
   }
 
   /// Undo restores the latest stored fields, not an old form snapshot.
