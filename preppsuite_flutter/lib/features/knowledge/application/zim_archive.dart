@@ -199,37 +199,65 @@ class ZimArchive {
   /// Title search, not full-text search: this finds "Wasseraufbereitung"
   /// by its name and cannot find the article that merely mentions it. The
   /// screen says so. Full text is the index the app builds.
+  ///
+  /// The order is by bytes, so case decides where a title stands, and the
+  /// prefix is looked for in each of [titleSpellings] (#407): as typed,
+  /// then the way a Wikipedia title starts, then with every word
+  /// capitalised. Only the second used to be asked, which made "iPhone"
+  /// "IPhone" -- and the lower-case titles of iFixit, Stack Exchange and
+  /// zimit archives unfindable -- and left "Erste hilfe" short of
+  /// "Erste Hilfe".
   Future<List<ZimEntry>> searchTitles(String prefix, {int limit = 25}) async {
     if (prefix.isEmpty) return const [];
 
     final order = await _titleOrder();
     if (order == null) return const [];
 
-    // Wikipedia titles start with a capital and the index is sorted by
-    // bytes, so a lowercase query would land past every match.
-    final query = prefix[0].toUpperCase() + prefix.substring(1);
+    final matches = <ZimEntry>[];
+    final seen = <int>{};
+    for (final spelling in titleSpellings(prefix)) {
+      for (final namespace in order.contentNamespaces) {
+        if (matches.length >= limit) return matches;
+        var at = await _firstTitleFrom(order, namespace, spelling);
+        for (; at < order.count && matches.length < limit; at++) {
+          final entry = await entryAt(await order.at(at));
+          if (entry.namespace != namespace ||
+              !entry.title.startsWith(spelling)) {
+            break;
+          }
+          if (seen.add(entry.index)) matches.add(entry);
+        }
+      }
+    }
+    return matches;
+  }
 
+  /// Where in [order] the first entry at or after ([namespace], [title])
+  /// stands.
+  ///
+  /// The order is by namespace and then by title. A version 6 listing
+  /// holds only the `C` namespace, where the title alone would do; the
+  /// table of a version 5 archive holds every entry, the pictures in `I`
+  /// and the metadata in `M` included, and a search that compared titles
+  /// alone landed in the middle of those for any word late in the alphabet
+  /// (#407).
+  Future<int> _firstTitleFrom(
+    _TitleOrder order,
+    String namespace,
+    String title,
+  ) async {
     var low = 0;
     var high = order.count - 1;
     while (low <= high) {
       final middle = (low + high) >> 1;
       final entry = await entryAt(await order.at(middle));
-      if (entry.title.compareTo(query) < 0) {
+      if (_compareKeys(entry.namespace, entry.title, namespace, title) < 0) {
         low = middle + 1;
       } else {
         high = middle - 1;
       }
     }
-
-    final matches = <ZimEntry>[];
-    for (var at = low; at < order.count && matches.length < limit; at++) {
-      final entry = await entryAt(await order.at(at));
-      if (!entry.title.startsWith(query)) break;
-      if (entry.namespace == 'C' || entry.namespace == 'A') {
-        matches.add(entry);
-      }
-    }
-    return matches;
+    return low;
   }
 
   /// The entry the archive opens on, or null when it names none.
@@ -277,8 +305,9 @@ class ZimArchive {
 
   // --- Internals --------------------------------------------------------
 
-  /// Namespace first, then URL, byte by byte — the order the index is
-  /// written in. A locale-aware comparison would find the wrong entries.
+  /// Namespace first, then URL (or title), byte by byte — the order the
+  /// indexes are written in. A locale-aware comparison would find the
+  /// wrong entries.
   static int _compareKeys(
     String leftNamespace,
     String leftUrl,
@@ -329,26 +358,49 @@ class ZimArchive {
         0,
         bytes.length ~/ 4,
       );
-      return _TitleOrder(
-        count: indexes.length,
-        at: (position) async => indexes[position],
+      return _withContentNamespaces(
+        _TitleOrder(
+          count: indexes.length,
+          at: (position) async => indexes[position],
+        ),
       );
     }
 
     if (header.majorVersion == 5 && header.titlePointerPosition > 0) {
-      return _TitleOrder(
-        count: header.entryCount,
-        at: (position) async {
-          final bytes = await _source.read(
-            header.titlePointerPosition + position * 4,
-            4,
-          );
-          return ByteData.sublistView(bytes).getUint32(0, Endian.little);
-        },
+      return _withContentNamespaces(
+        _TitleOrder(
+          count: header.entryCount,
+          at: (position) async {
+            final bytes = await _source.read(
+              header.titlePointerPosition + position * 4,
+              4,
+            );
+            return ByteData.sublistView(bytes).getUint32(0, Endian.little);
+          },
+        ),
       );
     }
 
     return null;
+  }
+
+  /// [order], knowing which of the two namespaces articles live in --
+  /// `A` before 2021, `C` since -- it holds. Asked once, so that a search
+  /// does not look for each prefix in a namespace that is not there.
+  Future<_TitleOrder> _withContentNamespaces(_TitleOrder order) async {
+    final present = <String>[];
+    for (final namespace in const ['A', 'C']) {
+      final at = await _firstTitleFrom(order, namespace, '');
+      if (at < order.count &&
+          (await entryAt(await order.at(at))).namespace == namespace) {
+        present.add(namespace);
+      }
+    }
+    return _TitleOrder(
+      count: order.count,
+      at: order.at,
+      contentNamespaces: present,
+    );
   }
 
   Future<Uint8List> _cluster(int number) async {
@@ -528,12 +580,41 @@ class ZimArchive {
 
 /// Access to the archive's entries in title order.
 class _TitleOrder {
-  const _TitleOrder({required this.count, required this.at});
+  const _TitleOrder({
+    required this.count,
+    required this.at,
+    this.contentNamespaces = const [],
+  });
 
   final int count;
 
+  /// Which of `A` and `C` this order holds entries in.
+  final List<String> contentNamespaces;
+
   /// The URL-order index of the entry at [position] in title order.
   final Future<int> Function(int position) at;
+}
+
+/// What a title search for [typed] looks for, in this order and without
+/// repeats: as typed, with its first letter in upper case, and with the
+/// first letter of every word in upper case (#407).
+///
+/// A title order is by bytes, so "iPhone", "IPhone" and "iphone" stand in
+/// three different places. Wikipedia titles begin with a capital, those
+/// of iFixit and Stack Exchange often do not, and a phone keyboard writes
+/// "erste hilfe" for an article called "Erste Hilfe".
+List<String> titleSpellings(String typed) {
+  String capitalised(String word) {
+    if (word.isEmpty) return word;
+    final first = String.fromCharCode(word.runes.first);
+    return first.toUpperCase() + word.substring(first.length);
+  }
+
+  return {
+    typed,
+    capitalised(typed),
+    typed.split(' ').map(capitalised).join(' '),
+  }.toList();
 }
 
 /// Keeps the "are the offsets 64-bit" flag with the decompressed body,

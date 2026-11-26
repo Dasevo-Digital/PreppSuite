@@ -39,10 +39,10 @@ class ZimFixture {
     this.majorVersion = 6,
     this.mimeTypes = const ['text/html', 'image/png'],
     this.compression = 1,
-    this.includeTitleListing = true,
+    bool? includeTitleListing,
     this.reverseDirectory = false,
     this.blobsPerCluster,
-  });
+  }) : includeTitleListing = includeTitleListing ?? majorVersion != 5;
 
   final List<ZimFixtureEntry> entries;
   final int majorVersion;
@@ -52,7 +52,8 @@ class ZimFixture {
   final int compression;
 
   /// Whether to write the `X/listing/titleOrdered/v1` entry that version 6
-  /// archives carry.
+  /// archives carry. Version 5 has none: its title order is a table that
+  /// the header points at.
   final bool includeTitleListing;
 
   /// Whether to lay the directory entries out in reverse, so their order
@@ -179,12 +180,16 @@ class ZimFixture {
     }
     out.add(_u64List(entryOffsets));
     if (writeTitleTable) {
-      out.add(
-        _u32List([
-          for (final e in byTitle) e.key,
-          ...List.filled(all.length - byTitle.length, 0),
-        ]),
-      );
+      // Every entry, by namespace and then by title, the way a version 5
+      // writer lays the table out: pictures and metadata included.
+      final table = List<int>.generate(all.length, (i) => i)
+        ..sort((a, b) {
+          final namespaces = all[a].namespace.compareTo(all[b].namespace);
+          return namespaces != 0
+              ? namespaces
+              : _titleOf(all[a]).compareTo(_titleOf(all[b]));
+        });
+      out.add(_u32List(table));
     }
     out.add(_u64List(clusterPositions));
     for (final cluster in clusters) {

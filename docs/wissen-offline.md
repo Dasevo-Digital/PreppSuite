@@ -124,7 +124,10 @@ Zwei Arten, und die Umschaltung steht über der Trefferliste.
 
 **Titel.** Nutzt die Titelreihenfolge, die im Archiv schon liegt. Sofort da,
 nichts vorzubereiten. Findet „Trinkwasseraufbereitung" über den Namen und
-nicht den Artikel, der das Wort nur erwähnt.
+nicht den Artikel, der das Wort nur erwähnt. Die Reihenfolge geht nach
+Bytes, „iPhone", „IPhone" und „iphone" stehen darin an drei Stellen. Gesucht
+wird deshalb so, wie es getippt ist, mit großem Anfangsbuchstaben und mit
+jedem Wort groß (#407).
 
 **Volltext.** Die App baut je Archiv einen eigenen Index mit SQLite FTS5
 auf, auf allen Plattformen.

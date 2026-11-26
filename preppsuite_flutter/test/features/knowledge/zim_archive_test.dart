@@ -244,6 +244,92 @@ void main() {
 
       expect(await archive.searchTitles(''), isEmpty);
     });
+
+    group('in more than one spelling (#407)', () {
+      ZimFixtureEntry page(String title) => ZimFixtureEntry(
+        namespace: 'C',
+        url: title.replaceAll(' ', '_'),
+        title: title,
+        content: const [65],
+      );
+
+      test('a title in lower case is found as it was typed', () async {
+        // iFixit, Stack Exchange and zimit archives keep their titles as
+        // written. "iPhone" used to be looked for as "IPhone" only.
+        final archive = await openFixture(
+          ZimFixture(
+            entries: [page('iPhone 4 Akku'), page('iPod'), page('IPhone')],
+          ),
+        );
+
+        expect((await archive.searchTitles('iPhone')).map((e) => e.title), [
+          'iPhone 4 Akku',
+          'IPhone',
+        ]);
+      });
+
+      test('every word is tried with a capital as well', () async {
+        // How a phone keyboard writes it, and how Wikipedia names it.
+        final archive = await openFixture(
+          ZimFixture(entries: [page('Erste Hilfe'), page('Erste Hilfe-Kurs')]),
+        );
+
+        expect(
+          (await archive.searchTitles('erste hilfe')).map((e) => e.title),
+          ['Erste Hilfe', 'Erste Hilfe-Kurs'],
+        );
+      });
+
+      test('a title found in two spellings is listed once', () async {
+        final archive = await openFixture(
+          ZimFixture(entries: [page('Wasser'), page('Wasserkocher')]),
+        );
+
+        expect((await archive.searchTitles('Wasser')).map((e) => e.title), [
+          'Wasser',
+          'Wasserkocher',
+        ]);
+      });
+    });
+
+    test(
+      'the older format is searched by namespace and title (#407)',
+      () async {
+        // A version 5 table holds every entry, sorted by namespace first:
+        // the layout files in `-`, the articles in `A`, the pictures in `I`.
+        // Compared by title alone, a word late in the alphabet landed among
+        // the pictures and found nothing.
+        ZimFixtureEntry entry(String namespace, String title) =>
+            ZimFixtureEntry(
+              namespace: namespace,
+              url: title,
+              title: title,
+              content: const [65],
+            );
+        final archive = await openFixture(
+          ZimFixture(
+            majorVersion: 5,
+            entries: [
+              entry('-', 'style.css'),
+              entry('A', 'Notvorrat'),
+              entry('A', 'Zivilschutz'),
+              entry('I', 'Anton.png'),
+              entry('I', 'Bild.png'),
+              entry('I', 'Cäsar.png'),
+              entry('I', 'Dora.png'),
+              entry('M', 'Title'),
+            ],
+          ),
+        );
+
+        expect(
+          (await archive.searchTitles('zivilschutz')).single.url,
+          'Zivilschutz',
+        );
+        expect((await archive.searchTitles('Notv')).single.url, 'Notvorrat');
+        expect(await archive.searchTitles('Bild'), isEmpty);
+      },
+    );
   });
 
   group('walking the directory in blocks', () {
