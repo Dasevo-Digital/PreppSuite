@@ -1,6 +1,7 @@
 import 'dart:io';
 
 import 'package:flutter_test/flutter_test.dart';
+import 'package:xml/xml.dart';
 
 /// The Windows runner, read as source (#409).
 ///
@@ -12,6 +13,29 @@ void main() {
   final recognition = File(
     'windows/runner/text_recognition.cpp',
   ).readAsStringSync();
+
+  test('narrow paths are UTF-8 in the whole process', () {
+    // The translator's engine opens its models with fopen. In the ANSI
+    // code page a path through "C:\Users\Jürgen" names another file, and
+    // the model "could not be opened".
+    final manifest = XmlDocument.parse(
+      File('windows/runner/runner.exe.manifest').readAsStringSync(),
+    );
+    final settings = manifest
+        .findAllElements(
+          'windowsSettings',
+          namespace: 'urn:schemas-microsoft-com:asm.v3',
+        )
+        .single;
+    final codePage = settings.childElements
+        .where((element) => element.localName == 'activeCodePage')
+        .single;
+    expect(
+      codePage.namespaceUri,
+      'http://schemas.microsoft.com/SMI/2019/WindowsSettings',
+    );
+    expect(codePage.innerText, 'UTF-8');
+  });
 
   group('photo text on Windows', () {
     test('another script is not read with the profile languages', () {
