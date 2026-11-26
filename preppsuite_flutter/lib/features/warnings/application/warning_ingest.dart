@@ -117,10 +117,11 @@ class WarningIngest {
       final sent = _parseDateTime(warning.sent);
       if (sent == null) continue;
 
+      final externalId = meteoAlarmExternalId(warning);
       final result = _prepare(
-        existing: existing[warning.identifier],
+        existing: existing[externalId],
         source: WarningSource.meteoalarm,
-        externalId: warning.identifier,
+        externalId: externalId,
         countryCode: countryCode,
         // Never the area description itself. It is words, and the
         // region filter compares keys — a key it cannot match does not
@@ -193,16 +194,15 @@ class WarningIngest {
         bbkAreaIsWholeCountry(areaDescription ?? existing?.areaDescription);
     final region = everywhere ? null : regionKey;
     final unchanged = existing != null && !sent.isAfter(existing.sent);
-    // A BBK warning in the feed again after it was ended here: it dropped
-    // out of one poll -- a source that flickered, a district that did not
+    // A warning in the feed again after it was ended here: it dropped out
+    // of one poll -- a source that flickered, a district that did not
     // answer -- and came back as it was. BBK rows carry no end of their
     // own, so being in the feed means being in force. Until #250 the
     // unchanged row was left as it was, ended, and the warning stayed out
-    // of sight until its source issued a new version.
-    final revives =
-        source == WarningSource.bbk &&
-        existing?.expires != null &&
-        expires == null;
+    // of sight until its source issued a new version. A MeteoAlarm row
+    // ended because its feed did not have it (#395) gets the end the feed
+    // gives it back.
+    final revives = existing != null && !_sameMoment(existing.expires, expires);
     if (unchanged) {
       // One exception to "unchanged is a no-op": a row that could not be
       // placed when it arrived and can be placed now. That happens when
@@ -418,6 +418,13 @@ String? bbkRegionFromId(String id) {
     if (germanStateByBbkCode(code) != null) return code;
   }
   return null;
+}
+
+/// Whether [a] and [b] are the same moment, as the database keeps it: to
+/// the second, and whatever zone each was read in.
+bool _sameMoment(DateTime? a, DateTime? b) {
+  if (a == null || b == null) return a == b;
+  return a.millisecondsSinceEpoch ~/ 1000 == b.millisecondsSinceEpoch ~/ 1000;
 }
 
 /// Whether a warning carries any of what only its CAP detail brings.

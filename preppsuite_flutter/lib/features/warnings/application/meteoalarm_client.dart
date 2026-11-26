@@ -34,6 +34,10 @@ class MeteoAlarmRawWarning {
   final Map<String, dynamic> raw;
 }
 
+/// What a MeteoAlarm entry is stored under, and what a full read of its
+/// feed is checked against.
+String meteoAlarmExternalId(MeteoAlarmRawWarning warning) => warning.identifier;
+
 /// One look at a country's feed.
 class MeteoAlarmFeed {
   const MeteoAlarmFeed({this.stamp, this.warnings});

@@ -1466,9 +1466,12 @@ class AppDatabase extends _$AppDatabase {
     });
   }
 
-  /// Stamps [expires] on active warnings of [source] that the feed no
-  /// longer lists. Mirrors the rule the server used: the sources carry no
-  /// end time, so a warning is over once it drops out of a complete poll.
+  /// Stamps [expires] on warnings of [source] still in force that the feed
+  /// no longer lists. Mirrors the rule the server used: the BBK sources
+  /// carry no end time, so a warning is over once it drops out of a
+  /// complete poll. MeteoAlarm's rows carry one, and the version of a
+  /// warning that a newer one replaced leaves the feed long before it
+  /// (#395); a row that has already ended keeps its end.
   Future<int> expireMissingWarnings({
     required String source,
     required Set<String> seenExternalIds,
@@ -1476,12 +1479,22 @@ class AppDatabase extends _$AppDatabase {
     /// Districts that did not answer this poll: their rows stay as they
     /// are, because their absence proves nothing (#250).
     Set<String> keepRegionKeys = const {},
-  }) async {
-    final active = await (select(
-      warnings,
-    )..where((t) => t.source.equals(source) & t.expires.isNull())).get();
 
+    /// Only this country's rows, for a feed that is one country's.
+    String? countryCode,
+  }) async {
     final now = DateTime.now().toUtc();
+    final active =
+        await (select(warnings)..where((t) {
+              final inForce =
+                  t.source.equals(source) &
+                  (t.expires.isNull() | t.expires.isBiggerThanValue(now));
+              return countryCode == null
+                  ? inForce
+                  : inForce & t.countryCode.equals(countryCode);
+            }))
+            .get();
+
     final gone = active
         .where(
           (w) =>

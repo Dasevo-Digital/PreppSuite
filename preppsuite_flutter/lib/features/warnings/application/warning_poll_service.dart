@@ -31,7 +31,8 @@ class WarningPollResult {
   /// The nationwide list retires only when it was read whole, and a
   /// district's warnings only when its dashboard answered (#369, #371). So
   /// a poll can retire nationwide warnings and still not be [complete],
-  /// because a district did not answer.
+  /// because a district did not answer. MeteoAlarm retires what a feed
+  /// read to its end no longer has (#395).
   final int retired;
 
   /// False when at least one source could not be read. What that source
@@ -225,12 +226,28 @@ class WarningPollService {
               areas: areas,
             ),
           );
+          // What the feed read to its end no longer has is over (#395).
+          // The DWD replaces a warning with a new version under a new
+          // identifier, and the old one leaves the feed; it used to stay
+          // in force until its own end, beside the new one in the list,
+          // the banner, the lamp and the widget -- the higher level of a
+          // warning that had been lowered, a warning lifted early. After
+          // the ingest, so that a new version still finds the old one it
+          // replaces. A parse that did not fail is a whole feed: the XML
+          // does not close otherwise.
+          retired += await _db.expireMissingWarnings(
+            source: WarningSource.meteoalarm.name,
+            countryCode: countryCode,
+            seenExternalIds: {
+              for (final w in warnings) meteoAlarmExternalId(w),
+            },
+          );
           // After storing, so a run that fails in between reads it again.
           await const WarningPollStatusStore().saveFeedStamp(slug, feed.stamp);
         }
-        // A feed that said it has not changed has answered in full, and
-        // nothing is missing: MeteoAlarm's rows end by their own expiry,
-        // not by dropping out of the feed.
+        // A feed that said it has not changed has answered in full: it is
+        // the one last read to its end, and what that one no longer had
+        // was ended then.
         sourcesOk['meteoalarm'] = true;
       } on Object {
         complete = false;

@@ -11,6 +11,8 @@ import 'package:preppsuite_flutter/features/warnings/application/bbk_client.dart
 import 'package:preppsuite_flutter/features/warnings/application/meteoalarm_client.dart';
 import 'package:preppsuite_flutter/features/warnings/application/warning_poll_service.dart';
 import 'package:preppsuite_flutter/features/warnings/application/warning_poll_status_store.dart';
+import 'package:preppsuite_flutter/features/warnings/application/warning_providers.dart'
+    show warningsInForce;
 import 'package:preppsuite_flutter/local_db/database.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
@@ -910,4 +912,150 @@ void main() {
       expect(await pending(), hasLength(1));
     });
   });
+
+  group('a MeteoAlarm version the feed no longer has (#395)', () {
+    setUp(() => SharedPreferences.setMockInitialValues({}));
+
+    // To the second, as the feed has it and the database keeps it.
+    final now = DateTime.fromMillisecondsSinceEpoch(
+      DateTime.now().millisecondsSinceEpoch ~/ 1000 * 1000,
+      isUtc: true,
+    );
+    // The live shape of 2026-11-26: the DWD replaced a moderate snowfall
+    // warning for Passau with a minor one, under a new identifier, and the
+    // old one left the feed.
+    final snowfall = _meteoEntry(
+      identifier: '2.49.0.0.276.0.DWD.PVW.1795610940000.3c94f30c.MUL',
+      area: 'Kreis und Stadt Passau',
+      event: 'snowfall',
+      severity: 'Moderate',
+      sent: now.subtract(const Duration(hours: 20)),
+      expires: now.add(const Duration(hours: 14)),
+    );
+    final lighter = _meteoEntry(
+      identifier: '2.49.0.0.276.0.DWD.PVW.1795681620000.f49c40a9.MUL',
+      area: 'Kreis und Stadt Passau',
+      event: 'light snowfall',
+      severity: 'Minor',
+      messageType: 'Update',
+      sent: now.subtract(const Duration(minutes: 5)),
+      expires: now.add(const Duration(hours: 15)),
+    );
+
+    Future<WarningPollResult> pollWith(
+      String feed, {
+      String country = 'DE',
+    }) => service({
+      ...allBbkSources(),
+      meteoUrl: feed,
+      'https://feeds.meteoalarm.org/feeds/meteoalarm-legacy-atom-austria': feed,
+    }).poll(countryCode: country);
+
+    Future<List<String>> inForce() async => [
+      for (final w in await warningsInForce(db.watchActiveWarnings()).first)
+        if (w.source == 'meteoalarm') w.eventType,
+    ];
+
+    test('ends once a feed read to its end does not have it', () async {
+      await pollWith(_meteoFeed('build-1', [snowfall]));
+      expect(await inForce(), ['snowfall']);
+
+      final result = await pollWith(_meteoFeed('build-2', [lighter]));
+
+      expect(await inForce(), ['light snowfall']);
+      expect(result.retired, 1);
+      // Ended, not deleted: it is still in the list, as over.
+      final all = await db.warningsBySource('meteoalarm');
+      expect(all, hasLength(2));
+
+      // And what has ended keeps the end it has.
+      final ended = all.values.singleWhere((w) => w.eventType == 'snowfall');
+      final again = await pollWith(_meteoFeed('build-3', [lighter]));
+      expect(again.retired, 0);
+      final still = (await db.warningsBySource('meteoalarm')).values
+          .singleWhere((w) => w.eventType == 'snowfall');
+      expect(still.expires, ended.expires);
+    });
+
+    test('a feed left after its head ends nothing', () async {
+      await pollWith(_meteoFeed('build-1', [snowfall]));
+
+      // The same build again: the feed is not read past its stamp, so it
+      // says nothing about what is missing.
+      await pollWith(_meteoFeed('build-1', [lighter]));
+
+      expect(await inForce(), ['snowfall']);
+    });
+
+    test('a broken feed ends nothing', () async {
+      await pollWith(_meteoFeed('build-1', [snowfall]));
+
+      final result = await pollWith(
+        _meteoFeed('build-2', [lighter]).substring(0, 600),
+      );
+
+      expect(result.complete, isFalse);
+      expect(await inForce(), ['snowfall']);
+    });
+
+    test('back in the feed, it has its own end again', () async {
+      await pollWith(_meteoFeed('build-1', [snowfall]));
+      await pollWith(_meteoFeed('build-2', [lighter]));
+
+      await pollWith(_meteoFeed('build-3', [snowfall, lighter]));
+
+      expect(await inForce(), unorderedEquals(['snowfall', 'light snowfall']));
+    });
+
+    test('another country\'s feed ends nothing here', () async {
+      await pollWith(_meteoFeed('build-1', [snowfall]));
+
+      await pollWith(_meteoFeed('build-2', [lighter]), country: 'AT');
+
+      final german = [
+        for (final w in await warningsInForce(db.watchActiveWarnings()).first)
+          if (w.countryCode == 'DE') w.eventType,
+      ];
+      expect(german, ['snowfall']);
+    });
+  });
 }
+
+/// One MeteoAlarm entry in the live shape of 2026-11-26.
+String _meteoEntry({
+  required String identifier,
+  required String area,
+  required String event,
+  required String severity,
+  required DateTime sent,
+  required DateTime expires,
+  DateTime? onset,
+  String areaCode = 'DE066',
+  String messageType = 'Alert',
+}) =>
+    '''
+  <entry>
+    <cap:geocode>
+      <valueName>EMMA_ID</valueName>
+      <value>$areaCode</value>
+    </cap:geocode>
+    <cap:areaDesc>$area</cap:areaDesc>
+    <cap:event>$event</cap:event>
+    <cap:sent>${sent.toIso8601String()}</cap:sent>
+    <cap:expires>${expires.toIso8601String()}</cap:expires>
+    <cap:onset>${(onset ?? sent).toIso8601String()}</cap:onset>
+    <cap:severity>$severity</cap:severity>
+    <cap:message_type>$messageType</cap:message_type>
+    <cap:identifier>$identifier</cap:identifier>
+    <title>$severity $event warning issued for Germany - $area</title>
+  </entry>''';
+
+/// A whole MeteoAlarm feed of [entries], built at [stamp].
+String _meteoFeed(String stamp, List<String> entries) =>
+    '''
+<?xml version="1.0" encoding="UTF-8"?>
+<feed xmlns="http://www.w3.org/2005/Atom" xmlns:cap="urn:oasis:names:tc:emergency:cap:1.2">
+  <updated>$stamp</updated>
+${entries.join('\n')}
+</feed>
+''';
