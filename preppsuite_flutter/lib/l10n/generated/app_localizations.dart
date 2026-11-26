@@ -4192,6 +4192,12 @@ abstract class AppLocalizations {
   /// **'The sync failed. The next attempt runs on its own.'**
   String get sharingErrorFailed;
 
+  /// No description provided for @sharingErrorInvalidRows.
+  ///
+  /// In en, this message translates to:
+  /// **'Until this is corrected, this device does not write its data to the folder. What the other devices write still arrives.'**
+  String get sharingErrorInvalidRows;
+
   /// No description provided for @sharingJoinedOther.
   ///
   /// In en, this message translates to:
@@ -17256,6 +17262,12 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Invalid stock values: please correct the amounts and nutrition of the affected items. They are not counted as available supplies.'**
   String get inventoryInvalidNumbers;
+
+  /// Like inventoryInvalidNumbers, naming the items concerned.
+  ///
+  /// In en, this message translates to:
+  /// **'Invalid stock values in: {names}. Please correct the amounts and nutrition there. They are not counted as available supplies.'**
+  String inventoryInvalidNumbersIn(String names);
 
   /// No description provided for @errorInputLimit.
   ///

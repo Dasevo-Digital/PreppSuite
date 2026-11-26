@@ -6,6 +6,7 @@ import 'package:cryptography/cryptography.dart' show Sha256;
 import 'package:shared_preferences/shared_preferences.dart';
 
 import '../../../local_db/database.dart';
+import '../../inventory/application/inventory_numbers.dart';
 import '../../inventory/application/photo_content_index.dart';
 import 'device_snapshot.dart';
 import 'folder_photos.dart';
@@ -43,6 +44,15 @@ enum SharedFolderSyncError {
   /// Previously encrypted metadata is missing or has been downgraded.
   encryptionChanged,
 
+  /// A row of this household holds a number that cannot travel -- a
+  /// negative amount, a figure past every limit, kept from an older
+  /// version and editable on purpose. This device's file is not written
+  /// until it is corrected; the others' are still read. Retrying changes
+  /// nothing, so it is not [failed] (#397): that said "the next attempt
+  /// runs on its own" every two minutes, while nothing of this device
+  /// reached the others. [SharedFolderSyncResult.cause] says which rows.
+  invalidRows,
+
   /// The folder could be reached but something failed while reading or
   /// writing. Worth retrying; the next run does.
   failed,
@@ -55,7 +65,12 @@ class SharedFolderSyncResult {
     this.published = false,
     this.photos = const FolderPhotoResult(),
     this.error,
+    this.cause,
   });
+
+  /// What stopped the run, where it says more than [error] can: the rows
+  /// behind [SharedFolderSyncError.invalidRows], for `describeError`.
+  final Object? cause;
 
   /// What happened to the pictures (#376); nothing in a plain folder.
   final FolderPhotoResult photos;
@@ -308,6 +323,13 @@ class SharedFolderSyncService {
         error: foreignFiles > 0 && skippedFiles == foreignFiles
             ? SharedFolderSyncError.unsupportedVersion
             : null,
+      );
+    } on InvalidInventoryNumbers catch (error) {
+      // Publishing reads the household first, and a row that cannot
+      // travel stops it -- with its name, which is what the card shows.
+      return SharedFolderSyncResult(
+        error: SharedFolderSyncError.invalidRows,
+        cause: error,
       );
     } catch (error, stack) {
       // A folder mid-download, a file the sync engine is holding open, a

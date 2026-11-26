@@ -26,6 +26,8 @@ import '../features/shelters/application/overpass_shelter_client.dart'
 import '../l10n/generated/app_localizations.dart';
 import 'local_database_encryption.dart';
 import '../features/inventory/application/inventory_numbers.dart';
+import '../features/sharing/application/snapshot_exchange.dart'
+    show InventoryNeedsCorrection;
 
 /// What to put on the screen when something failed.
 ///
@@ -51,6 +53,9 @@ String describeError(AppLocalizations l10n, Object error) {
       LocationRefusal.unavailable => l10n.locationUnavailable,
     },
     InputTooLarge() => l10n.errorInputLimit,
+    // Which rows, where the failure knows them (#397).
+    InventoryNeedsCorrection(:final shortList) =>
+      l10n.inventoryInvalidNumbersIn(shortList),
     InvalidInventoryNumbers() => l10n.inventoryInvalidNumbers,
     // The databases run in a background isolate, and what fails there
     // arrives wrapped; unwrapped, a disk that is full still says so

@@ -761,6 +761,7 @@
   "sharingFoundSealedIntro": "Der Ordner ist leer. Dein Haushalt wurde schon einmal verschlüsselt geteilt, deshalb legt PreppSuite auch diesen Ordner nur verschlüsselt an. Wähle dafür ein Kennwort.",
   "sharingErrorVersion": "Die Dateien im Ordner stammen aus einer neueren Version. Es wurde nichts verändert.",
   "sharingErrorFailed": "Der Abgleich ist fehlgeschlagen. Der nächste Versuch läuft von allein.",
+  "sharingErrorInvalidRows": "Bis das korrigiert ist, schreibt dieses Gerät seinen Stand nicht in den Ordner. Was die anderen Geräte schreiben, kommt weiter an.",
   "sharingJoinedOther": "Dieses Gerät gehört jetzt zum Haushalt „{name}“. Die bisherigen Einträge wurden mitgenommen.",
   "sharingLeaveDialogTitle": "Nicht mehr teilen?",
   "sharingLeaveDialogBody": "Dieses Gerät gleicht dann nicht mehr ab. Gelöscht wird nichts — weder hier noch im Ordner.",
@@ -4495,6 +4496,14 @@
   "documentNoDeadlinesDue": "Zurzeit sind keine Dokumentenfristen fällig.",
   "offlineProbeReadMode": "Lesetest",
   "inventoryInvalidNumbers": "Ungültige Vorratswerte: Bitte Mengen und Nährwerte der betroffenen Artikel korrigieren. Sie werden nicht als verfügbare Vorräte gezählt.",
+  "inventoryInvalidNumbersIn": "Ungültige Vorratswerte bei: {names}. Bitte Mengen und Nährwerte dort korrigieren. Sie werden nicht als verfügbare Vorräte gezählt.",
+  "@inventoryInvalidNumbersIn": {
+    "placeholders": {
+      "names": {
+        "type": "String"
+      }
+    }
+  },
   "errorInputLimit": "Die Datei überschreitet die unterstützten Größen- oder Verarbeitungsgrenzen. Bitte eine kleinere Datei verwenden.",
   "broadcastRadioTitle": "Radio ohne Internet",
   "broadcastRadioEntryHint": "Welche Sender hier informieren, und eure UKW-Frequenzen",

@@ -1392,6 +1392,7 @@
   "sharingFoundSealedIntro": "The folder is empty. Your household has been shared encrypted before, so PreppSuite sets up this folder encrypted too. Choose a passphrase for it.",
   "sharingErrorVersion": "The files in this folder come from a newer version. Nothing was changed.",
   "sharingErrorFailed": "The sync failed. The next attempt runs on its own.",
+  "sharingErrorInvalidRows": "Until this is corrected, this device does not write its data to the folder. What the other devices write still arrives.",
   "sharingJoinedOther": "This device now belongs to the household “{name}”. Its existing entries came along.",
   "@sharingJoinedOther": {
     "placeholders": {
@@ -6295,6 +6296,15 @@
   "documentNoDeadlinesDue": "No document deadlines are currently due.",
   "offlineProbeReadMode": "Read test",
   "inventoryInvalidNumbers": "Invalid stock values: please correct the amounts and nutrition of the affected items. They are not counted as available supplies.",
+  "inventoryInvalidNumbersIn": "Invalid stock values in: {names}. Please correct the amounts and nutrition there. They are not counted as available supplies.",
+  "@inventoryInvalidNumbersIn": {
+    "description": "Like inventoryInvalidNumbers, naming the items concerned.",
+    "placeholders": {
+      "names": {
+        "type": "String"
+      }
+    }
+  },
   "errorInputLimit": "The file exceeds the supported size or processing limits. Please use a smaller file.",
   "broadcastRadioTitle": "Radio without internet",
   "broadcastRadioEntryHint": "Which stations inform here, and your FM frequencies",

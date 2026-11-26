@@ -17,6 +17,28 @@ import 'settings_sync.dart';
 /// household that fails to sync is two devices that quietly disagree
 /// about what is in the cellar.
 
+/// Stock rows that hold a number which cannot travel, by name, so whoever
+/// reads the message knows which ones to open (#397).
+///
+/// An [InvalidInventoryNumbers], so everything that answers that answers
+/// this too.
+class InventoryNeedsCorrection extends InvalidInventoryNumbers {
+  const InventoryNeedsCorrection(this.names);
+
+  /// The names of the live rows concerned, in the order they are stored.
+  final List<String> names;
+
+  /// The first few of [names], for one line of text.
+  String get shortList {
+    const shown = 3;
+    final first = names.take(shown).join(', ');
+    return names.length > shown ? '$first …' : first;
+  }
+
+  @override
+  String toString() => 'InventoryNeedsCorrection(${names.length} rows)';
+}
+
 /// Everything this device knows about [householdId], ready to send.
 Future<DeviceSnapshot> readHouseholdSnapshot(
   AppDatabase db, {
@@ -31,12 +53,15 @@ Future<DeviceSnapshot> readHouseholdSnapshot(
 }) async {
   // Do not silently drop or rewrite a bad legacy row. Keep it editable
   // and tell the household to correct it before exporting a safety copy.
+  // By name (#397): the shared folder said only "failed, the next run
+  // tries again", every two minutes, and nothing of this device reached
+  // the others.
   final inventory = await db.inventoryItemsForSync(householdId);
-  if (inventory.any(
-    (row) => row.deletedAt == null && hasInvalidInventoryNumbers(row),
-  )) {
-    throw const InvalidInventoryNumbers();
-  }
+  final invalid = [
+    for (final row in inventory)
+      if (row.deletedAt == null && hasInvalidInventoryNumbers(row)) row.name,
+  ];
+  if (invalid.isNotEmpty) throw InventoryNeedsCorrection(invalid);
   return DeviceSnapshot(
     settings: settings,
     deviceId: deviceId,

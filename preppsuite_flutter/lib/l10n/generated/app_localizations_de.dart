@@ -2499,6 +2499,10 @@ class AppLocalizationsDe extends AppLocalizations {
       'Der Abgleich ist fehlgeschlagen. Der nächste Versuch läuft von allein.';
 
   @override
+  String get sharingErrorInvalidRows =>
+      'Bis das korrigiert ist, schreibt dieses Gerät seinen Stand nicht in den Ordner. Was die anderen Geräte schreiben, kommt weiter an.';
+
+  @override
   String sharingJoinedOther(String name) {
     return 'Dieses Gerät gehört jetzt zum Haushalt „$name“. Die bisherigen Einträge wurden mitgenommen.';
   }
@@ -10574,6 +10578,11 @@ class AppLocalizationsDe extends AppLocalizations {
   @override
   String get inventoryInvalidNumbers =>
       'Ungültige Vorratswerte: Bitte Mengen und Nährwerte der betroffenen Artikel korrigieren. Sie werden nicht als verfügbare Vorräte gezählt.';
+
+  @override
+  String inventoryInvalidNumbersIn(String names) {
+    return 'Ungültige Vorratswerte bei: $names. Bitte Mengen und Nährwerte dort korrigieren. Sie werden nicht als verfügbare Vorräte gezählt.';
+  }
 
   @override
   String get errorInputLimit =>

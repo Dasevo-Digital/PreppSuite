@@ -13,6 +13,7 @@ import '../application/sharing_providers.dart';
 import '../application/snapshot_exchange.dart';
 import 'folder_encryption_section.dart';
 import '../../../core/error_text.dart';
+import '../../inventory/application/inventory_numbers.dart';
 
 /// Settings card for sharing a household across devices.
 ///
@@ -209,11 +210,20 @@ class _Body extends ConsumerWidget {
     }
 
     final db = ref.read(appDatabaseProvider);
-    final rows = (await readHouseholdSnapshot(
-      db,
-      deviceId: 'conflict',
-      householdId: profile.id,
-    )).rowCount;
+    final int rows;
+    try {
+      rows = (await readHouseholdSnapshot(
+        db,
+        deviceId: 'conflict',
+        householdId: profile.id,
+      )).rowCount;
+    } on Object catch (error) {
+      // A stock row that cannot travel threw out of here unanswered, and
+      // picking the folder did nothing at all (#397). Say what, and join
+      // nothing: the question cannot be asked without the count.
+      if (context.mounted) _tell(context, describeError(l10n, error));
+      return null;
+    }
     if (!context.mounted) return null;
 
     final choice = await askAboutHouseholdConflict(
@@ -293,6 +303,10 @@ class _StatusLine extends StatelessWidget {
           SharedFolderSyncError.locked => l10n.sharingErrorLocked,
           SharedFolderSyncError.encryptionChanged =>
             l10n.sharingErrorEncryptionChanged,
+          // Which rows, and that retrying will not help (#397).
+          SharedFolderSyncError.invalidRows =>
+            '${describeError(l10n, result?.cause ?? const InvalidInventoryNumbers())} '
+                '${l10n.sharingErrorInvalidRows}',
           SharedFolderSyncError.failed => l10n.sharingErrorFailed,
         },
         style: theme.textTheme.bodySmall?.copyWith(

@@ -2484,6 +2484,10 @@ class AppLocalizationsEn extends AppLocalizations {
       'The sync failed. The next attempt runs on its own.';
 
   @override
+  String get sharingErrorInvalidRows =>
+      'Until this is corrected, this device does not write its data to the folder. What the other devices write still arrives.';
+
+  @override
   String sharingJoinedOther(String name) {
     return 'This device now belongs to the household “$name”. Its existing entries came along.';
   }
@@ -10524,6 +10528,11 @@ class AppLocalizationsEn extends AppLocalizations {
   @override
   String get inventoryInvalidNumbers =>
       'Invalid stock values: please correct the amounts and nutrition of the affected items. They are not counted as available supplies.';
+
+  @override
+  String inventoryInvalidNumbersIn(String names) {
+    return 'Invalid stock values in: $names. Please correct the amounts and nutrition there. They are not counted as available supplies.';
+  }
 
   @override
   String get errorInputLimit =>

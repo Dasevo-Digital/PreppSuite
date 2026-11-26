@@ -2499,6 +2499,10 @@ class AppLocalizationsEs extends AppLocalizations {
       'La sincronización ha fallado. El siguiente intento se hace solo.';
 
   @override
+  String get sharingErrorInvalidRows =>
+      'Hasta que se corrija, este dispositivo no escribe sus datos en la carpeta. Lo que escriben los otros dispositivos sigue llegando.';
+
+  @override
   String sharingJoinedOther(String name) {
     return 'Este dispositivo pertenece ahora al hogar «$name». Sus entradas existentes vinieron con él.';
   }
@@ -10608,6 +10612,11 @@ class AppLocalizationsEs extends AppLocalizations {
   @override
   String get inventoryInvalidNumbers =>
       'Valores de existencias no válidos: corrige las cantidades y los nutrientes de los artículos afectados. No se cuentan como provisiones disponibles.';
+
+  @override
+  String inventoryInvalidNumbersIn(String names) {
+    return 'Valores de existencias no válidos en: $names. Corrige allí las cantidades y los nutrientes. No se cuentan como provisiones disponibles.';
+  }
 
   @override
   String get errorInputLimit =>
