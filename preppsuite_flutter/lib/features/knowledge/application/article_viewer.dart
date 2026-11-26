@@ -3,6 +3,7 @@ import 'dart:async' show unawaited;
 import 'package:desktop_webview_window/desktop_webview_window.dart';
 import 'package:flutter/foundation.dart';
 import 'package:path/path.dart' as p;
+import 'package:webview_flutter/webview_flutter.dart' show HttpResponseError;
 
 import '../../../core/app_database_directory.dart';
 
@@ -69,6 +70,36 @@ bool isArchiveUrl(Uri? target, Uri origin) {
   return target.scheme == origin.scheme &&
       target.host == origin.host &&
       target.port == origin.port;
+}
+
+/// Whether [error] is about the page itself rather than something on it.
+///
+/// Android reports an HTTP error for every resource a page loads, and its
+/// `onHttpError` carries no main-frame flag the way `onWebResourceError`
+/// does: one picture missing from the archive answered 404 and replaced
+/// the whole article with the error screen, and "Reload" ended the same
+/// way (#407). So the request is compared with [document], the page being
+/// loaded, without its fragment -- `#Geschichte` is the same page. WebKit
+/// reports only the navigation itself and names no request; that one is
+/// always the page.
+bool isPageHttpError(HttpResponseError error, {required Uri? document}) {
+  final requested = error.request?.uri;
+  if (requested == null) return true;
+  if (document == null) return false;
+  return _withoutFragment(requested) == _withoutFragment(document);
+}
+
+/// [uri] as a comparable string: no fragment, and the path decoded, so
+/// that `%C3%A4` and `ä` are the same page.
+String _withoutFragment(Uri uri) {
+  final plain = uri.removeFragment();
+  String path;
+  try {
+    path = Uri.decodeFull(plain.path);
+  } on ArgumentError {
+    path = plain.path;
+  }
+  return '${plain.scheme}://${plain.host}:${plain.port}$path?${plain.query}';
 }
 
 /// Opens [uri] in a browser window of its own.

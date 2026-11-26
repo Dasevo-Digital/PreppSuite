@@ -1,5 +1,6 @@
 import 'package:flutter_test/flutter_test.dart';
 import 'package:preppsuite_flutter/features/knowledge/application/article_viewer.dart';
+import 'package:webview_flutter/webview_flutter.dart';
 
 /// What the article view will follow and what it refuses.
 ///
@@ -48,5 +49,62 @@ void main() {
 
   test('an unparsable link is refused rather than crashing the view', () {
     expect(isArchiveUrl(null, origin), isFalse);
+  });
+
+  group('an HTTP error ends the page only when it is the page (#407)', () {
+    HttpResponseError android(String url) => HttpResponseError(
+      request: WebResourceRequest(uri: Uri.parse(url)),
+      response: const WebResourceResponse(uri: null, statusCode: 404),
+    );
+
+    test('a picture missing from the archive leaves the article', () {
+      // Android reports every resource of a page, with no main-frame flag.
+      // One missing picture used to replace the article with an error.
+      expect(
+        isPageHttpError(
+          android('http://127.0.0.1:52341/I/Quelle.jpg'),
+          document: origin,
+        ),
+        isFalse,
+      );
+    });
+
+    test('the page itself, with or without its fragment, does end it', () {
+      expect(
+        isPageHttpError(android(origin.toString()), document: origin),
+        isTrue,
+      );
+      expect(
+        isPageHttpError(
+          android('http://127.0.0.1:52341/C/Trinkwasser'),
+          document: Uri.parse(
+            'http://127.0.0.1:52341/C/Trinkwasser#Geschichte',
+          ),
+        ),
+        isTrue,
+      );
+    });
+
+    test('the same page spelled with escapes is the same page', () {
+      expect(
+        isPageHttpError(
+          android('http://127.0.0.1:52341/C/K%C3%A4se'),
+          document: Uri.parse('http://127.0.0.1:52341/C/Käse'),
+        ),
+        isTrue,
+      );
+    });
+
+    test('WebKit names no request and reports only the page', () {
+      expect(
+        isPageHttpError(
+          const HttpResponseError(
+            response: WebResourceResponse(uri: null, statusCode: 500),
+          ),
+          document: origin,
+        ),
+        isTrue,
+      );
+    });
   });
 }

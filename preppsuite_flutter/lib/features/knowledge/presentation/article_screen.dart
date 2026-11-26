@@ -65,6 +65,11 @@ class _ArticleScreenState extends State<ArticleScreen> {
   /// Why the page did not arrive, in the engine's own words.
   String? _failure;
 
+  /// The page being loaded or shown: what an HTTP error has to be about
+  /// to be the page's (#407). Moved on by every navigation of the main
+  /// frame, a followed link before it arrives and a page once it starts.
+  late Uri? _document = widget.uri;
+
   @override
   void initState() {
     super.initState();
@@ -83,7 +88,8 @@ class _ArticleScreenState extends State<ArticleScreen> {
       ..setNavigationDelegate(
         NavigationDelegate(
           onNavigationRequest: _decideNavigation,
-          onPageStarted: (_) {
+          onPageStarted: (url) {
+            _follow(url);
             if (mounted) {
               setState(() {
                 _loading = true;
@@ -119,6 +125,8 @@ class _ArticleScreenState extends State<ArticleScreen> {
             }
           },
           onHttpError: (error) {
+            // Android reports one for every picture and script too.
+            if (!isPageHttpError(error, document: _document)) return;
             final status = error.response?.statusCode;
             if (mounted) {
               setState(() {
@@ -130,6 +138,7 @@ class _ArticleScreenState extends State<ArticleScreen> {
           onUrlChange: (change) {
             // Cleared on the way out, so the bar never names the page
             // before last while the next one is still arriving.
+            _follow(change.url);
             if (!mounted) return;
             final entryUrl = _entryUrlOf(change.url);
             setState(() {
@@ -155,6 +164,12 @@ class _ArticleScreenState extends State<ArticleScreen> {
         // An engine that does not take a background colour keeps its own.
       }),
     );
+  }
+
+  /// Moves [_document] to [url], where the engine names one.
+  void _follow(String? url) {
+    final page = url == null || url.isEmpty ? null : Uri.tryParse(url);
+    if (page != null) _document = page;
   }
 
   /// The archive entry [url] shows, or null when it shows none.
@@ -206,7 +221,9 @@ class _ArticleScreenState extends State<ArticleScreen> {
   }
 
   NavigationDecision _decideNavigation(NavigationRequest request) {
-    if (isArchiveUrl(Uri.tryParse(request.url), widget.uri)) {
+    final target = Uri.tryParse(request.url);
+    if (isArchiveUrl(target, widget.uri)) {
+      if (request.isMainFrame) _document = target;
       return NavigationDecision.navigate;
     }
     // Silently refusing looks like a broken app. Say it, because the link
