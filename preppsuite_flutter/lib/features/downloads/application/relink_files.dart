@@ -55,7 +55,15 @@ class FileRelinker {
   static const searchDepth = 2;
 
   /// Relinks what it can and answers how many files it found again.
-  Future<int> run() async {
+  ///
+  /// Once [stopped] says so, nothing more is written (#408). The start
+  /// does not wait past its budget, and from then on the app reads and
+  /// writes these stores itself: a run that went on would write the map
+  /// and the library as they were when it began over whatever had
+  /// changed since -- another map chosen, an archive added or removed.
+  /// What it has not done, the next start does.
+  Future<int> run({bool Function()? stopped}) async {
+    bool timeUp() => stopped?.call() ?? false;
     List<_Candidate>? index;
     Future<List<_Candidate>> candidates() async =>
         index ??= await _index(await _folders());
@@ -73,18 +81,22 @@ class FileRelinker {
           _byName(all, _fileNameIn(map.location)) ??
           _onlyOne(all, '.pmtiles');
       if (match != null) {
+        final location = await _remember(match.path, map.label);
+        if (timeUp()) return found;
         await const OfflineMapStore().save(
-          location: await _remember(match.path, map.label),
+          location: location,
           label: map.label,
         );
         found++;
       }
     }
+    if (timeUp()) return found;
 
     final library = await const ZimStore().library();
-    var changed = false;
+    var relinked = 0;
     final archives = <StoredArchive>[];
     for (final archive in library.archives) {
+      if (timeUp()) return found;
       if (await _opens(archive.location)) {
         archives.add(archive);
         continue;
@@ -101,25 +113,26 @@ class FileRelinker {
       archives.add(
         archive.relocated(await _remember(match.path, archive.label)),
       );
-      changed = true;
-      found++;
+      relinked++;
     }
-    if (changed) {
+    if (timeUp()) return found;
+    if (relinked > 0) {
       await const ZimStore().save(archives, selectedId: library.selectedId);
+      found += relinked;
     }
 
     const documents = PersonalDocumentStore();
     for (final document in await documents.load()) {
+      if (timeUp()) return found;
       if (await _opens(document.location)) continue;
       final all = await candidates();
       final match =
           _byName(all, document.label) ??
           _byName(all, _fileNameIn(document.location));
       if (match == null) continue;
-      await documents.relocate(
-        document.id,
-        await _remember(match.path, document.label),
-      );
+      final location = await _remember(match.path, document.label);
+      if (timeUp()) return found;
+      await documents.relocate(document.id, location);
       found++;
     }
     return found;
@@ -258,6 +271,12 @@ Duration relinkBudget({String? lastVersion, String? version}) =>
 /// Runs the relinker at start-up, bounded: a slow network volume must
 /// not keep the app from opening. Whatever it did not finish, the next
 /// start does.
+///
+/// `timeout` only stops the waiting, not the run: it went on behind the
+/// start, and once it found something it wrote the map and the library as
+/// they were when it began, over whatever the app had done meanwhile
+/// (#408). So the run is told when its time is up and writes nothing
+/// after that.
 Future<void> relinkMovedFiles() async {
   SharedPreferences? preferences;
   String? version;
@@ -267,13 +286,18 @@ Future<void> relinkMovedFiles() async {
   } on Object {
     // Then this start counts as an update: a longer wait, nothing skipped.
   }
+  final budget = relinkBudget(
+    lastVersion: preferences?.getString(_relinkedVersionKey),
+    version: version,
+  );
+  // Set before the wait below gives up: both timers run as long, and the
+  // one made first fires first.
+  var timeUp = false;
+  final deadline = Timer(budget, () => timeUp = true);
   try {
-    final found = await FileRelinker().run().timeout(
-      relinkBudget(
-        lastVersion: preferences?.getString(_relinkedVersionKey),
-        version: version,
-      ),
-    );
+    final found = await FileRelinker()
+        .run(stopped: () => timeUp)
+        .timeout(budget);
     // Only after a run that finished, or the next start would be the short
     // one with the work of this update still open.
     if (version != null) {
@@ -282,5 +306,7 @@ Future<void> relinkMovedFiles() async {
     if (found > 0) debugPrint('relinked $found file(s)');
   } on Object {
     // Never a reason not to start.
+  } finally {
+    deadline.cancel();
   }
 }

@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'dart:io';
 
 import 'package:flutter_test/flutter_test.dart';
@@ -168,6 +169,72 @@ void main() {
     expect(document.location, pdf.path);
     expect(document.indexStatus, 'ready');
     expect(document.indexedCharacters, 1200);
+  });
+
+  group('past its time (#408)', () {
+    // The start stops waiting after its budget, and the app takes over
+    // the stores. A run that went on used to write them as they were when
+    // it began, over whatever had changed since.
+    test('nothing is written once the time is up', () async {
+      put('wikipedia_de.zim', 20);
+      put('karte.pmtiles', 10);
+      await const OfflineMapStore().save(
+        location: '/old/container/Documents/karte.pmtiles',
+        label: 'karte.pmtiles',
+      );
+      await const ZimStore().save(const [
+        StoredArchive(
+          id: 'wiki',
+          location: '/old/container/Documents/wikipedia_de.zim',
+          label: 'wikipedia_de.zim',
+        ),
+      ], selectedId: 'wiki');
+
+      // The folders take longer than the start waits.
+      final slow = Completer<void>();
+      var timeUp = false;
+      final running = FileRelinker(
+        folders: () async {
+          await slow.future;
+          return [folder];
+        },
+        opens: (location) async => File(location).existsSync(),
+        remember: (path, label) async => path,
+      ).run(stopped: () => timeUp);
+
+      timeUp = true;
+      // Meanwhile the app has a library of its own.
+      await const ZimStore().save(const [
+        StoredArchive(id: 'new', location: '/elsewhere/new.zim', label: 'n'),
+      ], selectedId: 'new');
+      slow.complete();
+
+      expect(await running, 0);
+      final library = await const ZimStore().library();
+      expect(library.archives.single.id, 'new');
+      expect(library.selectedId, 'new');
+      expect(
+        (await const OfflineMapStore().archive())!.location,
+        '/old/container/Documents/karte.pmtiles',
+      );
+    });
+
+    test('within it, everything found is written as before', () async {
+      final wiki = put('wikipedia_de.zim', 20);
+      await const ZimStore().save(const [
+        StoredArchive(
+          id: 'wiki',
+          location: '/old/container/Documents/wikipedia_de.zim',
+          label: 'wikipedia_de.zim',
+        ),
+      ], selectedId: 'wiki');
+
+      expect(await relinker().run(stopped: () => false), 1);
+      expect(
+        (await const ZimStore().library()).archives.single.location,
+        wiki.path,
+      );
+    });
   });
 
   group('how long the first picture waits (#302)', () {
