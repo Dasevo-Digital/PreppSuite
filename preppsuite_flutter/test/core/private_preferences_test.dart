@@ -1,5 +1,6 @@
 import 'dart:io';
 import 'dart:async';
+import 'dart:typed_data';
 
 import 'package:flutter_test/flutter_test.dart';
 import 'package:shared_preferences/shared_preferences.dart';
@@ -209,6 +210,54 @@ void main() {
 
     expect(await raw('warningRegion'), '05334');
   }, skip: _skip);
+
+  test('a value sealed into a carried folder opens here and is kept plain '
+      '(#392)', () async {
+    // 3.0.3 copied the installation's sealed settings into the folder it
+    // took the household over to. On the computer whose key sealed them
+    // they open, and the folder keeps them plain from then on.
+    final encryption = await withKey();
+    await PrivatePreferences(encryption).setString('warningRegion', '05334');
+    final envelope = (await raw('warningRegion'))!;
+    expect(readEnvelope(envelope), isNotNull);
+
+    SharedPreferences.setMockInitialValues({});
+    await startPortableData(
+      environment: {'PREPPSUITE_DATA': directory.path},
+      executablePath: '${directory.path}/PreppSuite',
+    );
+    await (await SharedPreferences.getInstance()).setString(
+      'warningRegion',
+      envelope,
+    );
+
+    expect(
+      await PrivatePreferences(encryption).getString('warningRegion'),
+      '05334',
+    );
+    expect(await raw('warningRegion'), '05334');
+  }, skip: _skip);
+
+  test(
+    'an installation\'s value opens under its key, for the takeover',
+    () async {
+      final encryption = await withKey();
+      await PrivatePreferences(encryption).setString('warningRegion', '05334');
+      final envelope = (await raw('warningRegion'))!;
+
+      expect(
+        await PrivatePreferences.openWith(envelope, encryption.dataKeyBytes!),
+        '05334',
+      );
+      expect(
+        await PrivatePreferences.openWith('plain', encryption.dataKeyBytes!),
+        'plain',
+      );
+      final other = Uint8List(32);
+      expect(await PrivatePreferences.openWith(envelope, other), isNull);
+    },
+    skip: _skip,
+  );
 }
 
 /// Without a cipher the installation never reaches encrypted mode and

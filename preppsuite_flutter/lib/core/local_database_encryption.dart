@@ -133,6 +133,10 @@ class LocalDatabaseEncryption {
   /// this with a label of their own (see `private_preferences.dart`) and
   /// never store what they derived: one secret leaking must not hand over
   /// the others.
+  ///
+  /// With a carried folder this is the key of this computer's
+  /// installation, for opening what an earlier version sealed in the
+  /// folder with it. Nothing new is sealed there (#392).
   Uint8List? get dataKeyBytes {
     final key = _key;
     if (key == null) return null;
@@ -216,6 +220,10 @@ class LocalDatabaseEncryption {
 
     final resolvedDirectory = directory ?? await appDatabaseDirectory();
     _directory = resolvedDirectory;
+    if (portableLocation.isPortable) {
+      await _initializeCarried(resolvedDirectory);
+      return;
+    }
     final savedMode = await _storage.read(_modeKey);
     final interrupted = savedMode == 'migrating';
 
@@ -241,9 +249,16 @@ class LocalDatabaseEncryption {
       return;
     }
 
-    final effectiveMode = interrupted
-        ? await _storage.read(_modeKey)
-        : savedMode;
+    var effectiveMode = interrupted ? await _storage.read(_modeKey) : savedMode;
+    // 'plaintext' says how the household that is here was kept. With no
+    // database here at all it says nothing, and taken at its word it set
+    // up the next household unencrypted: 3.0.3 wrote it from a carried
+    // copy into the key store this installation shares (#392). Such a
+    // folder starts like a new one.
+    if (effectiveMode == 'plaintext' &&
+        !await _hasExistingDatabases(resolvedDirectory)) {
+      effectiveMode = null;
+    }
     switch (effectiveMode) {
       // 'recoveryRequired' is what 3.0.3 and earlier stored after an
       // interrupted upgrade without a readable key (#393). It is read as
@@ -275,11 +290,9 @@ class LocalDatabaseEncryption {
           // without its keychain. Opening them plainly would fail one
           // screen later with SQLite's own words.
           _mode = LocalDatabaseEncryptionMode.recoveryRequired;
-        } else if (portableLocation.isPortable ||
-            await _hasExistingDatabases(resolvedDirectory)) {
-          // A carried folder is never encrypted on its own: the key would
-          // stay behind on this machine and the folder would open nowhere
-          // else.
+        } else if (await _hasExistingDatabases(resolvedDirectory)) {
+          // An existing household stays readable until it is upgraded on
+          // purpose, after a backup.
           await _storage.write(_modeKey, 'plaintext');
           _mode = LocalDatabaseEncryptionMode.plaintext;
         } else {
@@ -350,6 +363,44 @@ class LocalDatabaseEncryption {
     }
   }
 
+  /// How a carried folder is opened: by its own files, never by the mode in
+  /// this computer's key store, and nothing is written there (#392).
+  ///
+  /// That mode is the installation's. Read from here, an installation's
+  /// `encrypted` had every new file on the disk created under this
+  /// computer's key, so the next computer found the whole disk locked; and
+  /// a `plaintext` written from here had the installation set up its next
+  /// household unencrypted. Neither the repair of an interrupted upgrade
+  /// nor its mark is the folder's business either: an upgrade never runs
+  /// on a carried folder.
+  ///
+  /// The key is read, for what an earlier version encrypted or sealed in
+  /// the folder with it. That opens on this computer, and on no other one,
+  /// which goes to recovery like any folder that arrives without its key.
+  /// New files are never encrypted (see [open]).
+  Future<void> _initializeCarried(Directory directory) async {
+    _key = await _storedKey();
+    if (await _hasStrandedCopies(directory)) {
+      _mode = LocalDatabaseEncryptionMode.recoveryRequired;
+      return;
+    }
+    final encrypted = [
+      for (final file in await _databaseBaseFiles(directory))
+        if (await _isEncryptedFile(file)) file,
+    ];
+    if (encrypted.isEmpty) {
+      _mode = LocalDatabaseEncryptionMode.plaintext;
+      return;
+    }
+    final key = _key;
+    _mode =
+        key != null &&
+            cipherAvailable &&
+            encrypted.every((file) => _opensWithKey(file.path, key))
+        ? LocalDatabaseEncryptionMode.encrypted
+        : LocalDatabaseEncryptionMode.recoveryRequired;
+  }
+
   static Future<bool> _holdsEncryptedDatabase(Directory directory) async {
     for (final file in await _databaseBaseFiles(directory)) {
       if (await _isEncryptedFile(file)) return true;
@@ -375,7 +426,10 @@ class LocalDatabaseEncryption {
 
   /// Whether the key store says an upgrade is under way, asked where
   /// nothing else could be read.
+  ///
+  /// Never for a carried folder: the mark is the installation's.
   Future<bool> _markedAsMigrating() async {
+    if (portableLocation.isPortable) return false;
     try {
       return await _storage.read(_modeKey) == 'migrating';
     } on Object {
@@ -430,6 +484,18 @@ class LocalDatabaseEncryption {
     // A key store that cannot be read usually cannot be written either,
     // and that must not stop the files from being moved out of the way --
     // the whole point of this is to get somebody a usable app back.
+    //
+    // Not at all for a carried folder: the key store is the installation's
+    // on this computer, and its key opens that household (#392).
+    if (!portableLocation.isPortable) {
+      await _setKeyAside(stamp);
+    }
+    _mode = null;
+    _key = null;
+    await initializeOrMarkUnavailable(directory: directory);
+  }
+
+  Future<void> _setKeyAside(String stamp) async {
     try {
       final old = await _storage.read(_keyKey);
       var kept = false;
@@ -445,9 +511,6 @@ class LocalDatabaseEncryption {
     } on Object {
       // Nothing to clear if the device will not talk to us.
     }
-    _mode = null;
-    _key = null;
-    await initializeOrMarkUnavailable(directory: directory);
   }
 
   /// The file [name].sqlite lives in, once [initialize] has run.
@@ -514,10 +577,19 @@ class LocalDatabaseEncryption {
     final key = _key;
     if (_mode == LocalDatabaseEncryptionMode.encrypted && key != null) {
       final path = file.path;
+      // In a carried folder only a file that already is encrypted gets
+      // the key; a new one is created plain (#392).
+      final carried = portableLocation.isPortable;
       return NativeDatabase.createInBackground(
         file,
         setup: (database) {
-          _configureCipherForFile(database, path, key);
+          if (carried) {
+            if (_isEncryptedFileSync(File(path))) {
+              _configureCipher(database, key);
+            }
+          } else {
+            _configureCipherForFile(database, path, key);
+          }
           _waitForOtherConnections(database);
         },
       );
@@ -840,6 +912,41 @@ void _encryptFileSync(String path, String key, {void Function()? afterCopy}) {
 void _configureCipherForFile(dynamic database, String path, String key) {
   if (_isPlaintextFileSync(File(path))) return;
   _configureCipher(database, key);
+}
+
+/// Whether [file] holds a database and it does not start like a plain one.
+///
+/// The question a carried folder asks: a file that is missing, or still
+/// empty, is a new one and stays plain.
+bool _isEncryptedFileSync(File file) {
+  try {
+    final handle = file.openSync();
+    try {
+      final bytes = handle.readSync(_sqliteHeader.length);
+      return bytes.length == _sqliteHeader.length &&
+          utf8.decode(bytes, allowMalformed: true) != _sqliteHeader;
+    } finally {
+      handle.closeSync();
+    }
+  } on FileSystemException {
+    return false;
+  }
+}
+
+/// Whether the database at [path] opens with [key], read-only.
+bool _opensWithKey(String path, String key) {
+  try {
+    final database = sqlite3.open(path, mode: OpenMode.readOnly);
+    try {
+      _configureCipher(database, key);
+      database.select('SELECT count(*) FROM sqlite_master');
+      return true;
+    } finally {
+      database.close();
+    }
+  } on Object {
+    return false;
+  }
 }
 
 bool _isPlaintextFileSync(File file) {

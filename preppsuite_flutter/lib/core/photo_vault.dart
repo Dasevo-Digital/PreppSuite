@@ -62,15 +62,38 @@ class PhotoVault {
     return true;
   }
 
+  /// The key a picture is sealed with, or null where pictures stay plain.
   Future<Uint8List?> _key() async {
     // A carried folder travels to another computer and the key stays in
     // this one's keychain; sealing here would leave the pictures
     // unreadable on the next machine. See `private_preferences.dart`.
     if (portableLocation.isPortable) return null;
+    return _openingKey();
+  }
 
+  /// The key a sealed picture is opened with, in a carried folder too:
+  /// 3.0.3 copied an installation's sealed pictures into one (#392). On the
+  /// computer whose key sealed them they open, and are written back plain.
+  Future<Uint8List?> _openingKey() async {
     final source = _source.dataKeyBytes;
     if (source == null) return null;
+    return _derive(source);
+  }
 
+  /// [stored] as image bytes under [dataKey]: opened when it is sealed, as
+  /// it is otherwise. Null for a sealed picture that key does not open.
+  ///
+  /// For taking an installation's pictures into a carried folder, which
+  /// keeps them plain.
+  static Future<Uint8List?> openWith(
+    Uint8List stored,
+    Uint8List dataKey,
+  ) async {
+    if (!isSealed(stored)) return stored;
+    return _open(stored, await _derive(dataKey));
+  }
+
+  static Future<Uint8List> _derive(Uint8List source) async {
     final cached = _derived;
     final from = _derivedFrom;
     if (cached != null && from != null && _sameBytes(from, source)) {
@@ -105,11 +128,11 @@ class PhotoVault {
       return null;
     }
 
-    final key = await _key();
     if (!isSealed(stored)) {
       // Taken before this installation had a key, or while it had none.
       // Put it away properly while it is in hand; a failure here costs
       // nothing, the next read tries again.
+      final key = await _key();
       if (key != null) {
         try {
           await _replace(file, await _seal(stored, key));
@@ -120,8 +143,17 @@ class PhotoVault {
       return stored;
     }
 
+    final key = await _openingKey();
     if (key == null) return null;
-    return _open(stored, key);
+    final clear = await _open(stored, key);
+    if (clear != null && portableLocation.isPortable) {
+      try {
+        await _replace(file, clear);
+      } on Object {
+        // Opened again on the next read.
+      }
+    }
+    return clear;
   }
 
   /// Writes [bytes] to [file], sealed where there is a key.
@@ -139,22 +171,39 @@ class PhotoVault {
   /// clear for ever. Does nothing without a key. A sealed picture costs a
   /// look at its first bytes: 300 of them took 31 ms that way, against
   /// 131 ms and 240 MB read when every file was read whole (#302).
+  ///
+  /// In a carried folder the other way round: every sealed picture this
+  /// computer's key opens is written back plain, so that the folder opens
+  /// on the next computer (#392). Returns how many then.
   Future<int> sealDirectory(Directory directory) async {
-    final key = await _key();
-    if (key == null || !await directory.exists()) return 0;
+    if (!await directory.exists()) return 0;
+    final seal = await _key();
+    final open = seal == null && portableLocation.isPortable
+        ? await _openingKey()
+        : null;
+    if (seal == null && open == null) return 0;
 
-    var sealed = 0;
+    var changed = 0;
     await for (final entry in directory.list(followLinks: false)) {
       if (entry is! File || entry.path.endsWith('.tmp')) continue;
       try {
-        if (isSealed(await _head(entry))) continue;
-        await _replace(entry, await _seal(await entry.readAsBytes(), key));
-        sealed++;
+        final sealed = isSealed(await _head(entry));
+        if (seal != null) {
+          if (sealed) continue;
+          await _replace(entry, await _seal(await entry.readAsBytes(), seal));
+        } else {
+          if (!sealed) continue;
+          final clear = await _open(await entry.readAsBytes(), open!);
+          if (clear == null) continue;
+          await _replace(entry, clear);
+        }
+        changed++;
       } on Object {
-        // One picture that cannot be sealed now is sealed on its next read.
+        // One picture that cannot be changed now is changed on its next
+        // read.
       }
     }
-    return sealed;
+    return changed;
   }
 
   /// As much of [file] as [isSealed] looks at.

@@ -240,9 +240,20 @@ void main() {
       for (final encrypted in [true, false]) {
         final folder = await directory.createTemp('mode');
         final store = _MemoryKeyStorage();
-        if (!encrypted) store.values[_modeKey] = 'plaintext';
+        if (!encrypted) {
+          // A plain household, kept plain: without one, `plaintext` in an
+          // empty folder starts like a new installation (#392).
+          store.values[_modeKey] = 'plaintext';
+          _writeHousehold('${folder.path}/preppsuite.sqlite', 'Beispiel');
+        }
         final encryption = LocalDatabaseEncryption(storage: store);
         await encryption.initialize(directory: folder);
+        expect(
+          encryption.mode,
+          encrypted
+              ? LocalDatabaseEncryptionMode.encrypted
+              : LocalDatabaseEncryptionMode.plaintext,
+        );
 
         final database = AppDatabase.forTesting(encryption.open('preppsuite'));
         addTearDown(database.close);
@@ -733,6 +744,116 @@ void main() {
       await encryption.initialize(directory: directory);
 
       expect(encryption.mode, LocalDatabaseEncryptionMode.recoveryRequired);
+    }, skip: noCipher);
+  });
+
+  group('a carried folder and the installation beside it (#392)', () {
+    Future<void> carry() => startPortableData(
+      environment: {'PREPPSUITE_DATA': directory.path},
+      executablePath: '${directory.path}/PreppSuite',
+    );
+
+    test('ignores the mode this computer keeps for its installation', () async {
+      // The installation here is encrypted; what the carried copy creates
+      // still has to open on the next computer.
+      storage.values[_modeKey] = 'encrypted';
+      storage.values[_keyKey] = _freshKey();
+      await carry();
+
+      final encryption = LocalDatabaseEncryption(storage: storage);
+      await encryption.initialize(directory: directory);
+      expect(encryption.mode, LocalDatabaseEncryptionMode.plaintext);
+
+      final database = AppDatabase.forTesting(encryption.open('preppsuite'));
+      await database.customSelect('SELECT 1').get();
+      await database.close();
+
+      expect(_looksLikePlaintext(File(pathTo('preppsuite'))), isTrue);
+      expect(storage.values[_modeKey], 'encrypted');
+    }, skip: noCipher);
+
+    test('writes nothing into the key store the installation reads', () async {
+      await carry();
+      final encryption = LocalDatabaseEncryption(storage: storage);
+      await encryption.initialize(directory: directory);
+      expect(encryption.mode, LocalDatabaseEncryptionMode.plaintext);
+      expect(storage.values, isEmpty);
+
+      // The installation started next sets its household up encrypted.
+      resetPortableData();
+      final installation = await directory.createTemp('installiert');
+      final installed = LocalDatabaseEncryption(storage: storage);
+      await installed.initialize(directory: installation);
+      expect(installed.mode, LocalDatabaseEncryptionMode.encrypted);
+    }, skip: noCipher);
+
+    test('an installation 3.0.3 marked plain from a carried copy is '
+        'set up encrypted', () async {
+      storage.values[_modeKey] = 'plaintext';
+
+      final encryption = LocalDatabaseEncryption(storage: storage);
+      await encryption.initialize(directory: directory);
+
+      expect(encryption.mode, LocalDatabaseEncryptionMode.encrypted);
+      expect(storage.values[_modeKey], 'encrypted');
+    }, skip: noCipher);
+
+    test('what an earlier version encrypted here opens, and nothing new is '
+        'encrypted', () async {
+      final key = _freshKey();
+      _writeHousehold(pathTo('preppsuite'), 'Beispielperson', key: key);
+      storage.values[_modeKey] = 'encrypted';
+      storage.values[_keyKey] = key;
+      await carry();
+
+      final encryption = LocalDatabaseEncryption(storage: storage);
+      await encryption.initialize(directory: directory);
+      expect(encryption.mode, LocalDatabaseEncryptionMode.encrypted);
+
+      final household = AppDatabase.forTesting(encryption.open('preppsuite'));
+      final rows = await household
+          .customSelect('SELECT name FROM household')
+          .get();
+      await household.close();
+      expect(rows.single.read<String>('name'), 'Beispielperson');
+
+      final documents = AppDatabase.forTesting(
+        encryption.open('preppsuite_personal_documents'),
+      );
+      await documents.customSelect('SELECT 1').get();
+      await documents.close();
+      expect(
+        _looksLikePlaintext(File(pathTo('preppsuite_personal_documents'))),
+        isTrue,
+      );
+    }, skip: noCipher);
+
+    test('a folder encrypted under another key goes to recovery', () async {
+      _writeHousehold(pathTo('preppsuite'), 'Beispielperson', key: _freshKey());
+      storage.values[_modeKey] = 'encrypted';
+      storage.values[_keyKey] = _freshKey();
+      await carry();
+
+      final encryption = LocalDatabaseEncryption(storage: storage);
+      await encryption.initialize(directory: directory);
+
+      expect(encryption.mode, LocalDatabaseEncryptionMode.recoveryRequired);
+    }, skip: noCipher);
+
+    test('starting over leaves the installation\'s key alone', () async {
+      final key = _freshKey();
+      _writeHousehold(pathTo('preppsuite'), 'Beispielperson', key: _freshKey());
+      storage.values[_modeKey] = 'encrypted';
+      storage.values[_keyKey] = key;
+      await carry();
+      final encryption = LocalDatabaseEncryption(storage: storage);
+      await encryption.initialize(directory: directory);
+      expect(encryption.mode, LocalDatabaseEncryptionMode.recoveryRequired);
+
+      await encryption.startOverKeepingUnreadableFiles();
+
+      expect(encryption.mode, LocalDatabaseEncryptionMode.plaintext);
+      expect(storage.values, {_modeKey: 'encrypted', _keyKey: key});
     }, skip: noCipher);
   });
 }

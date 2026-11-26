@@ -4,6 +4,7 @@ import 'dart:typed_data';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:preppsuite_flutter/core/local_database_encryption.dart';
 import 'package:preppsuite_flutter/core/photo_vault.dart';
+import 'package:preppsuite_flutter/core/portable_data.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 class _MemoryKeyStorage implements LocalDatabaseKeyStorage {
@@ -127,5 +128,57 @@ void main() {
 
   test('a missing picture is null, not an error', () async {
     expect(await const PhotoVault().read(file('nothing.jpg')), isNull);
+  });
+
+  group('in a carried folder (#392)', () {
+    Future<void> carry() async {
+      await startPortableData(
+        environment: {'PREPPSUITE_DATA': directory.path},
+        executablePath: '${directory.path}/PreppSuite',
+      );
+      addTearDown(resetPortableData);
+    }
+
+    test('a new picture is written plain', () async {
+      await carry();
+      final target = file('new.jpg');
+
+      await const PhotoVault().write(target, picture);
+
+      expect(target.readAsBytesSync(), picture);
+    });
+
+    test('a picture sealed here by 3.0.3 opens and is kept plain', () async {
+      final opened = file('opened.jpg');
+      final swept = file('swept.jpg');
+      await const PhotoVault().write(opened, picture);
+      await const PhotoVault().write(swept, picture);
+      await carry();
+
+      expect(await const PhotoVault().read(opened), picture);
+      expect(PhotoVault.isSealed(opened.readAsBytesSync()), isFalse);
+
+      expect(await const PhotoVault().sealDirectory(directory), 1);
+      expect(swept.readAsBytesSync(), picture);
+    });
+
+    test(
+      'opens an installation\'s picture under its key, for the takeover',
+      () async {
+        final sealed = file('sealed.jpg');
+        await const PhotoVault().write(sealed, picture);
+        final stored = sealed.readAsBytesSync();
+
+        expect(
+          await PhotoVault.openWith(stored, encryption.dataKeyBytes!),
+          picture,
+        );
+        expect(
+          await PhotoVault.openWith(picture, encryption.dataKeyBytes!),
+          picture,
+        );
+        expect(await PhotoVault.openWith(stored, Uint8List(32)), isNull);
+      },
+    );
   });
 }

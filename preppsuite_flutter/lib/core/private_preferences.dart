@@ -68,6 +68,7 @@ class PrivatePreferences {
     });
   }
 
+  /// The key a value is sealed with, or null where values stay plain.
   Future<FolderKey?> _key() async {
     // A carried folder travels to another computer; the key does not, it
     // sits in this machine's keychain. Sealing the settings here would
@@ -76,10 +77,21 @@ class PrivatePreferences {
     // portable vault would have to be passphrase-based and is a format of
     // its own, not this key under another name.
     if (portableLocation.isPortable) return null;
+    return _openingKey();
+  }
 
+  /// The key a sealed value is opened with.
+  ///
+  /// In a carried folder too: 3.0.3 copied an installation's sealed
+  /// settings into one when it took the household over (#392). On the
+  /// computer whose key sealed them they open, and are written back plain.
+  Future<FolderKey?> _openingKey() async {
     final source = _source.dataKeyBytes;
     if (source == null) return null;
+    return _derive(source);
+  }
 
+  static Future<FolderKey> _derive(Uint8List source) async {
     final cached = _derived;
     final from = _derivedFrom;
     if (cached != null && from != null && _sameBytes(from, source)) {
@@ -94,6 +106,16 @@ class PrivatePreferences {
     _derivedFrom = source;
     _derived = key;
     return key;
+  }
+
+  /// [stored] as it reads under [dataKey]: opened when it is sealed, as
+  /// it is otherwise. Null for a sealed value that key does not open.
+  ///
+  /// For taking an installation's settings into a carried folder, which
+  /// keeps them plain.
+  static Future<String?> openWith(String stored, Uint8List dataKey) async {
+    if (readEnvelope(stored) == null) return stored;
+    return decryptFromFolder(stored, await _derive(dataKey));
   }
 
   static bool _sameBytes(Uint8List a, Uint8List b) {
@@ -116,8 +138,8 @@ class PrivatePreferences {
   Future<String?> _readString(String key, SharedPreferences prefs) async {
     final stored = prefs.getString(key);
     if (stored == null) return null;
-    final folderKey = await _key();
     if (readEnvelope(stored) == null) {
+      final folderKey = await _key();
       if (folderKey != null) {
         final sealed = await encryptForFolder(stored, folderKey);
         // Also tolerate a legacy caller clearing raw preferences while
@@ -126,8 +148,17 @@ class PrivatePreferences {
       }
       return stored;
     }
-    if (folderKey == null) return null;
-    return decryptFromFolder(stored, folderKey);
+    final openingKey = await _openingKey();
+    if (openingKey == null) return null;
+    final clear = await decryptFromFolder(stored, openingKey);
+    // A carried folder keeps nothing sealed: it is to open on the next
+    // computer, which has another key (#392).
+    if (clear != null &&
+        portableLocation.isPortable &&
+        prefs.getString(key) == stored) {
+      await prefs.setString(key, clear);
+    }
+    return clear;
   }
 
   Future<void> setString(
