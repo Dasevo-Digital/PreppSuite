@@ -1657,6 +1657,50 @@ class AppDatabase extends _$AppDatabase {
     });
   }
 
+  /// Moves the built-in checklist rows that lie under any household but
+  /// [householdId] into it (#397), and answers how many moved.
+  ///
+  /// [templates] and [items] are the built-in client ids, the same in
+  /// every household, so a database holds each of them once. One under
+  /// another id is left over: written by the seeder beside a move, or
+  /// for a profile that was then forgotten, by versions before those were
+  /// fixed. It was shown all the same, as built-in lists are, but its
+  /// ticks went out under that id to nobody, "x of y" did not count it and
+  /// "delete household" left it. Only the household is written, and
+  /// `dirty`: `updatedAt` stays, so the copy goes out with the version it
+  /// has -- a tick made on it wins as the edit it is, an untouched one
+  /// loses to every edit elsewhere. Rows already here are not touched, so
+  /// running this again changes nothing.
+  Future<int> adoptChecklistRows(
+    String householdId, {
+    required Set<String> templates,
+    required Set<String> items,
+  }) {
+    return transaction(() async {
+      var moved = 0;
+      for (final (table, ids) in <(TableInfo<Table, Object?>, Set<String>)>[
+        (checklistTemplates, templates),
+        (checklistItems, items),
+      ]) {
+        for (final chunk in _chunks(ids)) {
+          moved += await customUpdate(
+            'UPDATE "${table.actualTableName}" '
+            'SET household_id = ?, dirty = 1 '
+            'WHERE household_id IS NOT ? '
+            'AND client_id IN (${_marks(chunk.length)})',
+            variables: [
+              Variable(householdId),
+              Variable(householdId),
+              for (final id in chunk) Variable(id),
+            ],
+            updates: {table},
+          );
+        }
+      }
+      return moved;
+    });
+  }
+
   /// [ids] in pieces small enough for one statement's variables.
   static Iterable<List<String>> _chunks(Set<String> ids) sync* {
     final all = ids.toList();

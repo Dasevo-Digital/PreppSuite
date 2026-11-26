@@ -77,6 +77,22 @@ class ChecklistSeeder {
   Future<void> seed(String householdId) async {
     await _db.claimOrphanChecklistRows(householdId);
 
+    // Built-in rows left under another household's id by an older
+    // version: written beside a move, or for a profile then forgotten
+    // (#397). Each id is in a database once, so a list found there was
+    // skipped below as existing and never became this household's. Taken
+    // over with the version it has, before anything here writes to it.
+    //
+    // Rows of another household are otherwise only here for the moment
+    // between a QR chain's or a handover's merge and the move after it.
+    // This does not run then: it runs at start and after the profile
+    // changes, through `forHousehold`, which a move waits for.
+    await _db.adoptChecklistRows(
+      householdId,
+      templates: builtInTemplateIds,
+      items: builtInItemIds,
+    );
+
     for (final clientId in _retiredBuiltInItems) {
       await _db.retireChecklistItem(clientId);
     }

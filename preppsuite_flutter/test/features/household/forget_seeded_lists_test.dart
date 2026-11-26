@@ -97,6 +97,31 @@ void main() {
     expect(await rowsUnder(forgotten), listLength + 1);
   });
 
+  test(
+    'what is left of it becomes the next profile\'s, tick and all',
+    () async {
+      final forgotten = await setUpProfile();
+      await seed(forgotten);
+      final line = (await db.watchAllChecklistItems(forgotten).first).first;
+      await ChecklistController(db, forgotten).toggleItem(line);
+      await profiles().forget();
+
+      final next = await setUpProfile();
+      await seed(next);
+
+      expect(await rowsUnder(forgotten), 0);
+      expect(await rowsUnder(next), shipped);
+      final adopted =
+          (await db
+                  .watchAllChecklistItems(
+                    next,
+                  )
+                  .first)
+              .singleWhere((row) => row.clientId == line.clientId);
+      expect(adopted.isChecked, isTrue);
+    },
+  );
+
   test('lists still being written finish before they are taken back', () async {
     final forgotten = await setUpProfile();
     final seeding = seed(forgotten);
