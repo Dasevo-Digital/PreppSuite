@@ -824,7 +824,7 @@ void main() {
     ]);
     final detail = jsonEncode({
       'identifier': id,
-      'sender': 'opendata@dwd.de',
+      'sender': 'dwd-sender',
       'msgType': 'Alert',
       'info': [
         {
@@ -1173,7 +1173,7 @@ void main() {
           ]),
           '$bbkBase/warnings/$id.json': jsonEncode({
             'identifier': id,
-            'sender': 'opendata@dwd.de',
+            'sender': 'dwd-sender',
             'msgType': references == null ? 'Alert' : 'Update',
             'references': ?references,
             'info': [
@@ -1191,7 +1191,7 @@ void main() {
         };
       }
 
-      const replacing = 'opendata@dwd.de,$before,2026-11-25T12:49:00-00:00';
+      const replacing = 'dwd-sender,$before,2026-11-25T12:49:00-00:00';
 
       test('the version its detail names is not announced again', () async {
         await service(feeds(before)).poll(countryCode: 'DE');

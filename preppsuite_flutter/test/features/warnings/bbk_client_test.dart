@@ -89,9 +89,9 @@ void main() {
     // CAP separates with a space.
     expect(
       bbkReferencedIds(
-        'opendata@dwd.de,dwdmap.2.49.0.0.276.0.DWD.PVW.1795610940000.'
+        'dwd-sender,dwdmap.2.49.0.0.276.0.DWD.PVW.1795610940000.'
         '1dcc04fd.MUL,2026-11-25T12:49:00-00:00 '
-        'opendata@dwd.de,dwdmap.2.49.0.0.276.0.DWD.PVW.1795612440000.'
+        'dwd-sender,dwdmap.2.49.0.0.276.0.DWD.PVW.1795612440000.'
         '4338a7be.MUL,2026-11-25T13:14:00-00:00',
       ),
       [
