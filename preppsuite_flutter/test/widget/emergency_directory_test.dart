@@ -126,6 +126,41 @@ void main() {
     );
   });
 
+  testWidgets('a contact is not saved without a name, nor lost (#412)', (
+    tester,
+  ) async {
+    // A number typed without a name was dropped on saving, with nothing
+    // said -- the number gone with it.
+    await show(tester);
+    await tester.scrollUntilVisible(find.byTooltip('Kontakt hinzufügen'), 400);
+    await tester.tap(find.byTooltip('Kontakt hinzufügen'));
+    await tester.pumpAndSettle();
+
+    FilledButton save() => tester.widget<FilledButton>(
+      find.widgetWithText(FilledButton, 'Speichern'),
+    );
+
+    expect(save().onPressed, isNull);
+    expect(find.text('Dieses Feld darf nicht leer sein.'), findsNothing);
+
+    await tester.enterText(find.byType(TextField).at(1), '0531 333333');
+    await tester.pump();
+    expect(save().onPressed, isNull);
+    expect(find.text('Dieses Feld darf nicht leer sein.'), findsOneWidget);
+
+    await tester.enterText(find.byType(TextField).at(0), 'Hausarzt');
+    await tester.pump();
+    expect(find.text('Dieses Feld darf nicht leer sein.'), findsNothing);
+    await tester.tap(find.text('Speichern'));
+    await tester.pumpAndSettle();
+
+    expect(find.text('Hausarzt'), findsOneWidget);
+    final stored = (await SharedPreferences.getInstance()).getString(
+      'nearbyEmergencyContacts',
+    )!;
+    expect(stored, contains('0531 333333'));
+  });
+
   testWidgets('the screen meets the accessibility guidelines', (tester) async {
     await show(tester);
     await expectAccessible(tester);

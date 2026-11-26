@@ -70,6 +70,17 @@ class _EmergencyInformationScreenState
     final coordinates = TextEditingController(
       text: existing?.coordinates ?? '',
     );
+    // A contact is listed under its name, and one without was dropped on
+    // saving, number and all, with nothing said (#412, as #350 was on the
+    // emergency card). Saving now waits for the name, and the field says
+    // why as soon as anything else has been typed.
+    final typed = Listenable.merge([name, phone, address, coordinates]);
+    bool nameMissing() => name.text.trim().isEmpty;
+    bool anythingElse() => [
+      phone,
+      address,
+      coordinates,
+    ].any((field) => field.text.trim().isNotEmpty);
     final accepted = await showDialog<bool>(
       context: context,
       builder: (context) => AlertDialog(
@@ -82,11 +93,17 @@ class _EmergencyInformationScreenState
           child: Column(
             mainAxisSize: MainAxisSize.min,
             children: [
-              TextField(
-                controller: name,
-                autofocus: true,
-                decoration: InputDecoration(
-                  labelText: l10n.emergencyContactName,
+              ListenableBuilder(
+                listenable: typed,
+                builder: (context, _) => TextField(
+                  controller: name,
+                  autofocus: true,
+                  decoration: InputDecoration(
+                    labelText: l10n.emergencyContactName,
+                    errorText: nameMissing() && anythingElse()
+                        ? l10n.fieldRequired
+                        : null,
+                  ),
                 ),
               ),
               TextField(
@@ -121,9 +138,14 @@ class _EmergencyInformationScreenState
             onPressed: () => Navigator.pop(context, false),
             child: Text(MaterialLocalizations.of(context).cancelButtonLabel),
           ),
-          FilledButton(
-            onPressed: () => Navigator.pop(context, true),
-            child: Text(l10n.saveButton),
+          ListenableBuilder(
+            listenable: name,
+            builder: (context, _) => FilledButton(
+              onPressed: nameMissing()
+                  ? null
+                  : () => Navigator.pop(context, true),
+              child: Text(l10n.saveButton),
+            ),
           ),
         ],
       ),
