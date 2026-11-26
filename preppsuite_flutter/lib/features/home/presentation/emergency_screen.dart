@@ -27,6 +27,7 @@ import 'broadcast_radio_screen.dart';
 import 'radio_emergency_screen.dart';
 import '../../knowledge/application/knowledge_providers.dart';
 import '../../maps/application/offline_map_providers.dart';
+import '../../warnings/application/warning_freshness.dart';
 import '../../warnings/application/warning_providers.dart';
 import '../../warnings/application/warning_relevance.dart';
 import '../application/shell_layout.dart';
@@ -73,6 +74,20 @@ class EmergencyScreen extends ConsumerWidget {
           ),
         )
         .toList();
+    // "No warning" only while the feeds are current, and never with a
+    // tick (#394): the absence of a warning is not an all-clear, and with
+    // the device offline since yesterday it is not even that.
+    final pollStatus = ref.watch(warningPollStatusProvider).value;
+    final now = DateTime.now();
+    final fresh = pollStatus == null
+        ? null
+        : warningFreshness(
+            pollStatus,
+            countryCode: profile.countryCode,
+            now: now,
+          );
+    final unheard =
+        fresh != null && fresh.freshness != WarningFreshness.current;
 
     // Built once, not once per checklist item. `any` short-circuits, so the
     // cost only shows in full when nothing is satisfied yet — which is the
@@ -295,10 +310,34 @@ class EmergencyScreen extends ConsumerWidget {
           ),
           const SizedBox(height: 8),
           Card(
-            child: warnings.isEmpty
+            child: warnings.isEmpty && unheard
                 ? ListTile(
-                    leading: const Icon(Icons.check_circle_outline),
+                    leading: Icon(
+                      Icons.cloud_off_outlined,
+                      color: Theme.of(context).colorScheme.error,
+                    ),
+                    title: Text(l10n.warningsStaleTitle),
+                    subtitle: Text(switch (fresh.at) {
+                      final at? => l10n.statusSituationStaleHint(
+                        formatWarningTime(l10n, at, now),
+                      ),
+                      null => l10n.statusSituationNever,
+                    }),
+                    trailing: const Icon(Icons.chevron_right),
+                    onTap: () => onNavigate(ShellDestination.warnings),
+                  )
+                : warnings.isEmpty
+                ? ListTile(
+                    leading: const Icon(Icons.notifications_none_outlined),
                     title: Text(l10n.emergencyNoWarnings),
+                    subtitle: switch (fresh?.at) {
+                      final at? => Text(
+                        l10n.warningsUpdatedAt(
+                          formatWarningTime(l10n, at, now),
+                        ),
+                      ),
+                      null => null,
+                    },
                   )
                 : Column(
                     children: [

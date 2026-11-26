@@ -4524,7 +4524,7 @@
   },
   "operationsTitle": "Situation now",
   "operationsWarning": "Active warning for your places",
-  "operationsQuiet": "Your followed places are quiet",
+  "operationsQuiet": "No official warning for your places",
   "operationsOpenWarnings": "Check warnings",
   "operationsOpenReadiness": "Open readiness",
   "operationsNextTask": "Next: {task}",

@@ -8,6 +8,8 @@ import 'package:preppsuite_flutter/features/household/application/household_plan
 import 'package:preppsuite_flutter/features/inventory/application/inventory_providers.dart';
 import 'package:preppsuite_flutter/features/knowledge/application/knowledge_providers.dart';
 import 'package:preppsuite_flutter/features/maps/application/offline_map_providers.dart';
+import 'package:preppsuite_flutter/features/warnings/application/warning_freshness.dart';
+import 'package:preppsuite_flutter/features/warnings/application/warning_poll_status_store.dart';
 import 'package:preppsuite_flutter/features/warnings/application/warning_providers.dart';
 import 'package:preppsuite_flutter/l10n/generated/app_localizations.dart';
 import 'package:preppsuite_flutter/model/household_profile.dart';
@@ -40,6 +42,7 @@ void main() {
     WidgetTester tester,
     Locale locale, {
     HouseholdProfile profile = profile,
+    WarningPollStatus? polled,
   }) async {
     await tester.binding.setSurfaceSize(const Size(600, 3000));
     addTearDown(() => tester.binding.setSurfaceSize(null));
@@ -62,6 +65,15 @@ void main() {
           activeWarningsProvider.overrideWith((ref) => Stream.value(const [])),
           offlineMapProvider.overrideWith(_NoMap.new),
           knowledgeProvider.overrideWith(_NoKnowledge.new),
+          warningPollStatusProvider.overrideWith(
+            (ref) async =>
+                polled ??
+                WarningPollStatus(
+                  lastComplete: DateTime.now().subtract(
+                    const Duration(minutes: 1),
+                  ),
+                ),
+          ),
         ],
         child: MaterialApp(
           locale: locale,
@@ -97,6 +109,47 @@ void main() {
 
     expect(find.text('Policía 110'), findsNothing);
     expect(find.textContaining('112'), findsWidgets);
+  });
+
+  group('no warning (#394)', () {
+    testWidgets('is said with the time, and without a tick', (tester) async {
+      await show(tester, const Locale('de'));
+
+      final none = find.text('Keine relevanten aktiven Warnungen');
+      expect(none, findsOneWidget);
+      expect(find.textContaining('Stand: heute'), findsOneWidget);
+      expect(
+        find.descendant(
+          of: find.ancestor(of: none, matching: find.byType(ListTile)),
+          matching: find.byIcon(Icons.check_circle_outline),
+        ),
+        findsNothing,
+      );
+    });
+
+    testWidgets('is not said when the feeds are out of date', (tester) async {
+      await show(
+        tester,
+        const Locale('de'),
+        polled: WarningPollStatus(
+          lastComplete: DateTime.now().subtract(const Duration(hours: 5)),
+        ),
+      );
+
+      expect(find.text('Keine relevanten aktiven Warnungen'), findsNothing);
+      expect(find.text('Warnungen nicht aktuell'), findsOneWidget);
+      expect(
+        find.textContaining('Es können Warnungen fehlen.'),
+        findsOneWidget,
+      );
+    });
+
+    testWidgets('nor before they have ever answered', (tester) async {
+      await show(tester, const Locale('en'), polled: const WarningPollStatus());
+
+      expect(find.text('No relevant active warnings'), findsNothing);
+      expect(find.text('Warnings not up to date'), findsOneWidget);
+    });
   });
 
   testWidgets('the offline section is English on an English locale', (

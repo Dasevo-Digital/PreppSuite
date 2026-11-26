@@ -2130,7 +2130,7 @@
   "transferLastSeenMixed": "Última lectura: imagen {frame} · {discarded} imágenes eran de otra transferencia",
   "operationsTitle": "Situación ahora",
   "operationsWarning": "Aviso activo para tus lugares",
-  "operationsQuiet": "Tus lugares seguidos están tranquilos",
+  "operationsQuiet": "Ningún aviso oficial para tus lugares",
   "operationsOpenWarnings": "Consultar avisos",
   "operationsOpenReadiness": "Abrir preparación",
   "operationsNextTask": "Siguiente: {task}",

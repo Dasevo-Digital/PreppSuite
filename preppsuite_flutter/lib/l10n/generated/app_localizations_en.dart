@@ -7808,7 +7808,7 @@ class AppLocalizationsEn extends AppLocalizations {
   String get operationsWarning => 'Active warning for your places';
 
   @override
-  String get operationsQuiet => 'Your followed places are quiet';
+  String get operationsQuiet => 'No official warning for your places';
 
   @override
   String get operationsOpenWarnings => 'Check warnings';

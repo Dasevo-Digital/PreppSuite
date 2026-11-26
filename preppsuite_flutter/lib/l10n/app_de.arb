@@ -3375,7 +3375,7 @@
   },
   "operationsTitle": "Lage jetzt",
   "operationsWarning": "Aktive Warnung für deine Orte",
-  "operationsQuiet": "Lage für deine Orte ruhig",
+  "operationsQuiet": "Keine amtliche Warnung für deine Orte",
   "operationsOpenWarnings": "Warnungen prüfen",
   "operationsOpenReadiness": "Bereitschaft öffnen",
   "operationsNextTask": "Als Nächstes: {task}",

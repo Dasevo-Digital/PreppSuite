@@ -7,6 +7,8 @@ import 'package:preppsuite_flutter/features/home/application/shell_layout.dart';
 import 'package:preppsuite_flutter/features/home/presentation/overview_screen.dart';
 import 'package:preppsuite_flutter/features/inventory/application/charge_reminder_provider.dart';
 import 'package:preppsuite_flutter/features/inventory/application/inventory_providers.dart';
+import 'package:preppsuite_flutter/features/warnings/application/warning_freshness.dart';
+import 'package:preppsuite_flutter/features/warnings/application/warning_poll_status_store.dart';
 import 'package:preppsuite_flutter/features/warnings/application/warning_providers.dart';
 import 'package:preppsuite_flutter/l10n/generated/app_localizations.dart';
 import 'package:preppsuite_flutter/local_db/database.dart';
@@ -77,6 +79,7 @@ void main() {
     List<ChecklistItem> checklistItems = const [],
     int adults = 2,
     Size size = const Size(900, 1600),
+    WarningPollStatus? polled,
   }) async {
     final navigated = <ShellDestination>[];
 
@@ -96,6 +99,16 @@ void main() {
           allChecklistItemsProvider(
             householdId,
           ).overrideWith((ref) => Stream.value(checklistItems)),
+          // Heard from the feeds a minute ago unless a test says otherwise.
+          warningPollStatusProvider.overrideWith(
+            (ref) async =>
+                polled ??
+                WarningPollStatus(
+                  lastComplete: DateTime.now().subtract(
+                    const Duration(minutes: 1),
+                  ),
+                ),
+          ),
         ],
         child: MaterialApp(
           locale: const Locale('de'),
@@ -209,6 +222,86 @@ void main() {
       find.text('Zurzeit keine Warnung für deine Regionen.'),
       findsOneWidget,
     );
+  });
+
+  group('how old "no warning" is (#394)', () {
+    // A device a day offline: the lamp said "out of date", and above and
+    // below it the briefing said "quiet" in green and the warning card
+    // "no warning". With nothing recorded the lamps are not even shown.
+    final yesterday = WarningPollStatus(
+      lastComplete: DateTime.now().subtract(const Duration(days: 1)),
+    );
+
+    testWidgets('out of date, no card says there is no warning', (
+      tester,
+    ) async {
+      await pumpOverview(tester, polled: yesterday);
+
+      expect(
+        find.text('Zurzeit keine Warnung für deine Regionen.'),
+        findsNothing,
+      );
+      expect(find.text('Keine amtliche Warnung für deine Orte'), findsNothing);
+      expect(find.text('Warnungen nicht aktuell'), findsOneWidget);
+      // The briefing and the warning card, with the lamps hidden.
+      expect(
+        find.textContaining('Es können Warnungen fehlen.'),
+        findsNWidgets(2),
+      );
+    });
+
+    testWidgets('never fetched, it says that', (tester) async {
+      await pumpOverview(tester, polled: const WarningPollStatus());
+
+      expect(
+        find.text('Zurzeit keine Warnung für deine Regionen.'),
+        findsNothing,
+      );
+      expect(
+        find.text(
+          'Noch keine Warnungen abgerufen. Dafür braucht die App einmal '
+          'Internet.',
+        ),
+        findsNWidgets(2),
+      );
+    });
+
+    testWidgets('a warning in force is named all the same', (tester) async {
+      await pumpOverview(
+        tester,
+        polled: yesterday,
+        warnings: [warning(headline: 'Hochwasser Leine', regionKey: '03241')],
+      );
+
+      expect(find.text('Hochwasser Leine'), findsOneWidget);
+      expect(find.text('Aktive Warnung für deine Orte'), findsOneWidget);
+    });
+
+    testWidgets('current, the card says when it was', (tester) async {
+      await pumpOverview(tester);
+
+      expect(
+        find.text('Zurzeit keine Warnung für deine Regionen.'),
+        findsOneWidget,
+      );
+      expect(find.textContaining('Stand: heute'), findsOneWidget);
+    });
+
+    testWidgets('the briefing is neither green nor ticked', (tester) async {
+      // "Zwei Ampeln ... hier gibt es kein Grün": no official warning is
+      // not an all-clear, and the card has no source for one.
+      await pumpOverview(tester, items: [item()]);
+
+      final title = find.text('Keine amtliche Warnung für deine Orte');
+      expect(title, findsOneWidget);
+      final card = tester.widget<Card>(
+        find.ancestor(of: title, matching: find.byType(Card)).first,
+      );
+      final scheme = Theme.of(tester.element(title)).colorScheme;
+      expect(card.color, isNot(scheme.primaryContainer));
+      expect(card.color, isNot(scheme.secondaryContainer));
+      expect(find.byIcon(Icons.verified_outlined), findsNothing);
+    });
   });
 
   testWidgets('every category is listed, including the empty ones', (

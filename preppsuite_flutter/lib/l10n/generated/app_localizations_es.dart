@@ -7867,7 +7867,7 @@ class AppLocalizationsEs extends AppLocalizations {
   String get operationsWarning => 'Aviso activo para tus lugares';
 
   @override
-  String get operationsQuiet => 'Tus lugares seguidos están tranquilos';
+  String get operationsQuiet => 'Ningún aviso oficial para tus lugares';
 
   @override
   String get operationsOpenWarnings => 'Consultar avisos';

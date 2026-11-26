@@ -9,8 +9,10 @@ import '../../inventory/application/charge_reminder_provider.dart';
 import '../../inventory/application/inventory_providers.dart';
 import '../../knowledge/application/knowledge_providers.dart';
 import '../../maps/application/offline_map_providers.dart';
+import '../../warnings/application/warning_freshness.dart';
 import '../../warnings/application/warning_providers.dart';
 import '../../warnings/application/warning_relevance.dart';
+import '../application/operational_briefing.dart';
 import '../application/shell_layout.dart';
 
 /// The single first answer on the overview: what needs attention now.
@@ -19,6 +21,14 @@ import '../application/shell_layout.dart';
 /// It does not manufacture a risk score from an empty pantry or a quiet
 /// warning feed. A quiet feed says just that, and an unopened readiness task
 /// stays a concrete next action.
+///
+/// **No green and no tick** (#394). The card said "Lage für deine Orte
+/// ruhig" in the app's green with a verified badge -- the "all well" that
+/// the situation lamp is built never to say, because authorities publish
+/// warnings and not all-clears. And it said so with the feeds a day out
+/// of reach, while the lamp beside it read "out of date". Without a
+/// warning the card is neutral and says "no official warning", and only
+/// while the feeds are current; otherwise it says that they are not.
 class OperationalBriefingCard extends ConsumerWidget {
   const OperationalBriefingCard({
     super.key,
@@ -46,10 +56,32 @@ class OperationalBriefingCard extends ConsumerWidget {
           ),
         )
         .toList();
+    // Read again after every poll, answered or not, like the lamp.
+    final status = ref.watch(warningPollStatusProvider).value;
+    final now = DateTime.now();
+    final fresh = status == null
+        ? null
+        : warningFreshness(
+            status,
+            countryCode: profile.countryCode,
+            now: now,
+          );
 
-    final _Briefing briefing;
-    if (warnings.isNotEmpty) {
-      briefing = _Briefing(
+    final state = operationalBriefing(
+      warnings: warnings.length,
+      freshness: fresh?.freshness,
+      inventoryEmpty: inventory.isEmpty,
+      chargeDue:
+          !equipment.isOff &&
+          (equipment.lastChecked == null || equipment.isDue()),
+    );
+
+    // Neutral whenever no warning is in force: the green of the app's
+    // primary colour would be the "all well" this card has no source for.
+    final quietForeground = theme.colorScheme.onSurface;
+    final quietBackground = theme.colorScheme.surfaceContainerHigh;
+    final _Briefing briefing = switch (state) {
+      OperationalBriefing.warning => _Briefing(
         icon: Icons.warning_amber_rounded,
         title: l10n.operationsWarning,
         detail: l10n.operationsWarningDetail,
@@ -57,39 +89,51 @@ class OperationalBriefingCard extends ConsumerWidget {
         destination: ShellDestination.warnings,
         foreground: theme.colorScheme.onErrorContainer,
         background: theme.colorScheme.errorContainer,
-      );
-    } else if (inventory.isEmpty) {
-      briefing = _Briefing(
+      ),
+      // The look of the warning list's own notice (#138): somebody who
+      // reads only this card must not come away thinking all is quiet.
+      OperationalBriefing.unheard => _Briefing(
+        icon: Icons.cloud_off_outlined,
+        title: l10n.warningsStaleTitle,
+        detail: switch (fresh?.at) {
+          final at? => l10n.statusSituationStaleHint(
+            formatWarningTime(l10n, at, now),
+          ),
+          null => l10n.statusSituationNever,
+        },
+        action: l10n.operationsOpenWarnings,
+        destination: ShellDestination.warnings,
+        foreground: theme.colorScheme.onErrorContainer,
+        background: theme.colorScheme.errorContainer,
+      ),
+      OperationalBriefing.inventoryMissing => _Briefing(
         icon: Icons.inventory_2_outlined,
         title: l10n.operationsQuiet,
         detail: l10n.operationsNextTask(l10n.operationsInventoryMissing),
         action: l10n.operationsOpenReadiness,
         destination: ShellDestination.inventory,
-        foreground: theme.colorScheme.onPrimaryContainer,
-        background: theme.colorScheme.primaryContainer,
-      );
-    } else if (!equipment.isOff &&
-        (equipment.lastChecked == null || equipment.isDue())) {
-      briefing = _Briefing(
+        foreground: quietForeground,
+        background: quietBackground,
+      ),
+      OperationalBriefing.chargeDue => _Briefing(
         icon: Icons.battery_charging_full_outlined,
         title: l10n.operationsQuiet,
         detail: l10n.operationsNextTask(l10n.operationsChargeDue),
         action: l10n.operationsOpenReadiness,
         destination: ShellDestination.settings,
-        foreground: theme.colorScheme.onPrimaryContainer,
-        background: theme.colorScheme.primaryContainer,
-      );
-    } else {
-      briefing = _Briefing(
-        icon: Icons.verified_outlined,
+        foreground: quietForeground,
+        background: quietBackground,
+      ),
+      OperationalBriefing.ready => _Briefing(
+        icon: Icons.notifications_none_outlined,
         title: l10n.operationsQuiet,
         detail: l10n.operationsReady,
         action: l10n.operationsOpenReadiness,
         destination: ShellDestination.emergency,
-        foreground: theme.colorScheme.onPrimaryContainer,
-        background: theme.colorScheme.primaryContainer,
-      );
-    }
+        foreground: quietForeground,
+        background: quietBackground,
+      ),
+    };
 
     // Two things the first version kept in one card. The red card held the
     // sentence about the warning *and* whether the map and the library are

@@ -12898,7 +12898,7 @@ abstract class AppLocalizations {
   /// No description provided for @operationsQuiet.
   ///
   /// In en, this message translates to:
-  /// **'Your followed places are quiet'**
+  /// **'No official warning for your places'**
   String get operationsQuiet;
 
   /// No description provided for @operationsOpenWarnings.

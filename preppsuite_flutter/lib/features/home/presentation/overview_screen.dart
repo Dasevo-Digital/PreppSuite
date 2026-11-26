@@ -21,6 +21,7 @@ import '../../inventory/presentation/inventory_item_form_screen.dart';
 import '../../inventory/application/supply_calculator.dart';
 import '../../checklists/application/checklist_providers.dart';
 import '../../checklists/application/checklist_satisfaction.dart';
+import '../../warnings/application/warning_freshness.dart';
 import '../../warnings/application/warning_providers.dart';
 import '../../warnings/application/warning_relevance.dart';
 import '../../tour/presentation/tour_offer_card.dart';
@@ -700,6 +701,11 @@ class _Stat extends StatelessWidget {
 }
 
 /// How many warnings concern this household right now.
+///
+/// "No warning" only while the feeds are current (#394). With the device
+/// a day offline the card said "Zurzeit keine Warnung" under a lamp that
+/// read "out of date" -- and on a household with nothing recorded the
+/// lamps are not shown, so nothing on the screen said how old that was.
 class _WarningCard extends ConsumerWidget {
   const _WarningCard({required this.profile, required this.onOpen});
 
@@ -722,13 +728,28 @@ class _WarningCard extends ConsumerWidget {
           ),
         )
         .toList();
+    final status = ref.watch(warningPollStatusProvider).value;
+    final now = DateTime.now();
+    final fresh = status == null
+        ? null
+        : warningFreshness(
+            status,
+            countryCode: profile.countryCode,
+            now: now,
+          );
+    final unheard =
+        mine.isEmpty &&
+        fresh != null &&
+        fresh.freshness != WarningFreshness.current;
 
     return _OverviewCard(
-      icon: mine.isEmpty
-          ? Icons.notifications_none_outlined
-          : Icons.warning_amber_rounded,
+      icon: mine.isNotEmpty
+          ? Icons.warning_amber_rounded
+          : unheard
+          ? Icons.cloud_off_outlined
+          : Icons.notifications_none_outlined,
       title: l10n.navWarnings,
-      tone: mine.isEmpty ? null : theme.colorScheme.error,
+      tone: mine.isEmpty && !unheard ? null : theme.colorScheme.error,
       onOpen: onOpen,
       trailing: mine.isEmpty
           ? null
@@ -736,10 +757,38 @@ class _WarningCard extends ConsumerWidget {
               visualDensity: VisualDensity.compact,
               label: Text('${mine.length}'),
             ),
-      child: Text(
-        mine.isEmpty ? l10n.overviewNoWarnings : warningTitle(mine.first, l10n),
-        style: theme.textTheme.bodyMedium,
-      ),
+      child: mine.isNotEmpty
+          ? Text(
+              warningTitle(mine.first, l10n),
+              style: theme.textTheme.bodyMedium,
+            )
+          : unheard
+          ? Text(
+              switch (fresh.at) {
+                final at? => l10n.statusSituationStaleHint(
+                  formatWarningTime(l10n, at, now),
+                ),
+                null => l10n.statusSituationNever,
+              },
+              style: theme.textTheme.bodyMedium,
+            )
+          : Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  l10n.overviewNoWarnings,
+                  style: theme.textTheme.bodyMedium,
+                ),
+                // How old "no warning" is, as the warning list says it.
+                if (fresh?.at case final at?)
+                  Text(
+                    l10n.warningsUpdatedAt(formatWarningTime(l10n, at, now)),
+                    style: theme.textTheme.bodySmall?.copyWith(
+                      color: theme.colorScheme.onSurfaceVariant,
+                    ),
+                  ),
+              ],
+            ),
     );
   }
 }

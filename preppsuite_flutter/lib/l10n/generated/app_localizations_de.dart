@@ -7843,7 +7843,7 @@ class AppLocalizationsDe extends AppLocalizations {
   String get operationsWarning => 'Aktive Warnung für deine Orte';
 
   @override
-  String get operationsQuiet => 'Lage für deine Orte ruhig';
+  String get operationsQuiet => 'Keine amtliche Warnung für deine Orte';
 
   @override
   String get operationsOpenWarnings => 'Warnungen prüfen';
