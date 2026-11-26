@@ -8644,6 +8644,9 @@ class AppLocalizationsEn extends AppLocalizations {
   String get aedHere => 'here';
 
   @override
+  String get aedSavedPosition => 'at the saved position';
+
+  @override
   String aedPositionFrom(String time) {
     return 'at the position taken $time';
   }
@@ -8789,8 +8792,18 @@ class AppLocalizationsEn extends AppLocalizations {
   }
 
   @override
+  String sirenLikelyFurther(String distance, String direction) {
+    return 'A siren $distance $direction is very likely to be heard here, although another one is nearer.';
+  }
+
+  @override
   String sirenMaybe(String distance, String direction) {
     return 'The nearest siren is $distance $direction. That lies between its reach in town and over open land: it may be heard, though hardly with wind and closed windows. The warning app and the radio matter here.';
+  }
+
+  @override
+  String sirenMaybeFurther(String distance, String direction) {
+    return 'The siren most likely to be heard is $distance $direction; a nearer one reaches less far by its entry. That distance lies between a siren\'s reach in town and over open land: it may be heard, though hardly with wind and closed windows. The warning app and the radio matter here.';
   }
 
   @override

@@ -101,17 +101,21 @@ Future<NearbyOutcome<T>> nearbyOutcome<T>(Future<T> search) => search.then(
 /// Where a list was measured from, as its heading names it: the address
 /// searched for, or the device's own position.
 ///
-/// "hier" only for a fix from now (#390). The device hands over its last
-/// known position when it gets no fresh one, and a list measured from
-/// where somebody was yesterday says when that was.
+/// "hier" only for a fix taken here and now. A search kept from an
+/// earlier visit has no [fix]: it was measured wherever the device was
+/// then, which after a journey is another town (#404). And the device
+/// hands over its last known position when it gets no fresh one, so a
+/// list measured from where somebody was yesterday says when that was
+/// (#390).
 String nearbyPlaceLabel(
   AppLocalizations l10n, {
   String? placeName,
   ReadablePosition? fix,
 }) {
   if (placeName != null) return placeName;
+  if (fix == null) return l10n.aedSavedPosition;
   final now = DateTime.now();
-  if (fix != null && fix.isStaleAt(now)) {
+  if (fix.isStaleAt(now)) {
     return l10n.aedPositionFrom(fix.takenAtLabel(l10n.localeName, now)!);
   }
   return l10n.aedHere;

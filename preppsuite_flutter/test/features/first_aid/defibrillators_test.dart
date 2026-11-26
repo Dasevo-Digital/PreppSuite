@@ -296,6 +296,41 @@ void main() {
       expect(await const DefibrillatorStore().load(), isNull);
     });
 
+    testWidgets('a search kept by position is not called "here" (#404)', (
+      tester,
+    ) async {
+      await const DefibrillatorStore().save(
+        DefibrillatorSearch(
+          latitude: 52.2689,
+          longitude: 10.5268,
+          checkedAt: DateTime(2026, 11, 3),
+          found: const [
+            Defibrillator(
+              id: 1,
+              latitude: 52.2733,
+              longitude: 10.5254,
+              tags: {'defibrillator:location': 'Neben Raum 143'},
+            ),
+          ],
+        ),
+      );
+      await tester.pumpWidget(
+        MaterialApp(
+          locale: const Locale('de'),
+          localizationsDelegates: AppLocalizations.localizationsDelegates,
+          supportedLocales: AppLocalizations.supportedLocales,
+          home: DefibrillatorScreen(geolocation: geolocation()),
+        ),
+      );
+      await tester.pumpAndSettle();
+
+      expect(
+        find.textContaining('an der gespeicherten Position, Stand'),
+        findsOneWidget,
+      );
+      expect(find.textContaining(', hier,'), findsNothing);
+    });
+
     testWidgets('a list from the last known position names when that was '
         '(#390)', (tester) async {
       final taken = DateTime.now().subtract(const Duration(hours: 3));

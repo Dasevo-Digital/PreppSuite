@@ -45,12 +45,14 @@ class _ShelterMapScreenState extends State<ShelterMapScreen> {
   LatLng? _center;
   double _radiusKm = 25;
   ShelterConfidence? _filter;
-  List<ClassifiedShelter> _shelters = const [];
+  var _listing = const ShelterListing();
   bool _isLoading = false;
   Object? _wwbotaError;
   Object? _overpassError;
-  DateTime? _cachedAt;
   String? _locationError;
+
+  List<ClassifiedShelter> get _shelters => _listing.shelters;
+  DateTime? get _cachedAt => _listing.cachedAt;
 
   int _lookupGeneration = 0;
   late final _shelterSearch = ShelterSearch(
@@ -142,20 +144,13 @@ class _ShelterMapScreenState extends State<ShelterMapScreen> {
     final bounds = boundingBoxForRadius(center, _radiusKm);
     final cached = await _cache.load(bounds);
     if (!mounted || generation != _lookupGeneration) return;
-    if (cached != null) {
-      setState(() {
-        _shelters = cached.shelters;
-        _cachedAt = cached.savedAt;
-      });
-    }
+    // Never the last box's list under this box's heading (#404).
+    setState(() => _listing = ShelterListing.startingWith(cached));
 
     await _shelterSearch.search(bounds, (result) {
       if (!mounted || generation != _lookupGeneration) return;
       setState(() {
-        if (result.hasSuccessfulSource) {
-          _shelters = result.shelters;
-          _cachedAt = null;
-        }
+        _listing = _listing.after(result);
         _wwbotaError = result.wwbotaError;
         _overpassError = result.overpassError;
         _isLoading = result.pending > 0;

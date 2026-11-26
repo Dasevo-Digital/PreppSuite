@@ -1,4 +1,5 @@
 import 'geo_bounds.dart';
+import 'shelter_cache.dart';
 import 'shelter_classification.dart';
 
 typedef ShelterSource = Future<List<ClassifiedShelter>> Function(
@@ -33,6 +34,35 @@ class ShelterSearchResult {
   /// for the cache: replacing a known list with a confirmed empty result is
   /// correct; replacing it because both public services timed out is not.
   bool get hasSuccessfulSource => successfulSources > 0;
+}
+
+/// What the shelter list shows, and from when if it is a kept one.
+class ShelterListing {
+  const ShelterListing({this.shelters = const [], this.cachedAt});
+
+  final List<ClassifiedShelter> shelters;
+
+  /// When the kept list was saved; null for a list from this search.
+  final DateTime? cachedAt;
+
+  /// What a search for a new box starts from: what the cache holds for
+  /// that box, or nothing (#404).
+  ///
+  /// Never the list of the box before. The list used to be replaced only
+  /// by a cache hit or by a search that worked, so going from 50 km to
+  /// 10 km, or to another town, with both services failing showed the
+  /// old box's shelters under "within 10 km", with distances from the new
+  /// place.
+  factory ShelterListing.startingWith(ShelterCacheEntry? cached) =>
+      cached == null
+      ? const ShelterListing()
+      : ShelterListing(shelters: cached.shelters, cachedAt: cached.savedAt);
+
+  /// After [result]: its shelters where a source answered, this list
+  /// where none did. A confirmed empty answer replaces it too.
+  ShelterListing after(ShelterSearchResult result) => result.hasSuccessfulSource
+      ? ShelterListing(shelters: result.shelters)
+      : this;
 }
 
 /// Independent sources publish partial results; only the newest search may win.

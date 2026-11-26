@@ -1,6 +1,7 @@
 import 'dart:async';
 
 import 'package:flutter_test/flutter_test.dart';
+import 'package:preppsuite_flutter/features/shelters/application/shelter_cache.dart';
 import 'package:preppsuite_flutter/features/shelters/application/shelter_search.dart';
 import 'package:preppsuite_flutter/features/shelters/application/shelter_classification.dart';
 import 'package:preppsuite_flutter/features/shelters/application/geo_bounds.dart';
@@ -16,6 +17,45 @@ void main() {
     confidence: ShelterConfidence.yellow,
     sourceLabel: 'Test',
   );
+  group('what the list shows when the box changes (#404)', () {
+    // 50 km found shelters; 10 km, or another town, is not in the cache and
+    // both services fail. The list used to keep the 50 km shelters under
+    // "within 10 km", with distances from the new place.
+    const before = ShelterListing(shelters: [shelter]);
+    const bothFailed = ShelterSearchResult(
+      [],
+      0,
+      0,
+      OverpassException(504),
+      OverpassException(504),
+    );
+
+    test('a box the cache does not hold starts empty', () {
+      final next = ShelterListing.startingWith(null);
+      expect(next.shelters, isEmpty);
+      expect(next.cachedAt, isNull);
+      // And stays so when nothing answers.
+      expect(next.after(bothFailed).shelters, isEmpty);
+      expect(before.shelters, isNotEmpty);
+    });
+
+    test('a box the cache holds starts from that, with its day', () {
+      final savedAt = DateTime.utc(2026, 11, 20);
+      final next = ShelterListing.startingWith(
+        ShelterCacheEntry(savedAt: savedAt, shelters: const [shelter]),
+      );
+      expect(next.shelters, [shelter]);
+      expect(next.cachedAt, savedAt);
+      expect(next.after(bothFailed).cachedAt, savedAt);
+    });
+
+    test('an answer replaces it, an empty one too', () {
+      const empty = ShelterSearchResult([], 0, 1, null, null);
+      expect(before.after(empty).shelters, isEmpty);
+      expect(before.after(empty).cachedAt, isNull);
+    });
+  });
+
   test('a failed source hands back why, not just that it failed', () async {
     // The reason used to be caught and dropped, which left the screen
     // saying "OpenStreetMap/Overpass konnte nicht geladen werden" and

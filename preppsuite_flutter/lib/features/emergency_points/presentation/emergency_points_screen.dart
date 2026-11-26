@@ -335,11 +335,22 @@ class _EmergencyPointsScreenState extends State<EmergencyPointsScreen> {
 
   Widget _sirenCard(AppLocalizations l10n, EmergencyPointSearch search) {
     final theme = Theme.of(context);
-    final sirens = search.of(EmergencyPointKind.siren);
-    final reach = search.sirenReachHere;
-    final nearest = sirens.isEmpty ? null : sirens.first;
-    final where = nearest == null ? null : _whereFrom(l10n, search, nearest);
+    // The siren the answer comes from, which is not always the nearest
+    // (#404): one further away with a mapped range can reach here.
+    final audible = search.audibleSiren;
+    final reach = audible?.reach ?? SirenReach.none;
+    final siren = audible?.siren;
+    final where = siren == null ? null : _whereFrom(l10n, search, siren);
+    final nearest = audible?.nearest ?? true;
     final text = switch (reach) {
+      SirenReach.likely when !nearest => l10n.sirenLikelyFurther(
+        where!.$1,
+        where.$2,
+      ),
+      SirenReach.maybe when !nearest => l10n.sirenMaybeFurther(
+        where!.$1,
+        where.$2,
+      ),
       SirenReach.likely => l10n.sirenLikely(where!.$1, where.$2),
       SirenReach.maybe => l10n.sirenMaybe(where!.$1, where.$2),
       SirenReach.unlikely => l10n.sirenUnlikely(where!.$1, where.$2),
@@ -357,7 +368,7 @@ class _EmergencyPointsScreenState extends State<EmergencyPointsScreen> {
       ),
       _ => (colours.errorContainer, colours.onErrorContainer),
     };
-    final range = nearest?.sirenRangeMetres;
+    final range = siren?.sirenRangeMetres;
     return Card(
       color: background,
       child: Padding(
@@ -377,12 +388,12 @@ class _EmergencyPointsScreenState extends State<EmergencyPointsScreen> {
                     ),
                   ),
                 ),
-                if (nearest != null)
+                if (siren != null)
                   IconButton(
                     tooltip: l10n.aedOpenMap,
                     color: foreground,
                     icon: const Icon(Icons.map_outlined),
-                    onPressed: () => _openMap(nearest, l10n.sirenUnnamed),
+                    onPressed: () => _openMap(siren, l10n.sirenUnnamed),
                   ),
               ],
             ),

@@ -14257,6 +14257,12 @@ abstract class AppLocalizations {
   /// **'here'**
   String get aedHere;
 
+  /// No description provided for @aedSavedPosition.
+  ///
+  /// In en, this message translates to:
+  /// **'at the saved position'**
+  String get aedSavedPosition;
+
   /// No description provided for @aedPositionFrom.
   ///
   /// In en, this message translates to:
@@ -14509,11 +14515,23 @@ abstract class AppLocalizations {
   /// **'The nearest siren is {distance} {direction}. It is very likely to be heard there.'**
   String sirenLikely(String distance, String direction);
 
+  /// No description provided for @sirenLikelyFurther.
+  ///
+  /// In en, this message translates to:
+  /// **'A siren {distance} {direction} is very likely to be heard here, although another one is nearer.'**
+  String sirenLikelyFurther(String distance, String direction);
+
   /// No description provided for @sirenMaybe.
   ///
   /// In en, this message translates to:
   /// **'The nearest siren is {distance} {direction}. That lies between its reach in town and over open land: it may be heard, though hardly with wind and closed windows. The warning app and the radio matter here.'**
   String sirenMaybe(String distance, String direction);
+
+  /// No description provided for @sirenMaybeFurther.
+  ///
+  /// In en, this message translates to:
+  /// **'The siren most likely to be heard is {distance} {direction}; a nearer one reaches less far by its entry. That distance lies between a siren\'s reach in town and over open land: it may be heard, though hardly with wind and closed windows. The warning app and the radio matter here.'**
+  String sirenMaybeFurther(String distance, String direction);
 
   /// No description provided for @sirenUnlikely.
   ///

@@ -324,20 +324,36 @@ class EmergencyPointSearch {
       distanceMetres(latitude, longitude, point.latitude, point.longitude);
 
   /// The nearest siren and what follows from it.
-  SirenReach get sirenReachHere {
-    final sirens = of(EmergencyPointKind.siren);
-    if (sirens.isEmpty) return SirenReach.none;
-    // A siren further away with a mapped range may reach where the nearest
-    // one does not; the best of them is the answer.
-    var best = SirenReach.unlikely;
+  SirenReach get sirenReachHere => audibleSiren?.reach ?? SirenReach.none;
+
+  /// The siren [sirenReachHere] comes from: the one most likely to be
+  /// heard, the nearest of those where several are equally likely.
+  ///
+  /// A siren further away with a mapped range may reach where the nearest
+  /// one does not; the best of them is the answer. The card has to name
+  /// that one (#404): it named the nearest, with its distance and its
+  /// range, above an answer another siren gave.
+  ({EmergencyPoint siren, SirenReach reach, bool nearest})? get audibleSiren {
+    final sirens = of(EmergencyPointKind.siren)
+      ..sort((a, b) => distanceTo(a).compareTo(distanceTo(b)));
+    if (sirens.isEmpty) return null;
+    var best = sirens.first;
+    var bestReach = SirenReach.unlikely;
     for (final siren in sirens) {
       final reach = sirenReach(
         distanceTo(siren),
         rangeMetres: siren.sirenRangeMetres,
       );
-      if (reach.index < best.index) best = reach;
+      if (reach.index < bestReach.index) {
+        best = siren;
+        bestReach = reach;
+      }
     }
-    return best;
+    return (
+      siren: best,
+      reach: bestReach,
+      nearest: identical(best, sirens.first),
+    );
   }
 
   Map<String, Object?> toJson() => {

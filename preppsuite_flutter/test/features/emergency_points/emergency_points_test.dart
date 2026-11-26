@@ -202,6 +202,34 @@ void main() {
       ],
     );
     expect(search.sirenReachHere, SirenReach.likely);
+    // And that is the siren the card names, not the nearer one (#404).
+    expect(search.audibleSiren!.siren.id, 2);
+    expect(search.audibleSiren!.nearest, isFalse);
+  });
+
+  test('where every siren is as far, the nearest is named', () {
+    final search = EmergencyPointSearch(
+      latitude: 52.0,
+      longitude: 10.0,
+      checkedAt: DateTime.utc(2026, 10, 8),
+      found: const [
+        EmergencyPoint(
+          id: 2,
+          kind: EmergencyPointKind.siren,
+          latitude: 52.02,
+          longitude: 10.0,
+        ),
+        EmergencyPoint(
+          id: 1,
+          kind: EmergencyPointKind.siren,
+          latitude: 52.01,
+          longitude: 10.0,
+        ),
+      ],
+    );
+    expect(search.audibleSiren!.reach, SirenReach.unlikely);
+    expect(search.audibleSiren!.siren.id, 1);
+    expect(search.audibleSiren!.nearest, isTrue);
   });
 
   test('a search is kept', () async {
@@ -292,6 +320,71 @@ void main() {
       scrollable: find.byType(Scrollable).first,
     );
     expect(find.text('Rathaus · 1,4 km östlich'), findsOneWidget);
+  });
+
+  testWidgets('the card names the siren its answer comes from (#404)', (
+    tester,
+  ) async {
+    await show(
+      tester,
+      EmergencyPointSearch(
+        latitude: 52.0,
+        longitude: 10.0,
+        placeName: 'Musterstadt',
+        checkedAt: DateTime(2026, 10, 8),
+        found: const [
+          // About 1.1 km, nothing mapped.
+          EmergencyPoint(
+            id: 1,
+            kind: EmergencyPointKind.siren,
+            latitude: 52.01,
+            longitude: 10.0,
+          ),
+          // About 1.8 km, mapped to reach two.
+          EmergencyPoint(
+            id: 2,
+            kind: EmergencyPointKind.siren,
+            latitude: 52.016,
+            longitude: 10.0,
+            tags: {'siren:range': '2000'},
+          ),
+        ],
+      ),
+    );
+
+    expect(
+      find.textContaining(
+        'Eine Sirene 1,8 km nördlich ist hier sehr '
+        'wahrscheinlich zu hören, auch wenn eine andere näher steht.',
+      ),
+      findsOneWidget,
+    );
+    expect(find.textContaining('Die nächste Sirene'), findsNothing);
+    expect(
+      find.textContaining('Reichweite laut Eintrag: 2,0 km'),
+      findsOneWidget,
+    );
+  });
+
+  testWidgets('a search kept by position is not called "here" (#404)', (
+    tester,
+  ) async {
+    // Searched from home, opened on holiday: the distances are from home.
+    await show(
+      tester,
+      EmergencyPointSearch(
+        latitude: 52.0,
+        longitude: 10.0,
+        checkedAt: DateTime(2026, 11, 3),
+        found: const [],
+      ),
+    );
+
+    expect(
+      find.textContaining('an der gespeicherten Position, Stand'),
+      findsOneWidget,
+    );
+    expect(find.textContaining('hier, Stand'), findsNothing);
   });
 
   testWidgets('no siren mapped says what that does and does not mean', (
