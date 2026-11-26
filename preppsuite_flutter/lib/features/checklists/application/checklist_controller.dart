@@ -11,6 +11,15 @@ import 'checklist_providers.dart';
 
 /// Local writes for checklist templates and items. See
 /// `InventoryController` for the general shape this follows.
+///
+/// Every write goes under [householdId], the household the screen is
+/// showing, never under the one the row happens to carry (#397). A
+/// built-in list is shown in every household, and its lines by their
+/// list alone, so a row left under an old id -- a list the seeder wrote
+/// while the device was moving, a row from before the seeder set the
+/// column -- looked like any other. Ticked under its own id it was never
+/// published, never counted and not deleted with the household; a write
+/// here brings it in.
 class ChecklistController {
   ChecklistController(this._db, this.householdId);
 
@@ -92,7 +101,7 @@ class ChecklistController {
       await _db.upsertChecklistTemplate(
         ChecklistTemplatesCompanion.insert(
           clientId: template.clientId,
-          householdId: Value(template.householdId),
+          householdId: Value(householdId),
           title: template.title,
           category: template.category,
           kind: Value(template.kind),
@@ -140,7 +149,7 @@ class ChecklistController {
     await _db.upsertChecklistItem(
       ChecklistItemsCompanion.insert(
         clientId: item.clientId,
-        householdId: Value(item.householdId),
+        householdId: Value(householdId),
         templateClientId: item.templateClientId,
         title: item.title,
         targetQuantity: Value(item.targetQuantity),
@@ -163,7 +172,7 @@ class ChecklistController {
     await _db.upsertChecklistItem(
       ChecklistItemsCompanion.insert(
         clientId: item.clientId,
-        householdId: Value(item.householdId),
+        householdId: Value(householdId),
         templateClientId: item.templateClientId,
         title: item.title,
         targetQuantity: Value(item.targetQuantity),
@@ -184,7 +193,7 @@ class ChecklistController {
     return _db.upsertChecklistItem(
       ChecklistItemsCompanion.insert(
         clientId: item.clientId,
-        householdId: Value(item.householdId),
+        householdId: Value(householdId),
         templateClientId: item.templateClientId,
         title: item.title,
         targetQuantity: Value(item.targetQuantity),

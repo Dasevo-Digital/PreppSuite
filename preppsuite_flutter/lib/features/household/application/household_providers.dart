@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:uuid/uuid.dart';
 
@@ -73,6 +75,10 @@ class HouseholdProfileController extends AsyncNotifier<HouseholdProfile?> {
   /// follows and whom it plans for belong to the device, not to the
   /// shared data. [name] and [countryCode] replace this device's own
   /// where the caller has the other household's.
+  ///
+  /// Takes its turn with [forHousehold] (#397): a write for the old
+  /// household that lands after the re-stamp stays under the old id, out
+  /// of sight of every query, of the folder and of "delete household".
   Future<HouseholdProfile> moveInto(
     HouseholdProfile from,
     String id, {
@@ -83,18 +89,38 @@ class HouseholdProfileController extends AsyncNotifier<HouseholdProfile?> {
     final moved = from.copyWith(id: id, name: name, countryCode: countryCode);
     if (id == from.id) return moved;
 
-    final db = ref.read(appDatabaseProvider);
-    if (discardOwnRows) {
-      await deleteHouseholdPhotos(db, householdId: from.id);
-      await db.deleteHouseholdData(from.id);
-    } else {
-      // Without the re-stamp the rows do not merge — they stop being
-      // visible, because every query selects by this id.
-      await db.adoptHouseholdId(from: from.id, to: id);
-    }
-    await _persist(moved);
-    return moved;
+    return ref.read(householdTurnsProvider).take(() async {
+      final db = ref.read(appDatabaseProvider);
+      if (discardOwnRows) {
+        await deleteHouseholdPhotos(db, householdId: from.id);
+        await db.deleteHouseholdData(from.id);
+      } else {
+        // Without the re-stamp the rows do not merge — they stop being
+        // visible, because every query selects by this id.
+        await db.adoptHouseholdId(from: from.id, to: id);
+      }
+      await _persist(moved);
+      return moved;
+    });
   }
+
+  /// Runs [work] for the household [id], but only while it is this
+  /// device's household, and never beside a [moveInto] (#397).
+  ///
+  /// For writes that start on their own and name the household when they
+  /// start: the built-in checklists, which the gate writes as soon as a
+  /// profile appears. On first setup that is the profile the form has
+  /// just made, and joining a folder moves it a moment later. Run beside
+  /// the move, the lists written after the re-stamp stayed under the old
+  /// id; a tick on them was never published, "x of y" did not count them
+  /// and "delete household" left them behind. Now a move waits for work
+  /// under way, and work that comes after a move finds its household gone
+  /// and does nothing -- the new household gets its own run.
+  Future<void> forHousehold(String id, Future<void> Function() work) =>
+      ref.read(householdTurnsProvider).take(() async {
+        if (state.value?.id != id) return;
+        await work();
+      });
 
   /// Drops the profile, putting the app back on the setup screen.
   ///
@@ -154,3 +180,26 @@ final householdProfileProvider =
     AsyncNotifierProvider<HouseholdProfileController, HouseholdProfile?>(
       HouseholdProfileController.new,
     );
+
+/// One thing at a time between moving households and the writes that
+/// belong to one (#397); see [HouseholdProfileController.forHousehold].
+///
+/// A provider of its own rather than a field of the controller: the
+/// controller is built afresh whenever its provider is, and a queue that
+/// went with it would let a move and a write run side by side again.
+class HouseholdTurns {
+  Future<void> _last = Future.value();
+
+  /// Runs [work] once everything handed in before it has finished,
+  /// failed or not.
+  Future<T> take<T>(Future<T> Function() work) {
+    final previous = _last;
+    final done = Completer<void>();
+    _last = done.future;
+    return previous.then((_) => work()).whenComplete(done.complete);
+  }
+}
+
+final householdTurnsProvider = Provider<HouseholdTurns>(
+  (ref) => HouseholdTurns(),
+);

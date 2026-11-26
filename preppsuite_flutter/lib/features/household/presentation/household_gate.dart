@@ -1,3 +1,5 @@
+import 'dart:async' show unawaited;
+
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
@@ -76,10 +78,23 @@ class _HouseholdGateState extends ConsumerState<HouseholdGate> {
   /// Fire-and-forget on purpose: nothing on screen waits for it. The
   /// checklists arrive through a stream, so the tab fills in when the
   /// write lands.
+  ///
+  /// Through [HouseholdProfileController.forHousehold], though (#397): on
+  /// first setup the profile this sees is the one the form has just made,
+  /// and joining a folder moves it a moment later. Run beside that move,
+  /// the lists written after the re-stamp stayed under the old id.
   void _seedChecklists(String householdId) {
     if (_seededFor == householdId) return;
     _seededFor = householdId;
-    ChecklistSeeder(ref.read(appDatabaseProvider)).seed(householdId);
+    final db = ref.read(appDatabaseProvider);
+    unawaited(
+      ref
+          .read(householdProfileProvider.notifier)
+          .forHousehold(
+            householdId,
+            () => ChecklistSeeder(db).seed(householdId),
+          ),
+    );
   }
 
   @override

@@ -242,4 +242,80 @@ void main() {
       expect(await db.watchAllChecklistItems(householdId).first, isEmpty);
     });
   });
+
+  /// A built-in list is shown in every household and its lines by their
+  /// list alone, so a row left under an old household id looked like any
+  /// other. Written back under that id, a tick was never published, never
+  /// counted and outlived "delete household" (#397).
+  group('every write goes under the household on screen (#397)', () {
+    const stale = 'household-before-the-move';
+
+    Future<(ChecklistTemplate, ChecklistItem)> leftBehind() async {
+      await db.upsertChecklistTemplate(
+        ChecklistTemplatesCompanion.insert(
+          clientId: 'built-in',
+          householdId: const Value(stale),
+          title: 'Notgepäck',
+          category: 'general',
+          isBuiltIn: const Value(true),
+          updatedAt: DateTime.utc(2024),
+          dirty: const Value(false),
+        ),
+      );
+      await db.upsertChecklistItem(
+        ChecklistItemsCompanion.insert(
+          clientId: 'built-in-line',
+          householdId: const Value(stale),
+          templateClientId: 'built-in',
+          title: 'Taschenlampe',
+          updatedAt: DateTime.utc(2024),
+          dirty: const Value(false),
+        ),
+      );
+      final template = (await db.watchChecklistTemplates(householdId).first)
+          .singleWhere((t) => t.clientId == 'built-in');
+      final item = (await db.watchChecklistItems('built-in').first).single;
+      return (template, item);
+    }
+
+    test('a tick', () async {
+      final (_, item) = await leftBehind();
+
+      await controller.toggleItem(item);
+
+      final published = await db.dirtyChecklistItems(householdId);
+      expect(published.single.clientId, 'built-in-line');
+      expect(published.single.isChecked, isTrue);
+      expect(await db.watchAllChecklistItems(householdId).first, hasLength(1));
+    });
+
+    test('linking stock and deleting a line', () async {
+      final (_, item) = await leftBehind();
+
+      await controller.linkInventoryItem(item, 'water');
+      expect(
+        (await db.dirtyChecklistItems(householdId)).single.householdId,
+        householdId,
+      );
+
+      final linked = (await db.watchChecklistItems('built-in').first).single;
+      await controller.deleteItem(linked);
+      final deleted = (await db.dirtyChecklistItems(householdId)).single;
+      expect(deleted.deletedAt, isNotNull);
+    });
+
+    test('deleting the list', () async {
+      final (template, _) = await leftBehind();
+
+      await controller.deleteTemplate(template);
+
+      final templates = await db.dirtyChecklistTemplates(householdId);
+      expect(templates.single.clientId, 'built-in');
+      expect(templates.single.deletedAt, isNotNull);
+      expect(
+        (await db.dirtyChecklistItems(householdId)).single.deletedAt,
+        isNotNull,
+      );
+    });
+  });
 }

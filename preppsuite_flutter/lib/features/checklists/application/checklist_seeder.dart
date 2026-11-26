@@ -8,6 +8,11 @@ import 'built_in_templates.dart';
 /// Idempotent by `clientId`, so it runs on every launch without piling up
 /// duplicates — which is also what lets a device that adopted someone
 /// else's shared data run it harmlessly.
+///
+/// The app runs it through `HouseholdProfileController.forHousehold`
+/// (#397), never beside a move into another household: a list written
+/// after the re-stamp stays under the old id, and the next run skips it
+/// because it exists.
 class ChecklistSeeder {
   const ChecklistSeeder(this._db);
 
