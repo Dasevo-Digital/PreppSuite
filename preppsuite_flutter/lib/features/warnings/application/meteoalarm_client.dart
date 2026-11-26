@@ -1,3 +1,4 @@
+import 'dart:convert';
 import 'dart:isolate';
 
 import 'package:http/http.dart' as http;
@@ -132,7 +133,14 @@ class MeteoAlarmClient {
 
     return MeteoAlarmFeed(
       stamp: stamp,
-      warnings: await _parseElsewhere(response.body),
+      // UTF-8, as the feed says it is, whatever the header says (#396).
+      // `response.body` reads a response without a charset as Latin-1:
+      // "Kreis Lörrach" came out as "Kreis LÃ¶rrach", which no district
+      // in the warncell table is called, and the warning was left
+      // unplaced -- a warning for everybody.
+      warnings: await _parseElsewhere(
+        utf8.decode(response.bodyBytes, allowMalformed: true),
+      ),
     );
   }
 
