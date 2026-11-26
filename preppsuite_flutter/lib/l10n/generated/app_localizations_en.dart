@@ -2691,10 +2691,10 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get knowledgeIndexCompactHint =>
-      'This index uses an older format. Rebuilding it in compact form saves storage without changing normal full-text search.';
+      'This index uses an older format that does not rank matches: they appear in the order of the archive. After a rebuild the best matches come first. The index then needs more storage.';
 
   @override
-  String get knowledgeIndexCompactAction => 'Rebuild compact index';
+  String get knowledgeIndexCompactAction => 'Rebuild index';
 
   @override
   String knowledgeIndexArticles(int count) {

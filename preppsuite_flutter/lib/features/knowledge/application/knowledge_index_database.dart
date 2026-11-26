@@ -24,7 +24,18 @@ part 'knowledge_index_database.g.dart';
 class KnowledgeIndexDatabase extends _$KnowledgeIndexDatabase {
   /// The schema of each derived, per-ZIM full-text index.
   static const currentSchemaVersion = 1;
-  static const _compactFormat = 'fts5-terms-v2';
+
+  /// How every index begun now is laid out (#391): terms with their
+  /// positions, which is what lets bm25 rank.
+  static const _format = 'fts5-ranked-v3';
+
+  /// The layout of 23 September to #391: `detail=none`, much smaller and
+  /// with no ranking at all. bm25 counts how often a term occurs in an
+  /// article, and that layout keeps only whether it does; every rank was
+  /// 0, and `ORDER BY rank LIMIT 30` gave the first thirty matches in URL
+  /// order -- in a whole Wikipedia thirty early-alphabet articles that
+  /// mention "Trinkwasser" somewhere, and not the article itself.
+  static const _unrankedFormat = 'fts5-terms-v2';
 
   KnowledgeIndexDatabase(String archiveId)
     : super(LocalDatabaseEncryption.instance.open(fileNameFor(archiveId))) {
@@ -85,10 +96,11 @@ class KnowledgeIndexDatabase extends _$KnowledgeIndexDatabase {
     // afford. The trade is that snippets have to be built from the archive
     // when a result is shown.
     //
-    // `detail=none` and `columnsize=0` retain only the term-to-article map.
-    // We never render FTS snippets or run phrase/NEAR queries: results are
-    // opened from the archive itself. That makes a large archive's derived
-    // index materially smaller without dropping ordinary word search.
+    // `columnsize=0` leaves out each article's length, which costs bm25
+    // its length normalisation and nothing else: it still ranks by how
+    // often and how rarely the terms occur. The positions stay
+    // (`detail=full`, the default). `detail=none`, which dropped them as
+    // well, ranked nothing (#391).
     //
     // `remove_diacritics 2` so that "Notvorrate" finds "Notvorräte". SQLite
     // has no stemmer for these languages; the words are stemmed in Dart on
@@ -96,7 +108,7 @@ class KnowledgeIndexDatabase extends _$KnowledgeIndexDatabase {
     // docs/wissen-offline.md.
     await customStatement(
       "CREATE VIRTUAL TABLE IF NOT EXISTS articles USING fts5("
-      "text, content='', detail=none, columnsize=0, "
+      "text, content='', columnsize=0, "
       "tokenize='unicode61 remove_diacritics 2')",
     );
     await customStatement(
@@ -121,12 +133,16 @@ class KnowledgeIndexDatabase extends _$KnowledgeIndexDatabase {
 
   Future<bool> isComplete() async => await _state('complete') == '1';
 
-  /// Whether this was built with the compact term-only layout.
+  /// Whether this index orders its results by relevance.
   ///
-  /// Older indexes remain usable.  They are deliberately not replaced at
-  /// startup, because rebuilding an encyclopedia can take a long time and is
-  /// a decision the household should make explicitly.
-  Future<bool> isCompact() async => await _state('format') == _compactFormat;
+  /// False only for the term-only layout of [_unrankedFormat]. Every other
+  /// index ranks: the current one, and those from before that layout,
+  /// which carry no format at all and keep each article's length as well.
+  /// An unranked index still answers and is deliberately not replaced at
+  /// startup, because rebuilding an encyclopedia can take hours and is a
+  /// decision the household should make; the panel offers it.
+  Future<bool> ranksResults() async =>
+      await _state('format') != _unrankedFormat;
 
   /// Bytes consumed by the SQLite database and its current journal files.
   ///
@@ -174,7 +190,7 @@ class KnowledgeIndexDatabase extends _$KnowledgeIndexDatabase {
     await _setState('position', '0');
     await _setState('complete', '0');
     await _setState('stemmer', stemmer);
-    await _setState('format', _compactFormat);
+    await _setState('format', _format);
   }
 
   /// Writes a batch of articles and moves the resume point.
@@ -277,3 +293,63 @@ String? fts5QueryFor(String query, {String Function(String)? stem}) {
       '"${terms[i]}"${i == terms.length - 1 ? '*' : ''}',
   ].join(' ');
 }
+
+/// [hits] with the ones whose title is what was searched for moved to the
+/// front, in bm25's order otherwise (#391).
+///
+/// The article called "Trinkwasser" answers "Trinkwasser" more surely than
+/// any article that only says the word often, and the titles are at hand:
+/// every hit is read out of the archive to be shown anyway. First the
+/// titles that are exactly the query, then those that hold every word of
+/// it. Words are compared as the index compares them -- lower case,
+/// without accents, and through [stem], the stemmer the index was built
+/// with -- so "Notvorräte" puts "Notvorrat" first.
+List<T> titleMatchesFirst<T>(
+  List<T> hits,
+  String query, {
+  required String Function(T hit) titleOf,
+  String Function(String)? stem,
+}) {
+  List<String> words(String text) => [
+    for (final word in text.toLowerCase().split(_notAWord))
+      if (word.isNotEmpty) _unaccented(stem == null ? word : stem(word)),
+  ];
+
+  final terms = words(query);
+  if (terms.isEmpty) return hits;
+
+  int tier(T hit) {
+    final title = words(titleOf(hit));
+    if (title.join(' ') == terms.join(' ')) return 0;
+    return terms.every(title.contains) ? 1 : 2;
+  }
+
+  final tiers = [for (final hit in hits) tier(hit)];
+  final order = List<int>.generate(hits.length, (i) => i)
+    ..sort((a, b) {
+      final byTier = tiers[a].compareTo(tiers[b]);
+      return byTier != 0 ? byTier : a.compareTo(b);
+    });
+  return [for (final i in order) hits[i]];
+}
+
+final _notAWord = RegExp(r'[^\p{L}\p{N}]+', unicode: true);
+
+/// [word] without the accents FTS5's `remove_diacritics` drops too, for
+/// the letters of the four languages the index stems.
+String _unaccented(String word) {
+  final out = StringBuffer();
+  for (final rune in word.runes) {
+    final letter = String.fromCharCode(rune);
+    out.write(_plainLetters[letter] ?? letter);
+  }
+  return out.toString();
+}
+
+const _plainLetters = {
+  'à': 'a', 'á': 'a', 'â': 'a', 'ã': 'a', 'ä': 'a', 'å': 'a', //
+  'ç': 'c', 'è': 'e', 'é': 'e', 'ê': 'e', 'ë': 'e', //
+  'ì': 'i', 'í': 'i', 'î': 'i', 'ï': 'i', 'ñ': 'n', //
+  'ò': 'o', 'ó': 'o', 'ô': 'o', 'õ': 'o', 'ö': 'o', //
+  'ù': 'u', 'ú': 'u', 'û': 'u', 'ü': 'u', 'ý': 'y', 'ÿ': 'y', //
+};

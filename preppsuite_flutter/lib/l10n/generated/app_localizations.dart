@@ -4531,13 +4531,13 @@ abstract class AppLocalizations {
   /// No description provided for @knowledgeIndexCompactHint.
   ///
   /// In en, this message translates to:
-  /// **'This index uses an older format. Rebuilding it in compact form saves storage without changing normal full-text search.'**
+  /// **'This index uses an older format that does not rank matches: they appear in the order of the archive. After a rebuild the best matches come first. The index then needs more storage.'**
   String get knowledgeIndexCompactHint;
 
   /// No description provided for @knowledgeIndexCompactAction.
   ///
   /// In en, this message translates to:
-  /// **'Rebuild compact index'**
+  /// **'Rebuild index'**
   String get knowledgeIndexCompactAction;
 
   /// No description provided for @knowledgeIndexArticles.

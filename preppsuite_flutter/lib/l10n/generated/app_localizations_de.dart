@@ -2706,10 +2706,10 @@ class AppLocalizationsDe extends AppLocalizations {
 
   @override
   String get knowledgeIndexCompactHint =>
-      'Dieser Index stammt aus einem älteren Format. Ein kompakter Neuaufbau spart Speicherplatz, ohne die normale Volltextsuche zu verändern.';
+      'Dieser Index stammt aus einem älteren Format, das Treffer nicht nach Relevanz ordnet: Sie stehen in der Reihenfolge des Archivs. Nach einem Neuaufbau stehen die passendsten Artikel oben. Der Index braucht dann mehr Speicherplatz.';
 
   @override
-  String get knowledgeIndexCompactAction => 'Kompakt neu aufbauen';
+  String get knowledgeIndexCompactAction => 'Index neu aufbauen';
 
   @override
   String knowledgeIndexArticles(int count) {

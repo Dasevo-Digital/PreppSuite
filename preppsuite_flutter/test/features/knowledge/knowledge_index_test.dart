@@ -3,6 +3,7 @@ import 'dart:io';
 
 import 'package:drift/native.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:preppsuite_flutter/features/knowledge/application/german_stemmer.dart';
 import 'package:preppsuite_flutter/features/knowledge/application/knowledge_index_database.dart';
 import 'package:preppsuite_flutter/features/knowledge/application/knowledge_indexer.dart';
 import 'package:preppsuite_flutter/features/knowledge/application/zim_archive.dart';
@@ -282,13 +283,118 @@ void main() {
     });
   });
 
-  group('resuming and discarding', () {
-    test('a newly built index uses the compact term-only layout', () async {
-      await index.beginIndex('test', 1);
+  group('ranking (#391)', () {
+    test('the article that says it most often comes first', () async {
+      // The term-only layout (`detail=none`) gave every row rank 0, and
+      // `ORDER BY rank LIMIT` then answered in the archive's own order --
+      // URL order, so "Anton" before "Zebra" whatever either said.
+      final archive = await archiveWith([
+        article(
+          'Anton',
+          '<p>Ein langer Text über vieles: Brot, Butter, Kerzen, Decken, '
+              'ein Radio, und einmal auch Trinkwasser.</p>',
+        ),
+        article(
+          'Zebra',
+          '<p>Trinkwasser abkochen. Trinkwasser lagern. Trinkwasser '
+              'tauschen. Trinkwasser.</p>',
+        ),
+      ]);
 
-      expect(await index.isCompact(), isTrue);
+      final indexer = KnowledgeIndexer(archive: archive, index: index);
+      await indexer.run(await indexer.plan(), fingerprint: 'test');
+
+      expect((await hits(archive, 'Trinkwasser')).map((e) => e.title), [
+        'Zebra',
+        'Anton',
+      ]);
     });
 
+    test('a newly built index ranks its results', () async {
+      await index.beginIndex('test', 1);
+
+      expect(await index.ranksResults(), isTrue);
+    });
+
+    test('an index in the term-only layout is known not to rank', () async {
+      // Built between 23 September and #391. It still answers, so it is
+      // kept; the panel offers to build it again.
+      await index.beginIndex('test', 1);
+      await index.customStatement(
+        "UPDATE index_state SET value = 'fts5-terms-v2' WHERE key = 'format'",
+      );
+
+      expect(await index.ranksResults(), isFalse);
+    });
+
+    test('an index from before any format was written still ranks', () async {
+      // Those kept every position and every article's length. Rebuilding
+      // one would cost hours and change nothing worth having.
+      await index.beginIndex('test', 1);
+      await index.customStatement(
+        "DELETE FROM index_state WHERE key = 'format'",
+      );
+
+      expect(await index.ranksResults(), isTrue);
+    });
+  });
+
+  group('title matches first (#391)', () {
+    List<String> ordered(
+      List<String> titles,
+      String query, {
+      String Function(String)? stem,
+    }) => titleMatchesFirst(
+      titles,
+      query,
+      titleOf: (title) => title,
+      stem: stem,
+    );
+
+    test('the article called what was asked for comes first', () {
+      expect(
+        ordered([
+          'Wasserversorgung',
+          'Trinkwasser in Deutschland',
+          'Trinkwasser',
+          'Brunnen',
+        ], 'trinkwasser'),
+        [
+          'Trinkwasser',
+          'Trinkwasser in Deutschland',
+          'Wasserversorgung',
+          'Brunnen',
+        ],
+      );
+    });
+
+    test('every word has to be in the title, in any case', () {
+      expect(
+        ordered([
+          'Hilfe',
+          'Kurs für Erste Hilfe',
+          'Erste Hilfe',
+        ], 'erste hilfe'),
+        ['Erste Hilfe', 'Kurs für Erste Hilfe', 'Hilfe'],
+      );
+    });
+
+    test('words are compared the way the index compares them', () {
+      // Stemmed with the index's own stemmer and without accents.
+      expect(
+        ordered(['Lagerung', 'Notvorrat'], 'Notvorräte', stem: germanStem),
+        ['Notvorrat', 'Lagerung'],
+      );
+      expect(ordered(['Kaffee', 'Café'], 'cafe'), ['Café', 'Kaffee']);
+    });
+
+    test('without a title match the ranking is left as it was', () {
+      expect(ordered(['C', 'A', 'B'], 'Wasser'), ['C', 'A', 'B']);
+      expect(ordered(['C', 'A'], '--'), ['C', 'A']);
+    });
+  });
+
+  group('resuming and discarding', () {
     test('an interrupted run picks up where it stopped', () async {
       final archive = await archiveWith([
         for (var i = 0; i < 6; i++)

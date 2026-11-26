@@ -158,6 +158,15 @@ anderen Sprachen werden ungestemmt indexiert. Ein englisches Archiv, das
 vor 2.5.8 indexiert wurde, sagt „keiner" und wird weiter ungestemmt
 durchsucht; wer die Wortstämme dort will, baut den Index neu auf.
 
+**Die Treffer stehen nach Relevanz.** FTS5 ordnet sie mit bm25: Oben
+steht, wo die gesuchten Wörter oft vorkommen, und ein seltenes Wort zählt
+mehr als ein häufiges. Davor kommen die Artikel, deren Titel die Suche
+ist oder alle ihre Wörter enthält (#391). Ein Index, der zwischen dem
+23. September und #391 entstand, weiß nur, ob ein Wort in einem Artikel
+vorkommt, nicht wie oft, und ordnet deshalb gar nicht: Die Treffer kamen
+in der Reihenfolge des Archivs. Er sucht weiter, und die App bietet an,
+ihn neu aufzubauen; der neue braucht mehr Platz.
+
 Der Aufbau läuft einmal, mit Fortschrittsanzeige, und lässt sich jederzeit
 anhalten – was schon drin ist, bleibt durchsuchbar, und beim nächsten Mal
 geht es dort weiter. Gelesen wird dabei in Block-Reihenfolge, nicht in

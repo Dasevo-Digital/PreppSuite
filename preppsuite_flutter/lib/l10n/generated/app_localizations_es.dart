@@ -2707,10 +2707,10 @@ class AppLocalizationsEs extends AppLocalizations {
 
   @override
   String get knowledgeIndexCompactHint =>
-      'Este índice usa un formato antiguo. Volver a crearlo en forma compacta ahorra espacio sin cambiar la búsqueda normal de texto completo.';
+      'Este índice usa un formato antiguo que no ordena los resultados por relevancia: aparecen en el orden del archivo. Tras volver a crearlo, los artículos más adecuados aparecen primero. El índice ocupará entonces más espacio.';
 
   @override
-  String get knowledgeIndexCompactAction => 'Volver a crear el índice compacto';
+  String get knowledgeIndexCompactAction => 'Volver a crear el índice';
 
   @override
   String knowledgeIndexArticles(int count) {

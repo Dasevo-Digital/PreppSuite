@@ -194,15 +194,15 @@ class KnowledgeIndexPanel extends ConsumerWidget {
         ),
         style: theme.textTheme.bodySmall,
       ),
-      if (!state.compact) ...[
+      if (!state.ranked) ...[
         const SizedBox(height: 10),
         Text(l10n.knowledgeIndexCompactHint, style: theme.textTheme.bodySmall),
         const SizedBox(height: 4),
         Align(
           alignment: Alignment.centerLeft,
           child: TextButton.icon(
-            onPressed: controller.rebuildCompact,
-            icon: const Icon(Icons.compress_outlined),
+            onPressed: controller.rebuild,
+            icon: const Icon(Icons.sort),
             label: Text(l10n.knowledgeIndexCompactAction),
           ),
         ),

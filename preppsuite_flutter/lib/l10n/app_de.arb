@@ -824,8 +824,8 @@
       }
     }
   },
-  "knowledgeIndexCompactHint": "Dieser Index stammt aus einem älteren Format. Ein kompakter Neuaufbau spart Speicherplatz, ohne die normale Volltextsuche zu verändern.",
-  "knowledgeIndexCompactAction": "Kompakt neu aufbauen",
+  "knowledgeIndexCompactHint": "Dieser Index stammt aus einem älteren Format, das Treffer nicht nach Relevanz ordnet: Sie stehen in der Reihenfolge des Archivs. Nach einem Neuaufbau stehen die passendsten Artikel oben. Der Index braucht dann mehr Speicherplatz.",
+  "knowledgeIndexCompactAction": "Index neu aufbauen",
   "knowledgeIndexArticles": "{count} Artikel in dieser Datei.",
   "knowledgeIndexLargeWarning": "Das sind viele. Rechne mit einigen Stunden und mit mehreren Gigabyte auf der Platte. Anhalten geht jederzeit, das Angefangene bleibt.",
   "knowledgeIndexScanning": "Artikel werden gezählt: {done} von {total}.",

@@ -8,6 +8,7 @@ import '../../maps/application/map_archive_access.dart' show openMapArchive;
 import 'knowledge_bookmark_store.dart';
 import 'knowledge_index_database.dart';
 import 'knowledge_indexer.dart';
+import 'stemmers.dart';
 import 'zim_archive.dart';
 import 'zim_http_server.dart';
 import 'zim_store.dart';
@@ -452,7 +453,7 @@ class KnowledgeIndexState {
     this.progress,
     this.articleCount,
     this.storageBytes = 0,
-    this.compact = true,
+    this.ranked = true,
   });
 
   KnowledgeIndexState copyWith({
@@ -460,14 +461,14 @@ class KnowledgeIndexState {
     IndexProgress? progress,
     int? articleCount,
     int? storageBytes,
-    bool? compact,
+    bool? ranked,
   }) {
     return KnowledgeIndexState(
       status: status ?? this.status,
       progress: progress ?? this.progress,
       articleCount: articleCount ?? this.articleCount,
       storageBytes: storageBytes ?? this.storageBytes,
-      compact: compact ?? this.compact,
+      ranked: ranked ?? this.ranked,
     );
   }
 
@@ -482,8 +483,9 @@ class KnowledgeIndexState {
   /// Disk use including SQLite's write-ahead log, if one exists.
   final int storageBytes;
 
-  /// A legacy index can still answer queries but lacks the compact layout.
-  final bool compact;
+  /// False for an index in the layout that cannot rank (#391). It still
+  /// answers, in the archive's order, and the panel offers to rebuild it.
+  final bool ranked;
 
   bool get isUsable =>
       status == KnowledgeIndexStatus.ready ||
@@ -533,7 +535,7 @@ class KnowledgeIndexController extends AsyncNotifier<KnowledgeIndexState> {
             ),
       articleCount: total,
       storageBytes: await index.storageBytes(archiveId),
-      compact: await index.isCompact(),
+      ranked: await index.ranksResults(),
     );
   }
 
@@ -576,7 +578,7 @@ class KnowledgeIndexController extends AsyncNotifier<KnowledgeIndexState> {
           progress: progress,
           articleCount: current?.articleCount,
           storageBytes: current?.storageBytes ?? 0,
-          compact: current?.compact ?? true,
+          ranked: current?.ranked ?? true,
         ),
       );
     }
@@ -587,7 +589,7 @@ class KnowledgeIndexController extends AsyncNotifier<KnowledgeIndexState> {
         status: KnowledgeIndexStatus.running,
         articleCount: current?.articleCount,
         storageBytes: current?.storageBytes ?? 0,
-        compact: current?.compact ?? true,
+        ranked: current?.ranked ?? true,
       ),
     );
 
@@ -626,8 +628,8 @@ class KnowledgeIndexController extends AsyncNotifier<KnowledgeIndexState> {
     state = const AsyncData(KnowledgeIndexState());
   }
 
-  /// Rebuilds an older, larger index with the current compact FTS layout.
-  Future<void> rebuildCompact() async {
+  /// Builds an index in an outdated layout afresh, in the current one.
+  Future<void> rebuild() async {
     await discard();
     if (!ref.mounted) return;
     await buildIndex();
@@ -665,10 +667,17 @@ final knowledgeFullTextProvider = FutureProvider.autoDispose
       final index = ref.watch(knowledgeIndexDatabaseProvider);
       if (index == null) return const [];
 
-      return [
-        for (final entryIndex in await index.search(query.trim()))
+      final asked = query.trim();
+      final hits = [
+        for (final entryIndex in await index.search(asked))
           await archive.entryAt(entryIndex),
       ];
+      return titleMatchesFirst(
+        hits,
+        asked,
+        titleOf: (entry) => entry.title,
+        stem: stemmerNamed(await index.stemmerName()),
+      );
     });
 
 /// Titles matching [query], or an empty list while nothing is configured.
