@@ -37,17 +37,45 @@ class KnowledgeIndexDatabase extends _$KnowledgeIndexDatabase {
   /// mention "Trinkwasser" somewhere, and not the article itself.
   static const _unrankedFormat = 'fts5-terms-v2';
 
-  KnowledgeIndexDatabase(String archiveId)
+  KnowledgeIndexDatabase(String this.archiveId)
     : super(LocalDatabaseEncryption.instance.open(fileNameFor(archiveId))) {
     OpenDatabases.track(this);
+    _register();
   }
 
-  KnowledgeIndexDatabase.forTesting(super.executor);
+  /// [archiveId] for a test that needs [deleteFor] to find this one open.
+  KnowledgeIndexDatabase.forTesting(super.executor, {this.archiveId}) {
+    _register();
+  }
 
+  /// The archive this index belongs to; null only in a test.
+  final String? archiveId;
+  Future<void>? _closing;
+
+  /// The index databases open in this isolate, by archive, so that one
+  /// about to be deleted is closed first (#408).
+  static final _open = <String, Set<KnowledgeIndexDatabase>>{};
+
+  void _register() {
+    final id = archiveId;
+    if (id != null) (_open[id] ??= {}).add(this);
+  }
+
+  /// Closes once, however often it is asked: by [deleteFor] and then by
+  /// the provider that opened it.
   @override
-  Future<void> close() {
+  Future<void> close() => _closing ??= _close();
+
+  Future<void> _close() async {
     OpenDatabases.untrack(this);
-    return super.close();
+    try {
+      await super.close();
+    } finally {
+      final id = archiveId;
+      final open = id == null ? null : _open[id];
+      open?.remove(this);
+      if (open != null && open.isEmpty) _open.remove(id);
+    }
   }
 
   /// One file per archive, so switching between them keeps both indexes.
@@ -67,8 +95,19 @@ class KnowledgeIndexDatabase extends _$KnowledgeIndexDatabase {
   /// again, and it is the largest thing the app writes. The native executor
   /// puts it in the app-private directory under the name above; the two
   /// journal files beside it go with it.
-  static Future<void> deleteFor(String archiveId) async {
-    final base = await _databasePath(archiveId);
+  ///
+  /// Closed first, if it is still open (#408). Windows does not delete an
+  /// open file, and the index of the archive just removed was always
+  /// still open: the deletion failed without a word and gigabytes stayed
+  /// for good. What still cannot go is left to [deleteAllBut].
+  static Future<void> deleteFor(
+    String archiveId, {
+    Directory? directory,
+  }) async {
+    for (final database in [...?_open[archiveId]]) {
+      await database.close();
+    }
+    final base = await _databasePath(archiveId, directory: directory);
 
     for (final path in [base, '$base-wal', '$base-shm']) {
       final file = File(path);
@@ -76,9 +115,62 @@ class KnowledgeIndexDatabase extends _$KnowledgeIndexDatabase {
     }
   }
 
-  static Future<String> _databasePath(String archiveId) async {
-    final directory = await appDatabaseDirectory();
-    return '${directory.path}${Platform.pathSeparator}'
+  /// Deletes every index whose archive is not one of [archiveIds] (#408).
+  ///
+  /// For what [deleteFor] could not remove -- a file Windows still held,
+  /// an app ended before the deletion ran. Nothing names such an index any
+  /// more, so without this it would stay as long as the app is installed.
+  /// Only the index files themselves, by their exact names; none that is
+  /// open, and nothing while the databases are being encrypted, which
+  /// renames them. [archiveIds] is asked again for every file, so that an
+  /// archive added meanwhile keeps its index.
+  static Future<void> deleteAllBut(
+    Set<String> Function() archiveIds, {
+    Directory? directory,
+  }) async {
+    final encryption = LocalDatabaseEncryption.instance;
+    if (encryption.isMigrating) return;
+    // Where the indexes are opened. Before that is settled nothing can
+    // have opened one, and there is nothing to look at.
+    final Directory folder;
+    if (directory != null) {
+      folder = directory;
+    } else if (encryption.isInitialized) {
+      folder = encryption.databaseFile(fileNameFor(legacyArchiveId)).parent;
+    } else {
+      return;
+    }
+    await for (final entity in folder.list(followLinks: false)) {
+      if (entity is! File) continue;
+      final name = entity.uri.pathSegments.last;
+      final base = _indexFile.firstMatch(name)?.group(1);
+      if (base == null) continue;
+      final kept = {
+        for (final id in {...archiveIds(), ..._open.keys}) fileNameFor(id),
+      };
+      if (kept.contains(base) || LocalDatabaseEncryption.instance.isMigrating) {
+        continue;
+      }
+      try {
+        await entity.delete();
+      } on FileSystemException {
+        // Still held somewhere; the next start tries again.
+      }
+    }
+  }
+
+  /// `preppsuite_knowledge.sqlite`, `preppsuite_knowledge_<id>.sqlite`
+  /// and their journals. Ids are hex (`ZimStore.newId`).
+  static final _indexFile = RegExp(
+    r'^(preppsuite_knowledge(?:_[0-9a-f]+)?)\.sqlite(?:-wal|-shm)?$',
+  );
+
+  static Future<String> _databasePath(
+    String archiveId, {
+    Directory? directory,
+  }) async {
+    final folder = directory ?? await appDatabaseDirectory();
+    return '${folder.path}${Platform.pathSeparator}'
         '${fileNameFor(archiveId)}.sqlite';
   }
 

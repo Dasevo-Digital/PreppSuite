@@ -9,6 +9,8 @@ import 'package:preppsuite_flutter/features/knowledge/application/german_stemmer
 import 'package:preppsuite_flutter/features/knowledge/application/knowledge_index_database.dart';
 import 'package:preppsuite_flutter/features/knowledge/application/knowledge_indexer.dart';
 import 'package:preppsuite_flutter/features/knowledge/application/zim_archive.dart';
+import 'package:preppsuite_flutter/features/knowledge/application/zim_store.dart'
+    show legacyArchiveId;
 import 'package:preppsuite_flutter/features/maps/application/pmtiles_archive.dart'
     show ByteRangeSource, FileByteRangeSource;
 
@@ -507,6 +509,94 @@ void main() {
         isTrue,
       );
       expect(await index.isComplete(), isTrue);
+    });
+  });
+
+  group('the index of an archive taken out of the library (#408)', () {
+    late Directory folder;
+    setUp(() => folder = Directory('${workspace.path}/db')..createSync());
+
+    Set<String> names() => {
+      for (final file in folder.listSync()) file.uri.pathSegments.last,
+    };
+
+    test('is closed before its file goes', () async {
+      // Windows does not delete an open file, and the index of the
+      // archive just removed was always still open: the deletion failed
+      // without a word and gigabytes stayed for good.
+      final file = File('${folder.path}/preppsuite_knowledge_abc.sqlite');
+      final open = KnowledgeIndexDatabase.forTesting(
+        NativeDatabase(file),
+        archiveId: 'abc',
+      );
+      await open.beginIndex('x', 1);
+
+      await KnowledgeIndexDatabase.deleteFor('abc', directory: folder);
+
+      expect(file.existsSync(), isFalse);
+      await expectLater(open.indexedArchive(), throwsA(anything));
+      // The provider that opened it closes it again; that is harmless.
+      await open.close();
+    });
+
+    test('what was left behind goes at the next start', () async {
+      for (final name in const [
+        'preppsuite_knowledge_aaa.sqlite',
+        'preppsuite_knowledge_aaa.sqlite-wal',
+        'preppsuite_knowledge_bbb.sqlite',
+        'preppsuite_knowledge_bbb.sqlite-shm',
+        'preppsuite_knowledge.sqlite',
+        'preppsuite.sqlite',
+        'preppsuite_personal_documents.sqlite',
+        'preppsuite_knowledge_ccc.sqlite.locked-2026-11-26T10-00-00Z',
+        'preppsuite_knowledge_ddd.sqlite.encrypting',
+      ]) {
+        File('${folder.path}/$name').writeAsStringSync('x');
+      }
+
+      await KnowledgeIndexDatabase.deleteAllBut(
+        () => {'aaa'},
+        directory: folder,
+      );
+
+      // Only index files, by their exact names: the household, the
+      // documents and what the encryption keeps aside stay.
+      expect(names(), {
+        'preppsuite_knowledge_aaa.sqlite',
+        'preppsuite_knowledge_aaa.sqlite-wal',
+        'preppsuite.sqlite',
+        'preppsuite_personal_documents.sqlite',
+        'preppsuite_knowledge_ccc.sqlite.locked-2026-11-26T10-00-00Z',
+        'preppsuite_knowledge_ddd.sqlite.encrypting',
+      });
+    });
+
+    test('the carried-over archive keeps its unsuffixed index', () async {
+      File('${folder.path}/preppsuite_knowledge.sqlite').writeAsStringSync('x');
+
+      await KnowledgeIndexDatabase.deleteAllBut(
+        () => {legacyArchiveId},
+        directory: folder,
+      );
+
+      expect(names(), {'preppsuite_knowledge.sqlite'});
+    });
+
+    test('an index still open is not touched', () async {
+      final file = File('${folder.path}/preppsuite_knowledge_eee.sqlite');
+      final open = KnowledgeIndexDatabase.forTesting(
+        NativeDatabase(file),
+        archiveId: 'eee',
+      );
+      addTearDown(open.close);
+      await open.beginIndex('x', 1);
+
+      await KnowledgeIndexDatabase.deleteAllBut(
+        () => const {},
+        directory: folder,
+      );
+
+      expect(file.existsSync(), isTrue);
     });
   });
 

@@ -221,6 +221,20 @@ class ZimStore {
     return (archives: archives, selectedId: prefs.getString(_selectedKey));
   }
 
+  /// False when a library is stored and cannot be read. [library] answers
+  /// an empty one then, which is not the same as having none: it says
+  /// nothing about which indexes still belong to an archive.
+  Future<bool> libraryIsReadable() async {
+    final prefs = await SharedPreferences.getInstance();
+    final raw = prefs.getString(_libraryKey);
+    if (raw == null) return true;
+    try {
+      return jsonDecode(raw) is List;
+    } on FormatException {
+      return false;
+    }
+  }
+
   /// An archive that leaves the library, or moves to another handle,
   /// gives its grant back where nothing else remembers it (#410).
   Future<void> save(

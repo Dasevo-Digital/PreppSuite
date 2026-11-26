@@ -100,6 +100,16 @@ class KnowledgeController extends AsyncNotifier<KnowledgeState> {
     ref.onDispose(memory.dispose);
 
     final stored = await _store.library();
+    // Not waited for: the library opens as it always did. What is deleted
+    // belongs to no archive in the library as it is when the file comes up.
+    unawaited(
+      _deleteOrphanedIndexes(
+        () => {
+          for (final archive in state.value?.library ?? stored.archives)
+            archive.id,
+        },
+      ),
+    );
     if (stored.archives.isEmpty) return const KnowledgeState();
 
     // A selection that names nothing falls back to the first entry rather
@@ -261,7 +271,8 @@ class KnowledgeController extends AsyncNotifier<KnowledgeState> {
   /// the app never owned it.
   ///
   /// Its full-text index is dropped, because nothing would ever reach it
-  /// again and it is the largest thing the app writes.
+  /// again and it is the largest thing the app writes -- once the library
+  /// has moved off it, so that nothing reads it any more (#408).
   Future<void> remove(String id) async {
     final current = state.value ?? const KnowledgeState();
     final library = [
@@ -270,8 +281,18 @@ class KnowledgeController extends AsyncNotifier<KnowledgeState> {
     ];
     if (library.length == current.library.length) return;
 
-    unawaited(_discardIndexFor(id));
+    try {
+      await _removeFrom(current, library, id);
+    } finally {
+      unawaited(_discardIndexFor(id));
+    }
+  }
 
+  Future<void> _removeFrom(
+    KnowledgeState current,
+    List<StoredArchive> library,
+    String id,
+  ) async {
     if (library.isEmpty) {
       await _store.save(const [], selectedId: null);
       _closeCurrent();
@@ -309,12 +330,13 @@ class KnowledgeController extends AsyncNotifier<KnowledgeState> {
 
   /// Removes every archive from the library.
   Future<void> forget() async {
-    for (final archive in state.value?.library ?? const <StoredArchive>[]) {
-      unawaited(_discardIndexFor(archive.id));
-    }
+    final gone = state.value?.library ?? const <StoredArchive>[];
     await _store.save(const [], selectedId: null);
     _closeCurrent();
     state = const AsyncData(KnowledgeState());
+    for (final archive in gone) {
+      unawaited(_discardIndexFor(archive.id));
+    }
   }
 
   /// Opens [entry], and only on success writes the library and swaps the
@@ -360,6 +382,19 @@ class KnowledgeController extends AsyncNotifier<KnowledgeState> {
     if (previousServer != null) unawaited(previousServer.close());
     if (previousArchive != null) unawaited(previousArchive.close());
     return null;
+  }
+
+  /// What [KnowledgeIndexDatabase.deleteFor] left behind, at start (#408).
+  Future<void> _deleteOrphanedIndexes(Set<String> Function() ids) async {
+    try {
+      // An unreadable library reads as an empty one, which would make
+      // every index an orphan.
+      if (!await _store.libraryIsReadable()) return;
+      await KnowledgeIndexDatabase.deleteAllBut(ids);
+    } on Object {
+      // No database folder to be had, or one that cannot be listed. The
+      // next start tries again.
+    }
   }
 
   Future<void> _discardIndexFor(String id) async {
