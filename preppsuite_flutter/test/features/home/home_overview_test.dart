@@ -1,5 +1,6 @@
 import 'package:flutter_test/flutter_test.dart';
 import 'package:preppsuite_flutter/features/home/application/home_overview.dart';
+import 'package:preppsuite_flutter/features/warnings/application/warning_region_filter.dart';
 import 'package:preppsuite_flutter/local_db/database.dart';
 import 'package:preppsuite_flutter/model/categories.dart';
 
@@ -284,6 +285,99 @@ void main() {
       expect(overview.total, 1);
       expect(overview.done, 1);
       expect(overview.progress, 1);
+    });
+  });
+
+  group('the warning the card names (#394)', () {
+    // Braunschweig, by its district.
+    const filter = WarningRegionFilter(
+      countryCode: 'DE',
+      ownRegionKey: '031010000000',
+    );
+    final noon = DateTime.utc(2026, 11, 26, 12);
+
+    Warning warning(
+      String id, {
+      required String severity,
+      String? regionKey = '03101',
+      DateTime? sent,
+      DateTime? effective,
+    }) => Warning(
+      source: 'bbk',
+      externalId: id,
+      countryCode: 'DE',
+      regionKey: regionKey,
+      severity: severity,
+      eventType: id,
+      headline: id,
+      effective: effective ?? noon.subtract(const Duration(hours: 2)),
+      sent: sent ?? noon.subtract(const Duration(hours: 2)),
+      updatedAt: noon,
+      notified: false,
+    );
+
+    test('the most severe, not the most recently sent', () {
+      // The database hands them over newest first.
+      final named = overviewWarning(
+        active: [
+          warning('Frost', severity: 'minor', sent: noon),
+          warning('Orkan', severity: 'extreme'),
+        ],
+        filter: filter,
+        now: noon,
+      );
+      expect(named?.headline, 'Orkan');
+    });
+
+    test('the same one as the banner', () {
+      // An extreme one that has not begun yet is in the list but not on
+      // the banner, and the card follows the banner.
+      final named = overviewWarning(
+        active: [
+          warning(
+            'Morgen',
+            severity: 'extreme',
+            sent: noon,
+            effective: noon.add(const Duration(hours: 20)),
+          ),
+          warning('Jetzt', severity: 'moderate'),
+        ],
+        filter: filter,
+        now: noon,
+      );
+      expect(named?.headline, 'Jetzt');
+    });
+
+    test('without one on the banner, the most severe relevant one', () {
+      final named = overviewWarning(
+        active: [
+          warning(
+            'Glatteis',
+            severity: 'minor',
+            sent: noon,
+            effective: noon.add(const Duration(hours: 4)),
+          ),
+          warning(
+            'Sturm',
+            severity: 'severe',
+            effective: noon.add(const Duration(hours: 6)),
+          ),
+        ],
+        filter: filter,
+        now: noon,
+      );
+      expect(named?.headline, 'Sturm');
+    });
+
+    test('one for somebody else is never named', () {
+      expect(
+        overviewWarning(
+          active: [warning('Bayern', severity: 'extreme', regionKey: '09162')],
+          filter: filter,
+          now: noon,
+        ),
+        isNull,
+      );
     });
   });
 }

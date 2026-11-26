@@ -759,7 +759,16 @@ class _WarningCard extends ConsumerWidget {
             ),
       child: mine.isNotEmpty
           ? Text(
-              warningTitle(mine.first, l10n),
+              // The most severe, as the banner names it (#394).
+              warningTitle(
+                overviewWarning(
+                      active: active,
+                      filter: profile.warningFilter,
+                      now: now,
+                    ) ??
+                    mine.first,
+                l10n,
+              ),
               style: theme.textTheme.bodyMedium,
             )
           : unheard

@@ -59,20 +59,24 @@ void main() {
     dirty: false,
   );
 
-  Warning warning({String headline = 'Hochwasser', String? regionKey}) =>
-      Warning(
-        source: 'bbk',
-        externalId: 'w1',
-        countryCode: 'DE',
-        regionKey: regionKey,
-        severity: 'severe',
-        eventType: 'Flood',
-        headline: headline,
-        effective: now,
-        sent: now,
-        updatedAt: now,
-        notified: false,
-      );
+  Warning warning({
+    String headline = 'Hochwasser',
+    String? regionKey,
+    String severity = 'severe',
+    DateTime? sent,
+  }) => Warning(
+    source: 'bbk',
+    externalId: headline,
+    countryCode: 'DE',
+    regionKey: regionKey,
+    severity: severity,
+    eventType: 'Flood',
+    headline: headline,
+    effective: now,
+    sent: sent ?? now,
+    updatedAt: now,
+    notified: false,
+  );
 
   Future<List<ShellDestination>> pumpOverview(
     WidgetTester tester, {
@@ -217,6 +221,28 @@ void main() {
     );
 
     expect(find.text('Hochwasser Leine'), findsOneWidget);
+  });
+
+  testWidgets('the card names the most severe, as the banner does (#394)', (
+    tester,
+  ) async {
+    // Newest first from the database: the banner said "Extrem: Orkan",
+    // the card under it the minor frost sent a minute later.
+    await pumpOverview(
+      tester,
+      warnings: [
+        warning(headline: 'Frost', regionKey: '03241', severity: 'minor'),
+        warning(
+          headline: 'Orkan',
+          regionKey: '03241',
+          severity: 'extreme',
+          sent: now.subtract(const Duration(minutes: 1)),
+        ),
+      ],
+    );
+
+    expect(find.text('Orkan'), findsOneWidget);
+    expect(find.text('Frost'), findsNothing);
   });
 
   testWidgets('a warning somewhere else is not counted here', (tester) async {

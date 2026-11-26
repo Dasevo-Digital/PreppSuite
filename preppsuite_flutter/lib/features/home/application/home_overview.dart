@@ -10,6 +10,8 @@ import '../../../local_db/database.dart';
 import '../../../model/categories.dart';
 import '../../inventory/application/inventory_category_l10n.dart';
 import '../../inventory/application/stock_today.dart';
+import '../../warnings/application/warning_region_filter.dart';
+import '../../warnings/application/warning_relevance.dart';
 
 /// The state of the stores, in the terms the overview shows them.
 class InventoryOverview {
@@ -175,4 +177,41 @@ ChecklistOverview summarizeChecklists({
     listsComplete: listsComplete,
     lists: preparation.length,
   );
+}
+
+/// The warning the overview's warning card names, out of [active]: the
+/// one the banner shows, and otherwise the most severe relevant one.
+///
+/// The card named the first of the list, which the database sorts by
+/// when a warning was sent, so the banner across the top read "Extrem:
+/// Orkanböen" and the card under it "Frost", minor, issued a minute later
+/// (#394). Where the banner shows anything, the card names the same; where
+/// it does not -- a warning that has not begun yet, or one for another
+/// district of the Land that is not extreme -- it takes the relevant ones
+/// in the banner's order: severity first, then nearness, then the newest.
+Warning? overviewWarning({
+  required List<Warning> active,
+  required WarningRegionFilter filter,
+  required DateTime now,
+}) {
+  final banner = bannerWarnings(warnings: active, filter: filter, now: now);
+  if (banner.isNotEmpty) return banner.first;
+  final relevant = [
+    for (final warning in active)
+      if (isWarningRelevant(warning: warning, filter: filter)) warning,
+  ];
+  if (relevant.isEmpty) return null;
+  int severity(Warning warning) =>
+      WarningSeverity.fromName(warning.severity).index;
+  relevant.sort((a, b) {
+    final bySeverity = severity(b).compareTo(severity(a));
+    if (bySeverity != 0) return bySeverity;
+    final byNearness = warningRelevanceRank(
+      warning: b,
+      filter: filter,
+    ).compareTo(warningRelevanceRank(warning: a, filter: filter));
+    if (byNearness != 0) return byNearness;
+    return b.sent.compareTo(a.sent);
+  });
+  return relevant.first;
 }
