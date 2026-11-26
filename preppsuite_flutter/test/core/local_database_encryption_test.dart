@@ -412,6 +412,164 @@ void main() {
     }, skip: noCipher);
   });
 
+  group('a key store that failed once (#393)', () {
+    test('never stores recovery, and opens once the key reads again', () async {
+      // The swap was done and the copy not yet cleared away when the app
+      // stopped; at the next start the key store missed one read.
+      final key = _freshKey();
+      _writeHousehold(pathTo('preppsuite'), 'Beispielperson', key: key);
+      _writeHousehold(
+        '${pathTo('preppsuite')}.plaintext-recovery',
+        'Beispielperson',
+      );
+      final flaky = _FlakyKeyStorage()
+        ..values[_modeKey] = 'migrating'
+        ..values[_keyKey] = key
+        ..failedKeyReads = 1;
+
+      final first = LocalDatabaseEncryption(storage: flaky);
+      await first.initialize(directory: directory);
+
+      expect(first.mode, LocalDatabaseEncryptionMode.recoveryRequired);
+      expect(flaky.values[_modeKey], 'encrypted');
+
+      // The next start, and "try again" in this one, both find the key.
+      final next = LocalDatabaseEncryption(storage: flaky);
+      await next.initialize(directory: directory);
+      expect(next.mode, LocalDatabaseEncryptionMode.encrypted);
+      await first.retryInitialization();
+      expect(first.mode, LocalDatabaseEncryptionMode.encrypted);
+      expect(_readHousehold(pathTo('preppsuite'), key: key), 'Beispielperson');
+    }, skip: noCipher);
+
+    test('a recovery stored by an earlier version is asked again', () async {
+      final key = _freshKey();
+      _writeHousehold(pathTo('preppsuite'), 'Beispielperson', key: key);
+      storage.values[_modeKey] = 'recoveryRequired';
+      storage.values[_keyKey] = key;
+
+      final encryption = LocalDatabaseEncryption(storage: storage);
+      await encryption.initialize(directory: directory);
+
+      expect(encryption.mode, LocalDatabaseEncryptionMode.encrypted);
+      expect(storage.values[_modeKey], 'encrypted');
+    }, skip: noCipher);
+
+    test('starting over keeps the key beside the files it opens', () async {
+      final key = _freshKey();
+      _writeHousehold(pathTo('preppsuite'), 'Beispielperson', key: key);
+      storage.values[_modeKey] = 'encrypted';
+      storage.values[_keyKey] = key;
+      final encryption = LocalDatabaseEncryption(storage: storage);
+      await encryption.initialize(directory: directory);
+
+      await encryption.startOverKeepingUnreadableFiles();
+
+      final locked = directory
+          .listSync()
+          .map((entity) => entity.uri.pathSegments.last)
+          .singleWhere((name) => name.contains('.locked-'));
+      final stamp = locked.substring(locked.indexOf('.locked-'));
+      expect(storage.values['$_keyKey$stamp'], key);
+      expect(storage.values[_keyKey], isNot(key));
+      expect(
+        _readHousehold('${directory.path}/$locked', key: key),
+        'Beispielperson',
+      );
+    }, skip: noCipher);
+  });
+
+  group('an upgrade cut off between its renames (#393)', () {
+    test(
+      'a rename that fails leads to recovery, not to a new household',
+      () async {
+        final recovery = '${pathTo('preppsuite')}.plaintext-recovery';
+        _writeHousehold(recovery, 'Beispielperson');
+        storage.values[_modeKey] = 'migrating';
+        // A virus scanner holding the file has the same effect as a folder
+        // that refuses the rename.
+        Process.runSync('chmod', ['555', directory.path]);
+        addTearDown(() => Process.runSync('chmod', ['755', directory.path]));
+
+        final encryption = LocalDatabaseEncryption(storage: storage);
+        await encryption.initializeOrMarkUnavailable(directory: directory);
+
+        expect(encryption.mode, LocalDatabaseEncryptionMode.recoveryRequired);
+        expect(
+          () => encryption.open('preppsuite'),
+          throwsA(isA<LocalDataUnavailable>()),
+        );
+        expect(storage.values[_modeKey], 'migrating');
+
+        // Once the file is free again, "try again" repairs it.
+        Process.runSync('chmod', ['755', directory.path]);
+        await encryption.retryInitialization();
+        expect(encryption.mode, LocalDatabaseEncryptionMode.plaintext);
+        expect(_readHousehold(pathTo('preppsuite')), 'Beispielperson');
+      },
+      skip: Platform.isWindows ? 'Needs POSIX permissions.' : null,
+    );
+
+    test('a copy without its database is kept, without the mark too', () async {
+      // The mark is gone (3.0.3 wrote "plaintext" over it), the household
+      // is still under its recovery name.
+      final recovery = '${pathTo('preppsuite')}.plaintext-recovery';
+      _writeHousehold(recovery, 'Beispielperson');
+      storage.values[_modeKey] = 'plaintext';
+
+      final encryption = LocalDatabaseEncryption(storage: storage);
+      await encryption.initialize(directory: directory);
+
+      expect(encryption.mode, LocalDatabaseEncryptionMode.plaintext);
+      expect(_readHousehold(pathTo('preppsuite')), 'Beispielperson');
+    });
+
+    test('an encrypted copy left on its own is not thrown away', () async {
+      final key = _freshKey();
+      final copy = '${pathTo('preppsuite')}.encrypting';
+      _writeHousehold(copy, 'Beispielperson', key: key);
+      storage.values[_modeKey] = 'migrating';
+      storage.values[_keyKey] = key;
+
+      final encryption = LocalDatabaseEncryption(storage: storage);
+      await encryption.initializeOrMarkUnavailable(directory: directory);
+
+      expect(encryption.mode, LocalDatabaseEncryptionMode.recoveryRequired);
+      expect(_readHousehold(copy, key: key), 'Beispielperson');
+      expect(File(pathTo('preppsuite')).existsSync(), isFalse);
+    }, skip: noCipher);
+
+    test('the next upgrade stops rather than delete a recovery copy', () async {
+      // What 3.0.3 left after a failed repair: an empty database under the
+      // household's name, the household under the recovery name.
+      _writeHousehold(pathTo('preppsuite'), 'Leer');
+      final recovery = '${pathTo('preppsuite')}.plaintext-recovery';
+      _writeHousehold(recovery, 'Beispielperson');
+      final copy = File('${pathTo('preppsuite')}.encrypting')
+        ..writeAsStringSync('copy');
+      storage.values[_modeKey] = 'migrating';
+
+      final encryption = LocalDatabaseEncryption(storage: storage);
+      await encryption.initialize(directory: directory);
+      expect(encryption.mode, LocalDatabaseEncryptionMode.plaintext);
+      expect(copy.existsSync(), isTrue);
+
+      await expectLater(
+        encryption.migrateExistingDatabases(),
+        throwsStateError,
+      );
+
+      expect(_readHousehold(recovery), 'Beispielperson');
+      expect(_readHousehold(pathTo('preppsuite')), 'Leer');
+      expect(storage.values[_modeKey], 'plaintext');
+      expect(
+        () => encryptDatabaseFileForTesting(pathTo('preppsuite'), _freshKey()),
+        throwsStateError,
+      );
+      expect(_readHousehold(recovery), 'Beispielperson');
+    }, skip: noCipher);
+  });
+
   group('a device that lost its key', () {
     test('keeps the unreadable files when it starts over', () async {
       final key = _freshKey();
@@ -577,6 +735,22 @@ void main() {
       expect(encryption.mode, LocalDatabaseEncryptionMode.recoveryRequired);
     }, skip: noCipher);
   });
+}
+
+/// A key store that misses a read of the key now and then, the way a
+/// keyring that is still locked or a Keystore error does. Swallowed to
+/// null, as `SecureLocalDatabaseKeyStorage` does.
+class _FlakyKeyStorage extends _MemoryKeyStorage {
+  int failedKeyReads = 0;
+
+  @override
+  Future<String?> read(String key) async {
+    if (key == _keyKey && failedKeyReads > 0) {
+      failedKeyReads--;
+      return null;
+    }
+    return super.read(key);
+  }
 }
 
 /// A key store that refuses, the way a Linux session without a keyring or

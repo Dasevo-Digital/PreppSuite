@@ -217,27 +217,56 @@ class LocalDatabaseEncryption {
     final resolvedDirectory = directory ?? await appDatabaseDirectory();
     _directory = resolvedDirectory;
     final savedMode = await _storage.read(_modeKey);
+    final interrupted = savedMode == 'migrating';
 
-    if (savedMode == 'migrating') {
-      if (!repairInterruptedMigration) throw const LocalDataBusy();
-      await _recoverInterruptedMigration(resolvedDirectory);
+    // A copy left beside a database that is not there is a migration
+    // that stopped between its renames, whatever the key store says
+    // (#393): the marker can be gone while the household still lies under
+    // the copy's name.
+    if (interrupted || await _hasStrandedCopies(resolvedDirectory)) {
+      if (!repairInterruptedMigration) {
+        if (interrupted) throw const LocalDataBusy();
+        _mode = LocalDatabaseEncryptionMode.recoveryRequired;
+        return;
+      }
+      await _recoverInterruptedMigration(
+        resolvedDirectory,
+        recordMode: interrupted,
+      );
+    }
+    // What the repair could not put back is still the household. Opening
+    // anything beside it would start an empty one under its name.
+    if (await _hasStrandedCopies(resolvedDirectory)) {
+      _mode = LocalDatabaseEncryptionMode.recoveryRequired;
+      return;
     }
 
-    final effectiveMode = await _storage.read(_modeKey);
+    final effectiveMode = interrupted
+        ? await _storage.read(_modeKey)
+        : savedMode;
     switch (effectiveMode) {
-      case 'encrypted':
+      // 'recoveryRequired' is what 3.0.3 and earlier stored after an
+      // interrupted upgrade without a readable key (#393). It is read as
+      // what it stood for: encrypted files and a key to be looked for
+      // again on every start, never a verdict for ever.
+      case 'encrypted' || 'recoveryRequired':
         final key = await _storage.read(_keyKey);
         if (_isValidKey(key) && cipherAvailable) {
           _key = key;
           _mode = LocalDatabaseEncryptionMode.encrypted;
+          if (effectiveMode == 'recoveryRequired') {
+            try {
+              await _storage.write(_modeKey, 'encrypted');
+            } on Object {
+              // Read the same way on the next start.
+            }
+          }
         } else {
           _mode = LocalDatabaseEncryptionMode.recoveryRequired;
         }
       case 'plaintext':
         _key = await _storage.read(_keyKey);
         _mode = LocalDatabaseEncryptionMode.plaintext;
-      case 'recoveryRequired':
-        _mode = LocalDatabaseEncryptionMode.recoveryRequired;
       default:
         if (await _holdsEncryptedDatabase(resolvedDirectory)) {
           // Nothing here says how to open this, and the files say they
@@ -254,7 +283,10 @@ class LocalDatabaseEncryption {
           await _storage.write(_modeKey, 'plaintext');
           _mode = LocalDatabaseEncryptionMode.plaintext;
         } else {
-          _key = await _createAndStoreKey();
+          // A key that is still there is taken rather than replaced: it
+          // can be the one "start over" could not set aside, and the
+          // settings and pictures sealed with it open only with it.
+          _key = await _storedKey() ?? await _createAndStoreKey();
           if (cipherAvailable) {
             await _storage.write(_modeKey, 'encrypted');
             _mode = LocalDatabaseEncryptionMode.encrypted;
@@ -290,9 +322,20 @@ class LocalDatabaseEncryption {
       // up. Refusing to start there would take a working offline app away
       // from somebody over a key it does not need yet. It runs
       // unencrypted, and the settings card says so in those words.
+      //
+      // An upgrade that was cut off and could not be repaired just now is
+      // not "plain files" either (#393). A rename refused by a virus
+      // scanner left the household under its recovery name, and a plain
+      // start opened an empty database beside it; the next upgrade then
+      // deleted the only copy. It waits in recovery instead, where
+      // "try again" runs the repair once more.
       final folder = _directory;
       try {
-        _mode = folder == null || await _holdsEncryptedDatabase(folder)
+        _mode =
+            folder == null ||
+                await _holdsEncryptedDatabase(folder) ||
+                await _hasStrandedCopies(folder) ||
+                await _markedAsMigrating()
             ? LocalDatabaseEncryptionMode.recoveryRequired
             : LocalDatabaseEncryptionMode.plaintext;
       } on Object {
@@ -314,6 +357,32 @@ class LocalDatabaseEncryption {
     return false;
   }
 
+  /// Whether a migration copy lies where its database is missing.
+  ///
+  /// Between the two renames of an upgrade the household is called
+  /// `.plaintext-recovery`, and nothing is called by its own name. A start
+  /// that took that for an empty folder created a new database there.
+  static Future<bool> _hasStrandedCopies(Directory directory) async {
+    for (final base in await _databaseBaseFiles(directory)) {
+      if (await base.exists()) continue;
+      if (await File('${base.path}$_recoverySuffix').exists() ||
+          await File('${base.path}$_encryptingSuffix').exists()) {
+        return true;
+      }
+    }
+    return false;
+  }
+
+  /// Whether the key store says an upgrade is under way, asked where
+  /// nothing else could be read.
+  Future<bool> _markedAsMigrating() async {
+    try {
+      return await _storage.read(_modeKey) == 'migrating';
+    } on Object {
+      return false;
+    }
+  }
+
   /// Asks the device again, for a key store that may have come back.
   ///
   /// A keyring started after the app, a keychain unlocked on the second
@@ -331,6 +400,8 @@ class LocalDatabaseEncryption {
   /// Nothing is deleted. Each file keeps its own name with `.locked-` and
   /// a timestamp appended, so a key that turns up later -- a restored
   /// keychain, a device that comes back -- still has something to open.
+  /// A key this installation can still read is kept the same way, under
+  /// its own name with the same stamp.
   /// What this buys is a usable app today, and something to restore a
   /// backup into.
   Future<void> startOverKeepingUnreadableFiles() async {
@@ -350,12 +421,27 @@ class LocalDatabaseEncryption {
         }
       }
     }
+    // The key goes the same way as the files: set aside under their stamp,
+    // never deleted (#393). Recovery is also where a key that could not be
+    // read once leads, and then it is the one key that opens what was just
+    // set aside. Only a key that is safely kept under its new name is
+    // taken off the old one; one that cannot be read is left where it is.
+    //
     // A key store that cannot be read usually cannot be written either,
     // and that must not stop the files from being moved out of the way --
     // the whole point of this is to get somebody a usable app back.
     try {
+      final old = await _storage.read(_keyKey);
+      var kept = false;
+      if (_isValidKey(old)) {
+        final aside = '$_keyKey.locked-$stamp';
+        await _storage.write(aside, old!);
+        kept = await _storage.read(aside) == old;
+      }
       await _storage.delete(_modeKey);
-      await _storage.delete(_keyKey);
+      if (kept || (old != null && !_isValidKey(old))) {
+        await _storage.delete(_keyKey);
+      }
     } on Object {
       // Nothing to clear if the device will not talk to us.
     }
@@ -481,10 +567,17 @@ class LocalDatabaseEncryption {
         'The bundled SQLite library has no encryption cipher.',
       );
     }
+    final directory = _directory!;
+    // Refused before the mark is set, so that nothing is left to repair: a
+    // recovery copy that is still there may be the household (#393).
+    for (final base in await _databaseBaseFiles(directory)) {
+      if (await File('${base.path}$_recoverySuffix').exists()) {
+        throw StateError('A recovery copy of ${base.path} is still there.');
+      }
+    }
     // Set before anything is touched, including the key: from here on no
     // part of the app may open one of these files.
     _migrating = true;
-    final directory = _directory!;
     final key = _key ?? await _storedKey() ?? await _createAndStoreKey();
     if (_key == null) await _storage.write(_keyKey, key);
     await _storage.write(_modeKey, 'migrating');
@@ -589,7 +682,15 @@ class LocalDatabaseEncryption {
     await Isolate.run(() => _encryptFileSync(path, key));
   }
 
-  Future<void> _recoverInterruptedMigration(Directory directory) async {
+  /// Puts the folder back into a state a start can open.
+  ///
+  /// [recordMode] when the key store marked the upgrade as running: the
+  /// mark is then replaced by what the folder now is. A copy found without
+  /// that mark is put back without touching the mode.
+  Future<void> _recoverInterruptedMigration(
+    Directory directory, {
+    bool recordMode = true,
+  }) async {
     var encrypted = 0;
     for (final base in await _databaseBaseFiles(directory)) {
       final recovery = File('${base.path}$_recoverySuffix');
@@ -606,27 +707,40 @@ class LocalDatabaseEncryption {
         continue;
       }
 
-      // Anything else: the readable copy is the plaintext one.  It is either
-      // still in place, or it was renamed aside and the process stopped
-      // before the encrypted file took its name.
-      if (!await base.exists() && await recovery.exists()) {
-        await recovery.rename(base.path);
+      if (!await base.exists()) {
+        // Renamed aside, and the process stopped before the encrypted file
+        // took its name: the readable copy is the plaintext one. A rename
+        // that fails here throws, and the start goes to recovery rather
+        // than past the household (#393).
+        if (await recovery.exists()) {
+          await recovery.rename(base.path);
+          if (await temporary.exists()) await temporary.delete();
+        }
+        // An encrypted copy with neither its original nor its recovery
+        // beside it is whatever is left of the household. It stays, and
+        // the start goes to recovery.
+        continue;
       }
+
+      // A plaintext database under its own name. Beside a recovery copy
+      // that is not the state any upgrade leaves behind: 3.0.3 opened an
+      // empty database there after a rename had failed. Which of the two
+      // is the household nobody here can say, so both stay, and so does
+      // the encrypted copy.
+      if (await recovery.exists()) continue;
+      // Otherwise the upgrade stopped before the copy was finished.
       if (await temporary.exists()) await temporary.delete();
     }
 
-    // A half-finished run leaves both kinds of file in the folder.  That is
-    // recoverable as long as the key is there -- `open` decides per file --
-    // but claiming `encrypted` without a key would hide a household behind
-    // something nobody has.
-    final usable = _isValidKey(await _storage.read(_keyKey)) && cipherAvailable;
+    if (!recordMode) return;
+    // A half-finished run leaves both kinds of file in the folder, which
+    // is `encrypted`: `open` decides per file. Never `recoveryRequired`
+    // (#393). Whether the key can be read is asked again by every start;
+    // stored, a key store that failed one read kept the household locked
+    // for good, and "start over" then set aside the key that opens it.
     await _storage.write(
       _modeKey,
-      encrypted == 0
-          ? 'plaintext'
-          : usable
-          ? 'encrypted'
-          : 'recoveryRequired',
+      encrypted == 0 ? 'plaintext' : 'encrypted',
     );
   }
 
@@ -663,6 +777,13 @@ void _encryptFileSync(String path, String key, {void Function()? afterCopy}) {
   final source = File(path);
   final temporary = File('$path$_encryptingSuffix');
   final recovery = File('$path$_recoverySuffix');
+  // A recovery copy already there may be the household itself (#393).
+  // Deleting it to make room was how an upgrade after a failed repair
+  // removed the only copy. The upgrade stops instead, before touching
+  // anything.
+  if (recovery.existsSync()) {
+    throw StateError('A recovery copy of $path is still there.');
+  }
   if (temporary.existsSync()) temporary.deleteSync();
 
   final sourceDatabase = sqlite3.open(path);
@@ -700,7 +821,6 @@ void _encryptFileSync(String path, String key, {void Function()? afterCopy}) {
     verify.close();
   }
 
-  if (recovery.existsSync()) recovery.deleteSync();
   source.renameSync(recovery.path);
   temporary.renameSync(path);
   recovery.deleteSync();
