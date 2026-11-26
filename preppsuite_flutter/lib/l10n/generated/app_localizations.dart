@@ -5971,7 +5971,7 @@ abstract class AppLocalizations {
   /// No description provided for @overviewChecklistLists.
   ///
   /// In en, this message translates to:
-  /// **'{complete} of {total} lists complete'**
+  /// **'{complete} of {total} preparation lists complete'**
   String overviewChecklistLists(Object complete, Object total);
 
   /// No description provided for @overviewResourcesTitle.

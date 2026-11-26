@@ -1081,7 +1081,7 @@
   "overviewLowStock": "unter Mindestmenge",
   "overviewExpiringSoon": "läuft in den nächsten 30 Tagen ab",
   "overviewNoWarnings": "Zurzeit keine Warnung für deine Regionen.",
-  "overviewChecklistLists": "{complete} von {total} Listen vollständig",
+  "overviewChecklistLists": "{complete} von {total} Vorsorgelisten vollständig",
   "overviewResourcesTitle": "Ressourcen",
   "overviewItemCount": "{count} Einträge",
   "photoEditTitle": "Foto zuschneiden",

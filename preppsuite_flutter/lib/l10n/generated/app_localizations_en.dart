@@ -3594,7 +3594,7 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String overviewChecklistLists(Object complete, Object total) {
-    return '$complete of $total lists complete';
+    return '$complete of $total preparation lists complete';
   }
 
   @override

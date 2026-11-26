@@ -109,7 +109,7 @@ InventoryOverview summarizeInventory(
   );
 }
 
-/// How much of the checklists is done.
+/// How much of the preparation lists is done.
 class ChecklistOverview {
   const ChecklistOverview({
     required this.done,
@@ -131,10 +131,22 @@ class ChecklistOverview {
   double get progress => total == 0 ? 0 : done / total;
 }
 
+/// Counted over the preparation lists only (#412).
+///
+/// A list for the event itself -- what to do in a blackout, during a
+/// flood -- is not progress made beforehand: nobody ticks it off until it
+/// happens, and counted in, it kept the bar well short of full on a
+/// household that had done everything there was to do. The PDF of
+/// missing equipment draws the same line (#290).
 ChecklistOverview summarizeChecklists({
   required List<ChecklistTemplate> templates,
   required List<ChecklistItem> items,
 }) {
+  final preparation = [
+    for (final template in templates)
+      if (ChecklistKind.fromName(template.kind) == ChecklistKind.preparation)
+        template,
+  ];
   final byTemplate = <String, List<ChecklistItem>>{};
   for (final item in items) {
     byTemplate.putIfAbsent(item.templateClientId, () => []).add(item);
@@ -143,7 +155,7 @@ ChecklistOverview summarizeChecklists({
   var done = 0;
   var listsComplete = 0;
 
-  for (final template in templates) {
+  for (final template in preparation) {
     final own = byTemplate[template.clientId] ?? const <ChecklistItem>[];
     final checked = own.where((item) => item.isChecked).length;
     done += checked;
@@ -153,7 +165,7 @@ ChecklistOverview summarizeChecklists({
   // Counted through the templates rather than over `items` directly, so
   // an item whose list was deleted does not go on inflating the total.
   final total = [
-    for (final template in templates)
+    for (final template in preparation)
       ...byTemplate[template.clientId] ?? const <ChecklistItem>[],
   ].length;
 
@@ -161,6 +173,6 @@ ChecklistOverview summarizeChecklists({
     done: done,
     total: total,
     listsComplete: listsComplete,
-    lists: templates.length,
+    lists: preparation.length,
   );
 }

@@ -2114,7 +2114,7 @@
   "overviewLowStock": "below minimum",
   "overviewExpiringSoon": "expires within 30 days",
   "overviewNoWarnings": "No warnings for your regions right now.",
-  "overviewChecklistLists": "{complete} of {total} lists complete",
+  "overviewChecklistLists": "{complete} of {total} preparation lists complete",
   "overviewResourcesTitle": "Resources",
   "overviewItemCount": "{count} entries",
   "photoEditTitle": "Crop photo",

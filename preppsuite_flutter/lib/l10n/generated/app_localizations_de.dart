@@ -3612,7 +3612,7 @@ class AppLocalizationsDe extends AppLocalizations {
 
   @override
   String overviewChecklistLists(Object complete, Object total) {
-    return '$complete von $total Listen vollständig';
+    return '$complete von $total Vorsorgelisten vollständig';
   }
 
   @override

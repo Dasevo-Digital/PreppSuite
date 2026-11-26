@@ -172,12 +172,15 @@ void main() {
   });
 
   group('summarizing the checklists', () {
-    ChecklistTemplate template(String clientId) => ChecklistTemplate(
+    ChecklistTemplate template(
+      String clientId, {
+      String kind = 'preparation',
+    }) => ChecklistTemplate(
       clientId: clientId,
       householdId: 'household-1',
       title: clientId,
       category: 'custom',
-      kind: 'preparation',
+      kind: kind,
       isBuiltIn: true,
       updatedAt: now,
       dirty: false,
@@ -231,6 +234,40 @@ void main() {
 
       expect(overview.progress, 0);
       expect(overview.total, 0);
+    });
+
+    test('only the preparation lists count (#412)', () {
+      // Everything there is to prepare done, and the lists for the event
+      // itself untouched, as they are until it happens: that is a full
+      // bar, not "144 of 208" and "19 of 26 lists".
+      final overview = summarizeChecklists(
+        templates: [
+          template('stock'),
+          template('blackout', kind: 'response'),
+        ],
+        items: [
+          checklistItem('water', 'stock', checked: true),
+          checklistItem('torch', 'stock', checked: true),
+          checklistItem('fridge', 'blackout'),
+          checklistItem('neighbours', 'blackout'),
+        ],
+      );
+
+      expect(overview.done, 2);
+      expect(overview.total, 2);
+      expect(overview.listsComplete, 1);
+      expect(overview.lists, 1);
+      expect(overview.progress, 1);
+    });
+
+    test('a kind this version does not know counts as preparation', () {
+      final overview = summarizeChecklists(
+        templates: [template('later', kind: 'something-newer')],
+        items: [checklistItem('a', 'later')],
+      );
+
+      expect(overview.lists, 1);
+      expect(overview.total, 1);
     });
 
     test('an item whose list is gone stops counting', () {

@@ -978,7 +978,7 @@
   "overviewLowStock": "por debajo del mínimo",
   "overviewExpiringSoon": "caduca en los próximos 30 días",
   "overviewNoWarnings": "Ahora mismo no hay avisos para tus regiones.",
-  "overviewChecklistLists": "{complete} de {total} listas completas",
+  "overviewChecklistLists": "{complete} de {total} listas de preparación completas",
   "overviewResourcesTitle": "Recursos",
   "overviewItemCount": "{count} entradas",
   "photoEditTitle": "Recortar foto",
