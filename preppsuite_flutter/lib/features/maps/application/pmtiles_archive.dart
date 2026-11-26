@@ -101,6 +101,10 @@ class PmTilesArchive {
     } on FormatException {
       // A gzip stream that is not one.
       return null;
+    } on ArgumentError {
+      // A RangeError included: a number in the file that no check above
+      // has thought of yet still costs this tile and not the walk (#327).
+      return null;
     }
   }
 
@@ -441,6 +445,16 @@ class _Directory {
   static _Directory parse(Uint8List bytes) {
     final reader = _VarintReader(bytes);
     final count = reader.read();
+    // Every entry takes at least one byte in each of the four columns, so
+    // a directory cannot hold more entries than a quarter of its bytes.
+    // Taken at its word, a count of a few hundred million allocated four
+    // lists of gigabytes before the bytes ran out (#327) -- and the map
+    // opens its archive at every start.
+    if (count < 0 || count > bytes.length ~/ 4) {
+      throw PmTilesException(
+        'directory of ${bytes.length} bytes claims $count entries',
+      );
+    }
 
     final tileIds = List<int>.filled(count, 0);
     var previous = 0;
@@ -457,6 +471,10 @@ class _Directory {
       final value = reader.read();
       // Zero is shorthand for "directly after the previous entry", which
       // is how a clustered archive avoids storing most offsets at all.
+      // The first entry has nothing before it to follow.
+      if (value == 0 && i == 0) {
+        throw const PmTilesException('first entry has no offset');
+      }
       offsets[i] = value == 0 ? offsets[i - 1] + lengths[i - 1] : value - 1;
     }
 
@@ -484,6 +502,10 @@ class _VarintReader {
     while (true) {
       if (_position >= _bytes.length) {
         throw const PmTilesException('directory ended mid-number');
+      }
+      // Ten bytes hold 64 bits; a longer number is not one.
+      if (shift > 63) {
+        throw const PmTilesException('number in directory is too long');
       }
       final byte = _bytes[_position++];
       result |= (byte & 0x7f) << shift;

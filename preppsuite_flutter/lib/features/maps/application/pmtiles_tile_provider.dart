@@ -36,11 +36,14 @@ class PmTilesVectorTileProvider implements VectorTileProvider {
       bytes = await archive.tile(tile.z, tile.x, tile.y);
     } on PmTilesException catch (error) {
       // Damaged or past the size limit: asking again reads the same bytes.
-      throw ProviderException(
-        message: '$error',
-        statusCode: 422,
-        retryable: Retryable.none,
-      );
+      throw _damaged(error);
+    } on FormatException catch (error) {
+      // A gzip stream that is not one.
+      throw _damaged(error);
+    } on ArgumentError catch (error) {
+      // A RangeError included: a number in the file no check has thought
+      // of yet is the same damage (#327).
+      throw _damaged(error);
     }
     if (bytes == null) {
       // An extract covers a region; asking past its edge is what panning
@@ -53,4 +56,10 @@ class PmTilesVectorTileProvider implements VectorTileProvider {
     }
     return bytes;
   }
+
+  static ProviderException _damaged(Object error) => ProviderException(
+    message: '$error',
+    statusCode: 422,
+    retryable: Retryable.none,
+  );
 }

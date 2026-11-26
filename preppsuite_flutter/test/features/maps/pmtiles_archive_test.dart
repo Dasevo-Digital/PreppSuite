@@ -4,6 +4,8 @@ import 'dart:typed_data';
 
 import 'package:flutter_test/flutter_test.dart';
 import 'package:preppsuite_flutter/features/maps/application/pmtiles_archive.dart';
+import 'package:preppsuite_flutter/features/maps/application/pmtiles_tile_provider.dart';
+import 'package:vector_map_tiles/vector_map_tiles.dart';
 
 import 'pmtiles_fixture.dart';
 
@@ -221,6 +223,127 @@ void main() {
     });
   });
 
+  /// Every number in a directory is one the file states about itself
+  /// (#327). These are the ones that used to get past the reader.
+  group('a directory that is lying', () {
+    late Directory workspace;
+
+    setUp(() {
+      workspace = Directory.systemTemp.createTempSync('preppsuite-lying');
+    });
+
+    tearDown(() => workspace.deleteSync(recursive: true));
+
+    Future<PmTilesArchive> open(Uint8List bytes) async {
+      final file = File('${workspace.path}/lying.pmtiles')
+        ..writeAsBytesSync(bytes);
+      return PmTilesArchive.open(await FileByteRangeSource.open(file));
+    }
+
+    List<int> varint(int value) {
+      final out = <int>[];
+      var remaining = value;
+      while (remaining >= 0x80) {
+        out.add((remaining & 0x7f) | 0x80);
+        remaining >>= 7;
+      }
+      return out..add(remaining);
+    }
+
+    test('more entries than it has bytes for is refused before any '
+        'list is made', () async {
+      // A million entries in nine bytes. Believed, the reader allocated
+      // four lists of that length before the bytes ran out; at 2^27 that
+      // was four gigabytes, on every start of the app.
+      final bytes = buildArchive(
+        tiles: const {},
+        rawRootDirectory: [...varint(1 << 20), 0, 0, 0, 0, 0, 0, 0, 0],
+      );
+
+      await expectLater(
+        open(bytes),
+        throwsA(
+          isA<PmTilesException>().having(
+            (error) => error.message,
+            'message',
+            contains('claims'),
+          ),
+        ),
+      );
+    });
+
+    test('a first entry that follows nothing is damage, not a crash', () async {
+      // Offset 0 means "after the one before", and the first has none:
+      // read as it was, that was offsets[-1], a RangeError nobody caught.
+      final bytes = buildArchive(
+        tiles: const {},
+        rawRootDirectory: [
+          ...varint(1), // one entry
+          ...varint(0), // tile id 0
+          ...varint(1), // run length
+          ...varint(10), // length
+          ...varint(0), // offset: "after the previous one"
+        ],
+      );
+
+      await expectLater(open(bytes), throwsA(isA<PmTilesException>()));
+    });
+
+    test('a number longer than 64 bits is refused', () async {
+      final bytes = buildArchive(
+        tiles: const {},
+        rawRootDirectory: [
+          ...varint(1), // one entry
+          ...List.filled(11, 0xff), 0x01, // a tile id of 78 bits
+          ...varint(1),
+          ...varint(10),
+          ...varint(1),
+        ],
+      );
+
+      await expectLater(open(bytes), throwsA(isA<PmTilesException>()));
+    });
+
+    test('a walk over many tiles loses one tile to a RangeError, not the '
+        'walk', () async {
+      final archive = await PmTilesArchive.open(
+        _ThrowingAfterOpen(
+          buildArchive(maxZoom: 1, tiles: {(1, 0, 0): 'x', (1, 1, 1): 'y'}),
+          RangeError('out of range'),
+        ),
+      );
+      addTearDown(archive.close);
+
+      expect(await archive.tileOrNull(1, 0, 0), isNull);
+    });
+
+    test(
+      'the map is told the tile is damaged, not left with a RangeError',
+      () async {
+        final archive = await PmTilesArchive.open(
+          _ThrowingAfterOpen(
+            buildArchive(maxZoom: 1, tiles: {(1, 0, 0): 'x'}),
+            RangeError('out of range'),
+          ),
+        );
+        addTearDown(archive.close);
+
+        await expectLater(
+          PmTilesVectorTileProvider(archive).provide(TileIdentity(1, 0, 0)),
+          throwsA(
+            isA<ProviderException>()
+                .having((error) => error.statusCode, 'status', 422)
+                .having(
+                  (error) => error.retryable,
+                  'retryable',
+                  Retryable.none,
+                ),
+          ),
+        );
+      },
+    );
+  });
+
   /// The map renderer asks for a screenful of tiles at once and the
   /// article view for a page's HTML, stylesheet and images together.
   /// Before the source queued its reads, `dart:io` refused every one of
@@ -289,4 +412,23 @@ void main() {
       expect(await following, [1, 2, 3, 4]);
     });
   });
+}
+
+/// Serves the header and the root directory, then throws [error] on every
+/// read: the shape of damage that only shows once a tile is asked for.
+class _ThrowingAfterOpen implements ByteRangeSource {
+  _ThrowingAfterOpen(this._bytes, this.error);
+
+  final Uint8List _bytes;
+  final Object error;
+  var _reads = 0;
+
+  @override
+  Future<Uint8List> read(int offset, int length) async {
+    if (_reads++ >= 2) throw error;
+    return Uint8List.sublistView(_bytes, offset, offset + length);
+  }
+
+  @override
+  Future<void> close() async {}
 }

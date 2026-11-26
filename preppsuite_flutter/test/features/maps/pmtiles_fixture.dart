@@ -57,6 +57,7 @@ Uint8List buildArchive({
   Map<String, Object?> metadata = const {},
   bool contiguousOffsets = false,
   int? leafSize,
+  List<int>? rawRootDirectory,
 }) => buildBinaryArchive(
   tiles: {
     for (final tile in tiles.entries) tile.key: utf8.encode(tile.value),
@@ -67,6 +68,7 @@ Uint8List buildArchive({
   metadata: metadata,
   contiguousOffsets: contiguousOffsets,
   leafSize: leafSize,
+  rawRootDirectory: rawRootDirectory,
 );
 
 /// The same, for tile bodies that are bytes rather than text.
@@ -78,6 +80,7 @@ Uint8List buildBinaryArchive({
   Map<String, Object?> metadata = const {},
   bool contiguousOffsets = false,
   int? leafSize,
+  List<int>? rawRootDirectory,
 }) {
   final tileData = BytesBuilder();
   final entries = <({int tileId, int offset, int length, int runLength})>[];
@@ -105,7 +108,10 @@ Uint8List buildBinaryArchive({
   // second lookup.
   final leaves = BytesBuilder();
   final List<int> directory;
-  if (leafSize == null) {
+  if (rawRootDirectory != null) {
+    // A directory as a damaged or hostile file has it, byte for byte.
+    directory = gzip.encode(rawRootDirectory);
+  } else if (leafSize == null) {
     directory = gzip.encode(
       _encodeDirectory(entries, contiguousOffsets: contiguousOffsets),
     );
