@@ -1,8 +1,10 @@
 import 'dart:async' show unawaited;
 import 'dart:typed_data';
 
+import 'package:flutter/foundation.dart' show listEquals;
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
+import '../../../core/error_log.dart';
 import '../../../core/memory_pressure_listener.dart';
 import '../../maps/application/map_archive_access.dart' show openMapArchive;
 import 'knowledge_bookmark_store.dart';
@@ -148,6 +150,20 @@ class KnowledgeController extends AsyncNotifier<KnowledgeState> {
         : current.library
               .where((archive) => archive.fileName == fileName)
               .firstOrNull;
+    // The open archive, chosen again where it is and unchanged: the same
+    // file picked once more, or a backup that found an identical copy
+    // already there. Opening it anew only closed the reader a running
+    // index build held, and the build then went on against it (#407).
+    final open = current.archive;
+    if (existing != null &&
+        existing.id == current.selectedId &&
+        current.isReady &&
+        open != null &&
+        await _isStill(open, location) &&
+        identical(state.value?.archive, open)) {
+      return null;
+    }
+
     final entry =
         existing ??
         sameFile?.relocated(location) ??
@@ -208,6 +224,26 @@ class KnowledgeController extends AsyncNotifier<KnowledgeState> {
     );
     await server?.close();
     await archive?.close();
+  }
+
+  /// Whether the file at [location] is still [open]: the same header and
+  /// the same checksum at its end. Anything that cannot be read says no.
+  static Future<bool> _isStill(ZimArchive open, String location) async {
+    try {
+      final source = await openMapArchive(location);
+      try {
+        final header = ZimHeader.parse(
+          await source.read(0, ZimHeader.byteLength),
+        );
+        if (header != open.header) return false;
+        final now = await source.read(header.checksumPosition, 16);
+        return now.length == 16 && listEquals(now, await open.checksum());
+      } finally {
+        await source.close();
+      }
+    } on Object {
+      return false;
+    }
   }
 
   /// The entry pointing at [location], or null.
@@ -587,6 +623,13 @@ class KnowledgeIndexController extends AsyncNotifier<KnowledgeIndexState> {
   }
 
   /// Builds the index, reporting progress as it goes.
+  ///
+  /// The run belongs to the archive that was open when it began. Opening
+  /// another one, opening the same one anew or closing it closes the reader
+  /// the run holds, and the run stops there (#407): it used to go on
+  /// against the closed reader, every read failing, and mark the index
+  /// complete. A run that has lost its archive then leaves this state alone,
+  /// which by then is the next archive's.
   Future<void> buildIndex() async {
     final knowledge = ref.read(knowledgeProvider).value;
     final archive = knowledge?.archive;
@@ -597,9 +640,12 @@ class KnowledgeIndexController extends AsyncNotifier<KnowledgeIndexState> {
     _cancelled = false;
     final indexer = _indexerFor(archive);
     if (indexer == null) return;
+    final index = indexer.index;
+
+    bool ours() => ref.mounted && !archive.isClosed;
 
     void report(IndexProgress progress) {
-      if (!ref.mounted) return;
+      if (!ours()) return;
       final current = state.value;
       state = AsyncData(
         KnowledgeIndexState(
@@ -622,28 +668,39 @@ class KnowledgeIndexController extends AsyncNotifier<KnowledgeIndexState> {
       ),
     );
 
-    final plan = await indexer.plan(
-      onProgress: report,
-      cancelled: () => _cancelled,
-    );
-    final finished = await indexer.run(
-      plan,
-      fingerprint: fingerprint,
-      onProgress: report,
-      cancelled: () => _cancelled,
-    );
+    IndexPlan? plan;
+    var finished = false;
+    try {
+      plan = await indexer.plan(
+        onProgress: report,
+        cancelled: () => _cancelled,
+      );
+      finished = await indexer.run(
+        plan,
+        fingerprint: fingerprint,
+        onProgress: report,
+        cancelled: () => _cancelled,
+      );
+    } on Object catch (error, stack) {
+      // A read or a write that failed as the archive was closed, or as its
+      // index went with it. Anything else ends the run like a stop, and the
+      // panel shows what is on disk; the protocol keeps the reason.
+      if (!ours()) return;
+      ErrorLog.instance.record(error, stack, context: 'Volltextindex');
+    }
 
-    if (!ref.mounted) return;
+    if (!ours()) return;
     // Read back rather than assumed: a run stopped during the scan never
     // touched the index, which is then as it was -- partial, or not there
     // at all for an archive that was never begun.
-    final index = ref.read(knowledgeIndexDatabaseProvider)!;
     final stored = await index.indexedArchive() == fingerprint
         ? await _stored(index, archiveId)
         : const KnowledgeIndexState();
-    if (!ref.mounted) return;
+    if (!ours()) return;
     state = AsyncData(
-      finished ? stored.copyWith(articleCount: plan.articleCount) : stored,
+      finished && plan != null
+          ? stored.copyWith(articleCount: plan.articleCount)
+          : stored,
     );
   }
 

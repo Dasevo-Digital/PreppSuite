@@ -1,5 +1,7 @@
+import 'dart:async';
 import 'dart:convert';
 import 'dart:io';
+import 'dart:typed_data';
 
 import 'package:drift/native.dart';
 import 'package:flutter_test/flutter_test.dart';
@@ -8,7 +10,7 @@ import 'package:preppsuite_flutter/features/knowledge/application/knowledge_inde
 import 'package:preppsuite_flutter/features/knowledge/application/knowledge_indexer.dart';
 import 'package:preppsuite_flutter/features/knowledge/application/zim_archive.dart';
 import 'package:preppsuite_flutter/features/maps/application/pmtiles_archive.dart'
-    show FileByteRangeSource;
+    show ByteRangeSource, FileByteRangeSource;
 
 import 'zim_fixture.dart';
 
@@ -394,6 +396,120 @@ void main() {
     });
   });
 
+  group('a reader that fails under the run (#407)', () {
+    // Opening the same archive anew -- downloading it again, choosing it
+    // again, restoring it -- closed the reader a running build held. Every
+    // read after that failed, each failure was swallowed as one unreadable
+    // article, and the index was marked complete with most of it unread.
+    // Letters rather than numbers, so that "Begriffb" is not a prefix of
+    // another article's word.
+    String word(int i) => 'Begriff${String.fromCharCode(0x61 + i)}';
+    List<ZimFixtureEntry> articles(int count) => [
+      for (var i = 0; i < count; i++)
+        article('Artikel$i', '<p>${word(i)}</p>', url: 'Artikel$i'),
+    ];
+
+    Future<String> fileWith(int count) async => writeZim(
+      workspace,
+      // One article to a cluster, as in a real archive many clusters.
+      ZimFixture(entries: articles(count), blobsPerCluster: 1),
+    );
+
+    test('a closed archive does not make the index complete', () async {
+      final path = await fileWith(6);
+      final archive = await ZimArchive.open(
+        await FileByteRangeSource.open(File(path)),
+      );
+      final indexer = KnowledgeIndexer(archive: archive, index: index);
+      final plan = await indexer.plan();
+
+      var asked = 0;
+      final finished = await indexer.run(
+        plan,
+        fingerprint: 'test',
+        // Closed as another copy is opened, part-way through.
+        cancelled: () {
+          if (++asked == 3) unawaited(archive.close());
+          return false;
+        },
+      );
+
+      expect(finished, isFalse);
+      expect(await index.isComplete(), isFalse);
+      expect(await index.progress(), 2);
+
+      // The archive open again: the run resumes and finds everything.
+      final reopened = await ZimArchive.open(
+        await FileByteRangeSource.open(File(path)),
+      );
+      addTearDown(reopened.close);
+      final again = KnowledgeIndexer(archive: reopened, index: index);
+      expect(await again.run(await again.plan(), fingerprint: 'test'), isTrue);
+      for (var i = 0; i < 6; i++) {
+        expect(await hits(reopened, word(i)), hasLength(1), reason: '$i');
+      }
+    });
+
+    test('reads failing cluster after cluster stop the run', () async {
+      // A disk pulled out: the reader is not closed, it just answers
+      // nothing any more.
+      final source = _FailingSource(
+        await FileByteRangeSource.open(File(await fileWith(12))),
+      );
+      final archive = await ZimArchive.open(source);
+      addTearDown(archive.close);
+      final indexer = KnowledgeIndexer(archive: archive, index: index);
+      final plan = await indexer.plan();
+
+      expect(
+        await indexer.run(
+          plan,
+          fingerprint: 'test',
+          // Pulled out once the run has begun reading articles.
+          cancelled: () {
+            source.failing = true;
+            return false;
+          },
+        ),
+        isFalse,
+      );
+      expect(await index.isComplete(), isFalse);
+      expect(await index.progress(), 0, reason: 'resumes where they began');
+
+      source.failing = false;
+      expect(await indexer.run(plan, fingerprint: 'test'), isTrue);
+      for (var i = 0; i < 12; i++) {
+        expect(await hits(archive, word(i)), hasLength(1), reason: '$i');
+      }
+    });
+
+    test('one cluster that will not read costs only its articles', () async {
+      final source = _FailingSource(
+        await FileByteRangeSource.open(File(await fileWith(6))),
+      );
+      final archive = await ZimArchive.open(source);
+      addTearDown(archive.close);
+      final indexer = KnowledgeIndexer(archive: archive, index: index);
+      final plan = await indexer.plan();
+
+      var reading = false;
+      var reads = 0;
+      source.failWhen = () => reading && ++reads == 1;
+      expect(
+        await indexer.run(
+          plan,
+          fingerprint: 'test',
+          cancelled: () {
+            reading = true;
+            return false;
+          },
+        ),
+        isTrue,
+      );
+      expect(await index.isComplete(), isTrue);
+    });
+  });
+
   group('resuming and discarding', () {
     test('an interrupted run picks up where it stopped', () async {
       final archive = await archiveWith([
@@ -488,4 +604,25 @@ void main() {
       expect(await index.search('Wasser'), isEmpty);
     });
   });
+}
+
+/// A source that can be made to fail, the way a disk does when it is
+/// pulled out: still open, answering nothing.
+class _FailingSource implements ByteRangeSource {
+  _FailingSource(this._inner);
+
+  final ByteRangeSource _inner;
+  bool failing = false;
+  bool Function()? failWhen;
+
+  @override
+  Future<Uint8List> read(int offset, int length) {
+    if (failing || (failWhen?.call() ?? false)) {
+      throw const FileSystemException('Input/output error');
+    }
+    return _inner.read(offset, length);
+  }
+
+  @override
+  Future<void> close() => _inner.close();
 }

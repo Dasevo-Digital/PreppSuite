@@ -31,6 +31,18 @@ const _scanChunk = 4096;
 /// on the clock the screen would stand still for a whole batch.
 const _frameBudget = Duration(milliseconds: 8);
 
+/// How many clusters in a row may fail to read before a run stops rather
+/// than goes on (#407).
+///
+/// One unreadable article, or one damaged cluster, is not worth losing the
+/// index over. But a reader that has been closed under the run -- the
+/// archive opened anew, a disk pulled out -- fails every read after it,
+/// and the run used to swallow each failure and mark the index complete
+/// with the rest of the archive never read. Counted in clusters, because
+/// the plan reads a cluster's articles one after another and a single bad
+/// cluster can hold hundreds of them.
+const _failingClustersInARow = 8;
+
 /// What the indexer is doing right now.
 class IndexProgress {
   const IndexProgress({
@@ -120,7 +132,7 @@ class KnowledgeIndexer {
     var complete = true;
 
     for (var at = 0; at < total; at += _scanChunk) {
-      if (cancelled?.call() ?? false) {
+      if ((cancelled?.call() ?? false) || archive.isClosed) {
         complete = false;
         break;
       }
@@ -131,7 +143,17 @@ class KnowledgeIndexer {
       // into the millions.
       await Future<void>.delayed(Duration.zero);
 
-      for (final entry in await archive.entriesAt(at, _scanChunk)) {
+      final List<ZimEntry> chunk;
+      try {
+        chunk = await archive.entriesAt(at, _scanChunk);
+      } on Object {
+        // Closed while this chunk was read: a plan of part of the archive,
+        // which is never run.
+        if (!archive.isClosed) rethrow;
+        complete = false;
+        break;
+      }
+      for (final entry in chunk) {
         if (!_isArticle(entry)) continue;
 
         targets.add((
@@ -168,9 +190,12 @@ class KnowledgeIndexer {
   /// Indexes [plan] under [fingerprint], resuming where a previous run
   /// stopped if it was over the same archive.
   ///
-  /// Returns false when it was asked to stop. The index stays usable
-  /// either way — a partial index answers about what it has, which is
-  /// better than answering nothing until an hour has passed.
+  /// Returns false when it was asked to stop, when the archive was closed
+  /// under it, and when [_failingClustersInARow] clusters in a row would
+  /// not read; then it resumes where those failures began. The index stays
+  /// usable either way — a partial index answers about what it has, which
+  /// is better than answering nothing until an hour has passed. Only a run
+  /// that read the archive to its end marks it complete (#407).
   Future<bool> run(
     IndexPlan plan, {
     required String fingerprint,
@@ -206,14 +231,20 @@ class KnowledgeIndexer {
     var batch = <({int entryIndex, String text})>[];
     final sinceFrame = Stopwatch()..start();
 
+    // The read failures since the last read that worked: where they began
+    // in the plan, the cluster of the last one and how many clusters.
+    int? failingFrom;
+    int? failedCluster;
+    var failingClusters = 0;
+
     while (position < total) {
       if (sinceFrame.elapsed >= _frameBudget) {
         await Future<void>.delayed(Duration.zero);
         sinceFrame.reset();
       }
 
-      if (cancelled?.call() ?? false) {
-        await _flush(batch, position);
+      if ((cancelled?.call() ?? false) || archive.isClosed) {
+        await _flush(batch, failingFrom ?? position);
         return false;
       }
 
@@ -222,12 +253,30 @@ class KnowledgeIndexer {
       final blob = plan.blobs[position];
       position++;
 
+      final Uint8List bytes;
+      try {
+        bytes = await archive.readBlobAt(cluster, blob);
+      } on Object {
+        failingFrom ??= position - 1;
+        if (cluster != failedCluster) {
+          failedCluster = cluster;
+          failingClusters++;
+        }
+        if (archive.isClosed || failingClusters >= _failingClustersInARow) {
+          await _flush(batch, failingFrom);
+          return false;
+        }
+        // One unreadable article is not worth abandoning the index for.
+        // It simply will not be findable.
+        continue;
+      }
+      failingFrom = null;
+      failedCluster = null;
+      failingClusters = 0;
+
       try {
         final text = htmlToIndexableText(
-          utf8.decode(
-            await archive.readBlobAt(cluster, blob),
-            allowMalformed: true,
-          ),
+          utf8.decode(bytes, allowMalformed: true),
         );
         if (text.isNotEmpty) {
           batch.add((
@@ -236,8 +285,7 @@ class KnowledgeIndexer {
           ));
         }
       } on Object {
-        // One unreadable article is not worth abandoning the index for.
-        // It simply will not be findable.
+        // Read, but not as text. It simply will not be findable.
       }
 
       if (batch.length >= _batchSize) {
@@ -253,6 +301,10 @@ class KnowledgeIndexer {
       }
     }
 
+    if (archive.isClosed) {
+      await _flush(batch, failingFrom ?? position);
+      return false;
+    }
     await _flush(batch, position);
     await index.markComplete();
     onProgress?.call(

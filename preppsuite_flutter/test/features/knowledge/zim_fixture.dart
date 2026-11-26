@@ -41,6 +41,7 @@ class ZimFixture {
     this.compression = 1,
     this.includeTitleListing = true,
     this.reverseDirectory = false,
+    this.blobsPerCluster,
   });
 
   final List<ZimFixtureEntry> entries;
@@ -58,6 +59,11 @@ class ZimFixture {
   /// in the file is the opposite of their pointers'. Real writers keep the
   /// two in step; a reader must not depend on it.
   final bool reverseDirectory;
+
+  /// How many blobs go into each cluster, or null for all of them in one.
+  /// Real archives have thousands of clusters, and a reader that fails
+  /// cluster by cluster needs a fixture that has more than one.
+  final int? blobsPerCluster;
 
   Uint8List build() {
     final all = [...entries];
@@ -92,9 +98,9 @@ class ZimFixture {
           ..sort((a, b) => _titleOf(a.value).compareTo(_titleOf(b.value)));
     final listing = Uint32List.fromList([for (final e in byTitle) e.key]);
 
-    // --- blobs, in one cluster ---
-    final blobs = <List<int>>[];
-    final blobIndex = <int, int>{};
+    // --- blobs, in one cluster or [blobsPerCluster] to a cluster ---
+    final clustered = <List<List<int>>>[[]];
+    final blobIndex = <int, ({int cluster, int blob})>{};
     for (var i = 0; i < all.length; i++) {
       final entry = all[i];
       if (entry.redirectTo != null) continue;
@@ -102,11 +108,18 @@ class ZimFixture {
       final content = entry.namespace == 'X' && includeTitleListing
           ? listing.buffer.asUint8List()
           : entry.content ?? const <int>[];
-      blobIndex[i] = blobs.length;
-      blobs.add(content);
+      final perCluster = blobsPerCluster;
+      if (perCluster != null && clustered.last.length >= perCluster) {
+        clustered.add([]);
+      }
+      blobIndex[i] = (
+        cluster: clustered.length - 1,
+        blob: clustered.last.length,
+      );
+      clustered.last.add(content);
     }
 
-    final cluster = _buildCluster(blobs);
+    final clusters = [for (final blobs in clustered) _buildCluster(blobs)];
 
     // --- directory entries ---
     final entryBytes = <Uint8List>[];
@@ -137,10 +150,13 @@ class ZimFixture {
     if (writeTitleTable) cursor += all.length * 4;
 
     final clusterPointerPosition = cursor;
-    cursor += 8; // one cluster
+    cursor += clusters.length * 8;
 
-    final clusterPosition = cursor;
-    cursor += cluster.length;
+    final clusterPositions = <int>[];
+    for (final cluster in clusters) {
+      clusterPositions.add(cursor);
+      cursor += cluster.length;
+    }
 
     final checksumPosition = cursor;
 
@@ -154,6 +170,7 @@ class ZimFixture {
         clusterPointerPosition: clusterPointerPosition,
         mimeListPosition: headerLength,
         checksumPosition: checksumPosition,
+        clusterCount: clusters.length,
       ),
     );
     out.add(mimeList);
@@ -169,8 +186,10 @@ class ZimFixture {
         ]),
       );
     }
-    out.add(_u64List([clusterPosition]));
-    out.add(cluster);
+    out.add(_u64List(clusterPositions));
+    for (final cluster in clusters) {
+      out.add(cluster);
+    }
     out.add(Uint8List(16)); // checksum, never verified here
 
     return out.toBytes();
@@ -186,6 +205,7 @@ class ZimFixture {
     required int clusterPointerPosition,
     required int mimeListPosition,
     required int checksumPosition,
+    required int clusterCount,
   }) {
     final header = Uint8List(80);
     final view = ByteData.sublistView(header);
@@ -193,7 +213,7 @@ class ZimFixture {
     view.setUint16(4, majorVersion, Endian.little);
     view.setUint16(6, 1, Endian.little);
     view.setUint32(24, entryCount, Endian.little);
-    view.setUint32(28, 1, Endian.little); // one cluster
+    view.setUint32(28, clusterCount, Endian.little);
     view.setUint64(32, urlPointerPosition, Endian.little);
     view.setUint64(40, titlePointerPosition, Endian.little);
     view.setUint64(48, clusterPointerPosition, Endian.little);
@@ -216,7 +236,7 @@ class ZimFixture {
   Uint8List _buildEntry(
     ZimFixtureEntry entry,
     Map<String, int> indexOf,
-    int? blob,
+    ({int cluster, int blob})? blob,
   ) {
     final out = BytesBuilder();
     final head = Uint8List(16);
@@ -236,8 +256,8 @@ class ZimFixture {
       view.setUint32(8, indexOf[redirect]!, Endian.little);
       out.add(Uint8List.sublistView(head, 0, 12));
     } else {
-      view.setUint32(8, 0, Endian.little); // cluster
-      view.setUint32(12, blob ?? 0, Endian.little);
+      view.setUint32(8, blob?.cluster ?? 0, Endian.little);
+      view.setUint32(12, blob?.blob ?? 0, Endian.little);
       out.add(head);
     }
 

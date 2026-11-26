@@ -126,6 +126,55 @@ void main() {
     );
   });
 
+  test('the open archive chosen again is not opened anew (#407)', () async {
+    // Choosing the same file again, or a backup that finds an identical
+    // copy in place, reopened it -- and closed the reader a running index
+    // build held, which then went on against it.
+    final container = ProviderContainer();
+    addTearDown(container.dispose);
+    await load(container);
+
+    final notifier = container.read(knowledgeProvider.notifier);
+    final path = writeArchive('Wikibooks', 'wikibooks.zim');
+    await notifier.useArchive(location: path, label: 'Wikibooks');
+    final before = container.read(knowledgeProvider).requireValue.archive!;
+
+    expect(
+      await notifier.useArchive(location: path, label: 'Wikibooks'),
+      isNull,
+    );
+
+    final after = container.read(knowledgeProvider).requireValue;
+    expect(after.archive, same(before));
+    expect(before.isClosed, isFalse);
+    expect(after.isReady, isTrue);
+  });
+
+  test('another file at the same place is opened anew (#407)', () async {
+    final container = ProviderContainer();
+    addTearDown(container.dispose);
+    await load(container);
+
+    final notifier = container.read(knowledgeProvider.notifier);
+    final path = writeArchive('Wikibooks', 'wikibooks.zim');
+    await notifier.useArchive(location: path, label: 'Wikibooks');
+    final before = container.read(knowledgeProvider).requireValue.archive!;
+
+    // Replaced under the same name, with other contents.
+    File(path).deleteSync();
+    writeArchive('Wikibooks, neuer Stand mit mehr drin', 'wikibooks.zim');
+
+    expect(
+      await notifier.useArchive(location: path, label: 'Wikibooks'),
+      isNull,
+    );
+
+    final after = container.read(knowledgeProvider).requireValue;
+    expect(after.archive, isNot(same(before)));
+    expect(before.isClosed, isTrue);
+    expect(after.title, 'Wikibooks, neuer Stand mit mehr drin');
+  });
+
   test('a download of the open archive gets it closed first (#408)', () async {
     // Windows does not rename onto an open file, so a download of the open
     // archive asks for it to be let go before it takes its place.

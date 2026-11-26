@@ -262,6 +262,11 @@ class ZimArchive {
     return utf8.decode(await readBlob(resolved), allowMalformed: true);
   }
 
+  /// The sixteen bytes at the end of the file: an MD5 of everything
+  /// before them, which the writer puts there. With the header, what tells
+  /// one file from another without reading either.
+  Future<Uint8List> checksum() => _source.read(header.checksumPosition, 16);
+
   String mimeTypeOf(ZimEntry entry) {
     final index = entry.mimeTypeIndex;
     if (index == null || index >= _mimeTypes.length) {
@@ -630,6 +635,34 @@ class ZimHeader {
   /// Where the archive's own checksum sits, which is also where the last
   /// cluster ends.
   final int checksumPosition;
+
+  @override
+  bool operator ==(Object other) =>
+      other is ZimHeader &&
+      other.majorVersion == majorVersion &&
+      other.minorVersion == minorVersion &&
+      other.entryCount == entryCount &&
+      other.clusterCount == clusterCount &&
+      other.urlPointerPosition == urlPointerPosition &&
+      other.titlePointerPosition == titlePointerPosition &&
+      other.clusterPointerPosition == clusterPointerPosition &&
+      other.mimeListPosition == mimeListPosition &&
+      other.mainPage == mainPage &&
+      other.checksumPosition == checksumPosition;
+
+  @override
+  int get hashCode => Object.hash(
+    majorVersion,
+    minorVersion,
+    entryCount,
+    clusterCount,
+    urlPointerPosition,
+    titlePointerPosition,
+    clusterPointerPosition,
+    mimeListPosition,
+    mainPage,
+    checksumPosition,
+  );
 
   static ZimHeader parse(Uint8List bytes) {
     if (bytes.length < byteLength) {
