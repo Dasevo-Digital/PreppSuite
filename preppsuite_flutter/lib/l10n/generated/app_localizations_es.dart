@@ -4759,6 +4759,10 @@ class AppLocalizationsEs extends AppLocalizations {
       'La frase de contraseña se pide al volver a la app.';
 
   @override
+  String get appLockCarried =>
+      'Una carpeta de datos que se lleva consigo no tiene bloqueo de la app. Sus datos no están cifrados para que la carpeta se abra en cualquier equipo: quien tenga el disco puede leerlos sin la app. Un bloqueo solo protegería el programa abierto, y el bloqueo de la instalación de este equipo no se aplica aquí.';
+
+  @override
   String get appLockSetTitle => 'Configurar el bloqueo de la app';
 
   @override

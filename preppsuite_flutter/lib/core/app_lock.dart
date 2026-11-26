@@ -6,6 +6,7 @@ import 'package:cryptography/cryptography.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
+import 'portable_data.dart';
 import 'secure_storage.dart';
 
 /// The lock exists but its state cannot be read right now.
@@ -55,6 +56,20 @@ class SecureAppLockStorage implements AppLockStorage {
 /// fixed marker. This protects a running, unattended device without turning a
 /// forgotten passphrase into lost household data: resetting the device lock
 /// removes the verifier, not the database.
+///
+/// **A carried data folder has no lock** ([available]). The secure store
+/// is this computer's, and the installation here keeps its own lock in it:
+/// read from a carried copy, the installation's passphrase locked the
+/// disk, a lock set on the disk locked it on every other computer, and
+/// "start over" or "reset the lock" in the folder deleted the
+/// installation's verifier. Keeping a verifier in the folder instead was
+/// considered and not done: the folder's data is plain on purpose, so that
+/// it opens anywhere, and whoever has the disk reads it without the app.
+/// What a lock there would add is a passphrase hash anyone holding the
+/// disk can guess at offline, and a face or finger on another computer
+/// that would open it. So in a carried folder every method here leaves
+/// the secure store alone and the lock reads as off; the settings card
+/// says why.
 class AppLockStore {
   AppLockStore({
     AppLockStorage? storage,
@@ -91,6 +106,10 @@ class AppLockStore {
   final int iterations;
   final int parallelism;
 
+  /// Whether this copy can have a lock at all: not in a carried data
+  /// folder (see the class comment).
+  static bool get available => !portableLocation.isPortable;
+
   /// Whether the app is locked.
   ///
   /// Throws [AppLockStatusUnavailable] when a lock is known to exist but
@@ -100,6 +119,9 @@ class AppLockStore {
   /// nothing yet -- that is the case a Mac without a signing certificate
   /// lands in, and it has to start.
   Future<bool> isEnabled() async {
+    // Neither the installation's lock nor a marker the folder brought
+    // along: a carried folder has none.
+    if (!available) return false;
     try {
       final value = await _storage.read(_enabledKey);
       if (value != 'true') {
@@ -146,6 +168,9 @@ class AppLockStore {
   }
 
   Future<void> enable(String passphrase) async {
+    if (!available) {
+      throw UnsupportedError('A carried data folder has no app lock.');
+    }
     final salt = Uint8List.fromList(
       List.generate(_saltLength, (_) => Random.secure().nextInt(256)),
     );
@@ -172,6 +197,7 @@ class AppLockStore {
   }
 
   Future<bool> verify(String passphrase) async {
+    if (!available) return false;
     final salt = _decode(await _storage.read(_saltKey));
     final check = await _storage.read(_checkKey);
     if (salt == null || check == null) return false;
@@ -196,6 +222,7 @@ class AppLockStore {
   /// fingerprint as well (#143). Off on every installation until turned
   /// on, and off again with the lock.
   Future<bool> biometricEnabled() async {
+    if (!available) return false;
     try {
       return await _storage.read(_biometricKey) == 'true';
     } on Object {
@@ -204,6 +231,7 @@ class AppLockStore {
   }
 
   Future<void> setBiometric(bool enabled) async {
+    if (!available) return;
     if (enabled) {
       await _storage.write(_biometricKey, 'true');
     } else {
@@ -212,6 +240,8 @@ class AppLockStore {
   }
 
   Future<void> disable() async {
+    // What it would delete is the installation's.
+    if (!available) return;
     await _storage.delete(_biometricKey);
     await _storage.delete(_enabledKey);
     await _storage.delete(_saltKey);
@@ -237,6 +267,9 @@ class AppLockStore {
   /// deletions. Should it come back holding the old lock after all,
   /// [isEnabled] reads `true` and sets the marker again.
   Future<void> forgetForFreshStart() async {
+    // "Start over" in a carried folder set aside the folder's files, and
+    // the lock it deleted here was the installation's (#392).
+    if (!available) return;
     for (final key in [_biometricKey, _enabledKey, _saltKey, _checkKey]) {
       try {
         await _storage.delete(key);

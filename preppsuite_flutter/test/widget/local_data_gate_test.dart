@@ -5,11 +5,13 @@ import 'dart:math';
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import 'package:shared_preferences_platform_interface/shared_preferences_platform_interface.dart';
 import 'package:sqlite3/sqlite3.dart';
 
 import 'package:preppsuite_flutter/core/app_lock.dart';
 import 'package:preppsuite_flutter/core/local_data_gate.dart';
 import 'package:preppsuite_flutter/core/local_database_encryption.dart';
+import 'package:preppsuite_flutter/core/portable_data.dart';
 import 'package:preppsuite_flutter/l10n/generated/app_localizations.dart';
 
 class _MemoryKeyStorage implements LocalDatabaseKeyStorage, AppLockStorage {
@@ -167,5 +169,44 @@ void main() {
 
       expect(await lock.isEnabled(), isTrue);
     });
+
+    test(
+      'starting over in a carried folder leaves the installation\'s lock '
+      '(#392)',
+      () async {
+        // The installation on this computer has a lock; the carried folder
+        // holds a database it cannot open.
+        final lockStorage = _MemoryKeyStorage();
+        await _lock(lockStorage).enable('ein-langer-test-schluessel');
+        final installed = Map.of(lockStorage.values);
+        final folder = await Directory.systemTemp.createTemp('gate-carried-');
+        addTearDown(() => folder.delete(recursive: true));
+        final database = sqlite3.open(
+          '${folder.path}${Platform.pathSeparator}preppsuite.sqlite',
+        );
+        database
+          ..execute("PRAGMA cipher = 'aes256cbc'")
+          ..execute("PRAGMA key = 'ein-anderer-schluessel'")
+          ..execute('CREATE TABLE household (name TEXT)')
+          ..close();
+        final platform = SharedPreferencesStorePlatform.instance;
+        addTearDown(() {
+          SharedPreferencesStorePlatform.instance = platform;
+          resetPortableData();
+        });
+        await startPortableData(
+          environment: {portableEnvironmentVariable: folder.path},
+        );
+        final carried = LocalDatabaseEncryption(storage: _MemoryKeyStorage());
+        await carried.initialize(directory: folder);
+        expect(carried.mode, LocalDatabaseEncryptionMode.recoveryRequired);
+
+        await startOverLocalData(carried, appLock: _lock(lockStorage));
+
+        expect(carried.mode, LocalDatabaseEncryptionMode.plaintext);
+        expect(lockStorage.values, installed);
+      },
+      skip: !LocalDatabaseEncryption.cipherAvailable,
+    );
   });
 }

@@ -1,6 +1,10 @@
+import 'dart:io';
+
 import 'package:flutter_test/flutter_test.dart';
 import 'package:preppsuite_flutter/core/app_lock.dart';
+import 'package:preppsuite_flutter/core/portable_data.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import 'package:shared_preferences_platform_interface/shared_preferences_platform_interface.dart';
 
 class _MemoryStorage implements AppLockStorage {
   final values = <String, String>{};
@@ -199,6 +203,85 @@ void main() {
         (await SharedPreferences.getInstance()).getBool('appLockConfigured.v1'),
         isTrue,
       );
+    });
+  });
+
+  group('a carried data folder (#392)', () {
+    // The key store is this computer's, and the lock in it belongs to the
+    // installation here.
+    late Directory folder;
+    late SharedPreferencesStorePlatform platform;
+
+    setUp(() {
+      folder = Directory.systemTemp.createTempSync('lock-folder');
+      platform = SharedPreferencesStorePlatform.instance;
+    });
+
+    tearDown(() {
+      SharedPreferencesStorePlatform.instance = platform;
+      resetPortableData();
+      folder.deleteSync(recursive: true);
+    });
+
+    Future<void> carry() => startPortableData(
+      environment: {portableEnvironmentVariable: folder.path},
+    );
+
+    test('is not locked by the installation\'s lock', () async {
+      final storage = _MemoryStorage();
+      await store(storage).enable('ein-langer-test-schluessel');
+      await store(storage).setBiometric(true);
+      final installed = Map.of(storage.values);
+      // The marker comes into the folder with the installation's settings.
+      await carry();
+
+      final lock = store(storage);
+      expect(AppLockStore.available, isFalse);
+      expect(await lock.isEnabled(), isFalse);
+      expect(await lock.verify('ein-langer-test-schluessel'), isFalse);
+      expect(await lock.biometricEnabled(), isFalse);
+      expect(storage.values, installed);
+    });
+
+    test('never clears the installation\'s lock', () async {
+      final storage = _MemoryStorage();
+      await store(storage).enable('ein-langer-test-schluessel');
+      final installed = Map.of(storage.values);
+      await carry();
+
+      // "Start over" in the folder, "reset the lock", turning it off.
+      await store(storage).forgetForFreshStart();
+      await store(storage).disable();
+      await store(storage).setBiometric(false);
+
+      expect(storage.values, installed);
+      resetPortableData();
+      SharedPreferencesStorePlatform.instance = platform;
+      expect(await store(storage).isEnabled(), isTrue);
+      expect(
+        await store(storage).verify('ein-langer-test-schluessel'),
+        isTrue,
+      );
+    });
+
+    test('sets up no lock of its own', () async {
+      final storage = _MemoryStorage();
+      await carry();
+
+      await expectLater(
+        store(storage).enable('ein-langer-test-schluessel'),
+        throwsUnsupportedError,
+      );
+      expect(storage.values, isEmpty);
+    });
+
+    test('a marker the folder brought along does not lock it', () async {
+      // Set on the disk with 3.0.3: the marker is in the folder, the
+      // verifier in the key store of whichever computer it was set on.
+      SharedPreferences.setMockInitialValues({'appLockConfigured.v1': true});
+      await carry();
+
+      expect(await store(_MemoryStorage()).isEnabled(), isFalse);
     });
   });
 }

@@ -7834,6 +7834,12 @@ abstract class AppLocalizations {
   /// **'The passphrase is required when you return to the app.'**
   String get appLockEnabledHint;
 
+  /// No description provided for @appLockCarried.
+  ///
+  /// In en, this message translates to:
+  /// **'A carried data folder has no app lock. The data in it is unencrypted so that the folder opens on every machine: whoever has the disk can read it without the app. A lock would only protect the open program, and a lock of the installation on this machine does not apply here.'**
+  String get appLockCarried;
+
   /// No description provided for @appLockSetTitle.
   ///
   /// In en, this message translates to:

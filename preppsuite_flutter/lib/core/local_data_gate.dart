@@ -12,7 +12,9 @@ import 'protected_navigation.dart';
 /// sat in the same key store that no longer opens the databases, and the
 /// fresh installation behind it must reach setup, where the household
 /// comes back from a backup. After the files and only if they really were
-/// set aside: a household still in place keeps its lock.
+/// set aside: a household still in place keeps its lock. A carried folder
+/// has no lock, and the one in this computer's key store is the
+/// installation's: `forgetForFreshStart` leaves it alone there (#392).
 Future<void> startOverLocalData(
   LocalDatabaseEncryption encryption, {
   AppLockStore? appLock,

@@ -1576,6 +1576,7 @@
   "appLockTitle": "App-Sperre",
   "appLockDisabledHint": "Schützt die App nach dem Verlassen mit einer eigenen Passphrase.",
   "appLockEnabledHint": "Beim Zurückkehren in die App wird die Passphrase verlangt.",
+  "appLockCarried": "In einem mitgeführten Datenordner gibt es keine App-Sperre. Die Daten darin sind unverschlüsselt, damit der Ordner an jedem Rechner aufgeht: Wer den Datenträger hat, kann sie auch ohne die App lesen. Eine Sperre würde nur das geöffnete Programm schützen, und eine Sperre der Installation auf diesem Rechner gilt hier nicht.",
   "appLockSetTitle": "App-Sperre einrichten",
   "appLockDisableTitle": "App-Sperre ausschalten",
   "appLockDialogHint": "Die Passphrase wird nicht gespeichert. Sie schützt den Zugriff auf die geöffnete App.",

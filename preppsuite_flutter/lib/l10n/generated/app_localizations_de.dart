@@ -4748,6 +4748,10 @@ class AppLocalizationsDe extends AppLocalizations {
       'Beim Zurückkehren in die App wird die Passphrase verlangt.';
 
   @override
+  String get appLockCarried =>
+      'In einem mitgeführten Datenordner gibt es keine App-Sperre. Die Daten darin sind unverschlüsselt, damit der Ordner an jedem Rechner aufgeht: Wer den Datenträger hat, kann sie auch ohne die App lesen. Eine Sperre würde nur das geöffnete Programm schützen, und eine Sperre der Installation auf diesem Rechner gilt hier nicht.';
+
+  @override
   String get appLockSetTitle => 'App-Sperre einrichten';
 
   @override

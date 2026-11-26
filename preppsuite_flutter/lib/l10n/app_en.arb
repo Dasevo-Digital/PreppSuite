@@ -2739,6 +2739,7 @@
   "appLockTitle": "App lock",
   "appLockDisabledHint": "Protects the app with a separate passphrase after you leave it.",
   "appLockEnabledHint": "The passphrase is required when you return to the app.",
+  "appLockCarried": "A carried data folder has no app lock. The data in it is unencrypted so that the folder opens on every machine: whoever has the disk can read it without the app. A lock would only protect the open program, and a lock of the installation on this machine does not apply here.",
   "appLockSetTitle": "Set up app lock",
   "appLockDisableTitle": "Turn off app lock",
   "appLockDialogHint": "The passphrase is not stored. It protects access to the open app.",

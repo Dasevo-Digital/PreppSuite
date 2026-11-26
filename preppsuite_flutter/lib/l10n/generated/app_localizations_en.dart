@@ -4723,6 +4723,10 @@ class AppLocalizationsEn extends AppLocalizations {
       'The passphrase is required when you return to the app.';
 
   @override
+  String get appLockCarried =>
+      'A carried data folder has no app lock. The data in it is unencrypted so that the folder opens on every machine: whoever has the disk can read it without the app. A lock would only protect the open program, and a lock of the installation on this machine does not apply here.';
+
+  @override
   String get appLockSetTitle => 'Set up app lock';
 
   @override

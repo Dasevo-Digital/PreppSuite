@@ -1289,6 +1289,7 @@
   "appLockTitle": "Bloqueo de la app",
   "appLockDisabledHint": "Protege la app con una frase de contraseña propia cuando sales de ella.",
   "appLockEnabledHint": "La frase de contraseña se pide al volver a la app.",
+  "appLockCarried": "Una carpeta de datos que se lleva consigo no tiene bloqueo de la app. Sus datos no están cifrados para que la carpeta se abra en cualquier equipo: quien tenga el disco puede leerlos sin la app. Un bloqueo solo protegería el programa abierto, y el bloqueo de la instalación de este equipo no se aplica aquí.",
   "appLockSetTitle": "Configurar el bloqueo de la app",
   "appLockDisableTitle": "Desactivar el bloqueo de la app",
   "appLockDialogHint": "La frase de contraseña no se guarda. Protege el acceso a la app abierta.",

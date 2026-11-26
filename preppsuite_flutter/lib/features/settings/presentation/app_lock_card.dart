@@ -13,6 +13,17 @@ class AppLockCard extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
+    // Said rather than left out: somebody who set a lock on the disk with
+    // an earlier version would otherwise look for it in vain (#392).
+    if (!AppLockStore.available) {
+      return Card(
+        child: ListTile(
+          leading: const Icon(Icons.lock_open_outlined),
+          title: Text(l10n.appLockTitle),
+          subtitle: Text(l10n.appLockCarried),
+        ),
+      );
+    }
     final status = ref.watch(appLockProvider);
     final enabled = status.when(
       data: (value) => value,
