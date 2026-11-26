@@ -1,5 +1,6 @@
 import 'dart:convert';
 import 'dart:io';
+import 'dart:math' as math;
 import 'dart:typed_data';
 
 import '../../../core/bounded_gzip.dart';
@@ -21,6 +22,18 @@ class PmTilesArchive {
   final ByteRangeSource _source;
   final PmTilesHeader header;
   final _Directory _rootDirectory;
+
+  /// The area the archive is about: what the offline points are fetched
+  /// for, what the readiness overview counts places against and where the
+  /// offline search says "outside".
+  ///
+  /// Usually the header's own box. Every map built in the app up to 3.0.3
+  /// states the whole world there, because the world base under the rings
+  /// went into the box (#389). For an archive that states the world, the
+  /// box is taken from its metadata's `bounds` where that names a region,
+  /// and otherwise from the tiles themselves ([_boundsOfTiles]). A real
+  /// map of the world comes out as the world either way.
+  late final PmTilesBounds bounds;
 
   /// Leaf directories read or being read, keyed by their offset, the
   /// most recently used last.
@@ -51,7 +64,9 @@ class PmTilesArchive {
           header.internalCompression,
         ),
       );
-      return PmTilesArchive._(source, header, root);
+      final archive = PmTilesArchive._(source, header, root);
+      archive.bounds = await archive._coveredBounds();
+      return archive;
     } on Object {
       await source.close();
       rethrow;
@@ -126,6 +141,122 @@ class PmTilesArchive {
   }
 
   Future<void> close() => _source.close();
+
+  Future<PmTilesBounds> _coveredBounds() async {
+    final stated = PmTilesBounds(
+      west: header.minLongitude,
+      south: header.minLatitude,
+      east: header.maxLongitude,
+      north: header.maxLatitude,
+    );
+    if (!stated.isWholeWorld) return stated;
+    try {
+      final named = PmTilesBounds.parse((await metadata())['bounds']);
+      if (named != null && !named.isWholeWorld) return named;
+      return await _boundsOfTiles() ?? stated;
+    } on Object {
+      // Damage here costs the narrower box, not the map: it still draws,
+      // and the world is what the archive said.
+      return stated;
+    }
+  }
+
+  /// The deepest level the walk below goes to once it has found the
+  /// outermost ring. A tile there is about 0.09 degrees wide, which is
+  /// all a box for points around a place needs, and the levels below it
+  /// are where almost all of an archive's entries are.
+  static const _boundsDeepestLevel = 12;
+
+  /// The most directory entries the walk reads before it settles for what
+  /// it has. A map built in the app comes to a few thousand up to level
+  /// 12; a whole planet would be millions.
+  static const _boundsEntryLimit = 50000;
+
+  /// A level held for the whole world this deep is not a base under a
+  /// region, it is a map of the world. The app's base ends at 4.
+  static const _worldBaseDeepest = 5;
+
+  /// The outermost ring's box, read from which tiles the archive holds.
+  ///
+  /// An archive the app built is a world base, levels 0 to 4 everywhere,
+  /// and then rings that nest: the country coarse from level 5, the state
+  /// deeper, the place deepest. So the walk passes over the levels that
+  /// are held whole, takes the first that is not, and follows it down for
+  /// as long as each level holds the same box at twice the resolution --
+  /// each edge where the level above puts it, or half a tile inside.
+  /// Where an edge jumps further in, the next ring has begun, and the
+  /// level before is the outermost ring at its finest. The box is the
+  /// tiles' own edges, so it holds the ring and at most a tile more.
+  ///
+  /// Null where no level is anything but whole: a world map.
+  Future<PmTilesBounds?> _boundsOfTiles() async {
+    final budget = _WalkBudget(_boundsEntryLimit);
+    _TileRange? ring;
+    // Ids run out of 64 bits past zoom 31.
+    final deepest = math.min(header.maxZoom, 31);
+    for (var z = header.minZoom; z <= deepest; z++) {
+      if (ring != null && z > _boundsDeepestLevel) break;
+      final level = _TileRange(z);
+      try {
+        await _collect(_rootDirectory, level, budget, depth: 0);
+      } on _WalkTooLong {
+        break;
+      }
+      if (level.isEmpty) {
+        if (ring != null) break;
+        continue;
+      }
+      if (ring == null) {
+        if (level.coversWholeLevel) {
+          if (z >= _worldBaseDeepest) return null;
+          continue;
+        }
+        ring = level;
+      } else if (level.continues(ring)) {
+        ring = level;
+      } else {
+        break;
+      }
+    }
+    return ring?.bounds;
+  }
+
+  /// Every tile of [level]'s zoom held under [directory], into [level].
+  ///
+  /// Ids are ordered by zoom level first, so the level is one stretch of
+  /// ids and only the leaves that overlap it are read.
+  Future<void> _collect(
+    _Directory directory,
+    _TileRange level,
+    _WalkBudget budget, {
+    required int depth,
+  }) async {
+    final first = _firstIdAt(level.z);
+    final end = _firstIdAt(level.z + 1);
+    final entries = directory.entries;
+    for (var i = 0; i < entries.length; i++) {
+      final entry = entries[i];
+      if (entry.tileId >= end) return;
+      if (entry.runLength == 0) {
+        // A leaf holds the ids from its own up to the next entry's.
+        if (i + 1 < entries.length && entries[i + 1].tileId <= first) {
+          continue;
+        }
+        if (depth >= 2) {
+          throw const PmTilesException('leaf directories nested too deep');
+        }
+        await _collect(await _leaf(entry), level, budget, depth: depth + 1);
+        continue;
+      }
+      final from = math.max(entry.tileId, first);
+      final to = math.min(entry.tileId + entry.runLength, end);
+      for (var id = from; id < to; id++) {
+        budget.take();
+        final (x, y) = _hilbertPosition(level.z, id - first);
+        level.add(x, y);
+      }
+    }
+  }
 
   Future<_Directory> _leaf(_Entry entry) {
     final offset = header.leafDirectoryOffset + entry.offset;
@@ -390,6 +521,168 @@ int tileIdFor(int z, int x, int y) {
     }
   }
   return id;
+}
+
+/// The tile [tileIdFor] gave [id] to.
+({int z, int x, int y}) tileForId(int id) {
+  if (id < 0) throw ArgumentError.value(id, 'id', 'is negative');
+  var z = 0;
+  while (z < 31 && id >= _firstIdAt(z + 1)) {
+    z++;
+  }
+  final (x, y) = _hilbertPosition(z, id - _firstIdAt(z));
+  return (z: z, x: x, y: y);
+}
+
+/// The first id at zoom [z]: every tile of every level above it,
+/// (4^z - 1) / 3.
+int _firstIdAt(int z) => ((1 << (z * 2)) - 1) ~/ 3;
+
+/// Where on the level of zoom [z] the [position]th tile along the Hilbert
+/// curve lies: [tileIdFor] backwards, the way the specification's own
+/// readers walk it.
+(int, int) _hilbertPosition(int z, int position) {
+  var x = 0;
+  var y = 0;
+  var t = position;
+  for (var side = 1; side < 1 << z; side <<= 1) {
+    final rx = 1 & (t >> 1);
+    final ry = 1 & (t ^ rx);
+    if (ry == 0) {
+      if (rx == 1) {
+        x = side - 1 - x;
+        y = side - 1 - y;
+      }
+      final swap = x;
+      x = y;
+      y = swap;
+    }
+    x += side * rx;
+    y += side * ry;
+    t >>= 2;
+  }
+  return (x, y);
+}
+
+/// A box on the map, in degrees.
+class PmTilesBounds {
+  const PmTilesBounds({
+    required this.west,
+    required this.south,
+    required this.east,
+    required this.north,
+  });
+
+  final double west;
+  final double south;
+  final double east;
+  final double north;
+
+  /// The whole Web Mercator world, give or take the rounding of a header
+  /// that stores degrees in fixed point.
+  bool get isWholeWorld =>
+      west <= -179.9 && east >= 179.9 && south <= -84.9 && north >= 84.9;
+
+  bool contains(double latitude, double longitude) =>
+      longitude >= west &&
+      longitude <= east &&
+      latitude >= south &&
+      latitude <= north;
+
+  /// A box written as `"west,south,east,north"` -- the MBTiles spelling,
+  /// which is what archives that carry one in their metadata use -- or as
+  /// a list of the four. Null for anything that is not a box.
+  static PmTilesBounds? parse(Object? value) {
+    final List<Object?> parts = switch (value) {
+      final String text => text.split(','),
+      final List<Object?> list => list,
+      _ => const [],
+    };
+    if (parts.length != 4) return null;
+    final numbers = <double>[];
+    for (final part in parts) {
+      final number = switch (part) {
+        final num value => value.toDouble(),
+        final String text => double.tryParse(text.trim()),
+        _ => null,
+      };
+      if (number == null || !number.isFinite) return null;
+      numbers.add(number);
+    }
+    final [west, south, east, north] = numbers;
+    if (west < -180 || east > 180 || south < -90 || north > 90) return null;
+    if (west >= east || south >= north) return null;
+    return PmTilesBounds(west: west, south: south, east: east, north: north);
+  }
+
+  @override
+  String toString() => 'PmTilesBounds($west, $south, $east, $north)';
+}
+
+/// The tiles held at one zoom level, as the smallest range of columns and
+/// rows that holds them.
+class _TileRange {
+  _TileRange(this.z);
+
+  final int z;
+  var minX = 1 << 62;
+  var minY = 1 << 62;
+  var maxX = -1;
+  var maxY = -1;
+
+  bool get isEmpty => maxX < 0;
+
+  void add(int x, int y) {
+    if (x < minX) minX = x;
+    if (x > maxX) maxX = x;
+    if (y < minY) minY = y;
+    if (y > maxY) maxY = y;
+  }
+
+  bool get coversWholeLevel {
+    final last = (1 << z) - 1;
+    return minX == 0 && minY == 0 && maxX == last && maxY == last;
+  }
+
+  /// Whether this level holds the same box as [coarser], one level up, at
+  /// twice the resolution: no edge more than half of one of the coarser
+  /// tiles inside where the same box would put it.
+  bool continues(_TileRange coarser) =>
+      minX <= 2 * coarser.minX + 1 &&
+      minY <= 2 * coarser.minY + 1 &&
+      maxX >= 2 * coarser.maxX &&
+      maxY >= 2 * coarser.maxY;
+
+  PmTilesBounds get bounds {
+    final side = 1 << z;
+    double longitude(int x) => x / side * 360 - 180;
+    double latitude(int y) {
+      final n = math.pi * (1 - 2 * y / side);
+      return math.atan((math.exp(n) - math.exp(-n)) / 2) * 180 / math.pi;
+    }
+
+    return PmTilesBounds(
+      west: longitude(minX),
+      south: latitude(maxY + 1),
+      east: longitude(maxX + 1),
+      north: latitude(minY),
+    );
+  }
+}
+
+/// How many more entries a walk may read.
+class _WalkBudget {
+  _WalkBudget(this._left);
+
+  int _left;
+
+  void take() {
+    if (--_left < 0) throw const _WalkTooLong();
+  }
+}
+
+class _WalkTooLong implements Exception {
+  const _WalkTooLong();
 }
 
 class _Entry {

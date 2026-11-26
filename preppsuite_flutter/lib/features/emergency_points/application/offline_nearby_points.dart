@@ -155,12 +155,13 @@ bool offlinePointAreaFits(GeoBoundingBox box) =>
 /// slowly at this scale: a defibrillator here and there.
 const offlinePointsRefreshAfter = Duration(days: 60);
 
-/// The box of [archive], as its header states it.
+/// The box of [archive]: the area it is about, not the world base every
+/// map built in the app carries under it (#389).
 GeoBoundingBox boundsOfArchive(PmTilesArchive archive) => GeoBoundingBox(
-  west: archive.header.minLongitude,
-  south: archive.header.minLatitude,
-  east: archive.header.maxLongitude,
-  north: archive.header.maxLatitude,
+  west: archive.bounds.west,
+  south: archive.bounds.south,
+  east: archive.bounds.east,
+  north: archive.bounds.north,
 );
 
 /// The points on disk, packed, beside a small file that says what they

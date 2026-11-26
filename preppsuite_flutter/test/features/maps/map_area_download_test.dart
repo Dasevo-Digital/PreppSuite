@@ -291,6 +291,40 @@ void main() {
       }
     });
 
+    test('a staggered download states its rings, not the world base, as '
+        'its area (#389)', () async {
+      final target = '${dir.path}/staggered.pmtiles';
+      final plan = MapDownloadPlan([
+        MapDownloadStep(label: 'Welt', area: MapArea.world(to: 2)),
+        MapDownloadStep(label: 'Deutschland', area: _germany.band(3, 6)),
+      ]);
+
+      await MapAreaDownloader(httpClient: _TileServer(), concurrency: 2)
+          .download(
+            plan: plan,
+            source: _source(8),
+            targetPath: target,
+            workingDirectory: dir,
+          )
+          .drain<void>();
+
+      final archive = await PmTilesArchive.open(
+        await FileByteRangeSource.open(File(target)),
+      );
+      addTearDown(archive.close);
+
+      // The world base is in it...
+      expect(archive.header.minZoom, 0);
+      expect(await archive.tile(0, 0, 0), isNotNull);
+      // ...and the box is Germany's.
+      expect(archive.header.minLongitude, closeTo(5.9, 1e-6));
+      expect(archive.header.minLatitude, closeTo(47.3, 1e-6));
+      expect(archive.header.maxLongitude, closeTo(15.0, 1e-6));
+      expect(archive.header.maxLatitude, closeTo(55.1, 1e-6));
+      expect((await archive.metadata())['bounds'], '5.9,47.3,15.0,55.1');
+      expect(archive.bounds.west, closeTo(5.9, 1e-6));
+    });
+
     test('asking for more zoom than the source has is refused', () async {
       await expectLater(
         MapAreaDownloader(httpClient: _TileServer())

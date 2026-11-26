@@ -104,10 +104,26 @@ class MapDownloadPlan {
   int get maxZoom =>
       steps.map((step) => step.area.maxZoom).reduce((a, b) => a > b ? a : b);
 
+  /// The box the archive is about: the rings, without the world base
+  /// under them.
+  ///
+  /// Taken over every step, the base made every map built in the app
+  /// state the whole world as its area (#389). Its header is what the
+  /// points taken along with the map, the readiness overview and the
+  /// offline search read as "what this map covers": the points were
+  /// never fetched (a box of the world is too large), every place counted
+  /// as on the map, and a search outside it found "nothing" rather than
+  /// saying it was outside. A plan of nothing but the world still says
+  /// the world.
   double get minLongitude => _least((step) => step.area.minLongitude);
   double get minLatitude => _least((step) => step.area.minLatitude);
   double get maxLongitude => _most((step) => step.area.maxLongitude);
   double get maxLatitude => _most((step) => step.area.maxLatitude);
+
+  Iterable<MapDownloadStep> get _area {
+    final rings = steps.where((step) => !step.area.coversWholeWorld);
+    return rings.isEmpty ? steps : rings;
+  }
 
   /// Every tile the plan covers, each one once.
   ///
@@ -143,10 +159,10 @@ class MapDownloadPlan {
   }
 
   double _least(double Function(MapDownloadStep) of) =>
-      steps.map(of).reduce((a, b) => a < b ? a : b);
+      _area.map(of).reduce((a, b) => a < b ? a : b);
 
   double _most(double Function(MapDownloadStep) of) =>
-      steps.map(of).reduce((a, b) => a > b ? a : b);
+      _area.map(of).reduce((a, b) => a > b ? a : b);
 }
 
 /// A ring before its zoom band has been decided.

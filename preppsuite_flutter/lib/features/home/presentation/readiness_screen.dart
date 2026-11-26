@@ -284,13 +284,10 @@ class ReadinessScreen extends ConsumerWidget {
   }
 }
 
-bool _covers(PmTilesArchive archive, PersonalPlace place) {
-  final header = archive.header;
-  return place.longitude >= header.minLongitude &&
-      place.longitude <= header.maxLongitude &&
-      place.latitude >= header.minLatitude &&
-      place.latitude <= header.maxLatitude;
-}
+/// Against the area the map is about, not the world base under it,
+/// which every place on earth is in (#389).
+bool _covers(PmTilesArchive archive, PersonalPlace place) =>
+    archive.bounds.contains(place.latitude, place.longitude);
 
 class _StatusRow extends StatelessWidget {
   const _StatusRow({

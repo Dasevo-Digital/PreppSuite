@@ -164,10 +164,10 @@ class OfflinePoiSearch {
     if (header.maxZoom < poiZoom) {
       throw const PoiSearchException(PoiSearchProblem.tooShallow);
     }
-    if (centre.longitude < header.minLongitude ||
-        centre.longitude > header.maxLongitude ||
-        centre.latitude < header.minLatitude ||
-        centre.latitude > header.maxLatitude) {
+    // The area the map is about, not the world base under it (#389):
+    // against that, nowhere was outside, and a search beyond the map read
+    // "nothing found".
+    if (!archive.bounds.contains(centre.latitude, centre.longitude)) {
       throw const PoiSearchException(PoiSearchProblem.outsideArchive);
     }
 

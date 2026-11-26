@@ -287,6 +287,47 @@ void main() {
     },
   );
 
+  test('a map built in the app that states the world still has an outside '
+      '(#389)', () async {
+    // What 3.0.3 wrote: the world base, a region, and the whole world in
+    // the header. Against the header nowhere was outside, and a search in
+    // Munich read every tile and said "nothing found".
+    final bytes = buildBinaryArchive(
+      tiles: {
+        (0, 0, 0): poiTile(const []),
+        for (var x = 1078; x <= 1088; x++)
+          for (var y = 668; y <= 678; y++) (11, x, y): poiTile(const []),
+        (14, 8671, 5391): poiTile(const [
+          (subclass: 'pharmacy', name: 'Apotheke', x: 2048, y: 2048),
+        ]),
+      },
+    );
+    final file = File('${workspace.path}/${serial++}.pmtiles')
+      ..writeAsBytesSync(bytes);
+    final archive = await PmTilesArchive.open(
+      await FileByteRangeSource.open(file),
+    );
+    addTearDown(archive.close);
+    expect(archive.header.maxLongitude, 180);
+
+    expect(
+      () => OfflinePoiSearch(
+        archive,
+      ).search(centre: const LatLng(48.1372, 11.5756), radiusMeters: 2000).last,
+      throwsA(
+        isA<PoiSearchException>().having(
+          (e) => e.problem,
+          'problem',
+          PoiSearchProblem.outsideArchive,
+        ),
+      ),
+    );
+    final near = await OfflinePoiSearch(
+      archive,
+    ).search(centre: centre, radiusMeters: 1000).last;
+    expect(near.places.single.name, 'Apotheke');
+  });
+
   test('a wide radius is capped rather than left to read the country', () {
     final tiles = tilesAround(centre, 100000);
     expect(tiles, hasLength(OfflinePoiSearch.tileBudget));

@@ -65,6 +65,14 @@ class MapArea {
     maxZoom: to,
   );
 
+  /// Whether this is the whole planet rather than a region in it — the
+  /// base [world] gives every download.
+  bool get coversWholeWorld =>
+      minLongitude <= -180 &&
+      maxLongitude >= 180 &&
+      minLatitude <= -85 &&
+      maxLatitude >= 85;
+
   /// The same box over a different range of zoom levels.
   MapArea band(int from, int to) => MapArea(
     minLongitude: minLongitude,
@@ -328,6 +336,11 @@ class MapAreaDownloader {
           'name': 'PreppSuite',
           'format': 'pbf',
           'type': 'baselayer',
+          // The box once more, in the MBTiles spelling other readers know
+          // (#389): west, south, east, north.
+          'bounds':
+              '${plan.minLongitude},${plan.minLatitude},'
+              '${plan.maxLongitude},${plan.maxLatitude}',
           'vector_layers': source.vectorLayers,
           if (source.attribution != null) 'attribution': source.attribution,
         },
