@@ -16,7 +16,7 @@ void main() {
 
   test('narrow paths are UTF-8 in the whole process', () {
     // The translator's engine opens its models with fopen. In the ANSI
-    // code page a path through "C:\Users\Jürgen" names another file, and
+    // code page a path through "E:\Für Notfälle" names another file, and
     // the model "could not be opened".
     final manifest = XmlDocument.parse(
       File('windows/runner/runner.exe.manifest').readAsStringSync(),
