@@ -100,11 +100,20 @@ class DatabaseSnapshots {
 
     await folder.create(recursive: true);
     await excludeFromBackup(folder.path);
+    await _deleteLeftoverParts();
     final name = '${_stem()}-${_stamp(at)}.sqlite';
     final partial = File(p.join(folder.path, '$name.part'));
     if (await partial.exists()) await partial.delete();
-    await write(partial.path);
-    final copy = await partial.rename(p.join(folder.path, name));
+    final File copy;
+    try {
+      await write(partial.path);
+      copy = await partial.rename(p.join(folder.path, name));
+    } on Object {
+      // A copy cut off by a full disk is of use to nobody, and under its
+      // own stamp nothing would ever remove it (#406).
+      await _deleteQuietly(partial);
+      rethrow;
+    }
 
     for (final old in {...readable, ...(await list()).skip(keep)}) {
       try {
@@ -118,8 +127,48 @@ class DatabaseSnapshots {
 
   /// Removes every copy. For a household that is deleted: its copies hold
   /// the same emergency cards and must not outlive it.
+  ///
+  /// The damaged database [restore] set aside goes too, with its journals
+  /// (#406): it is the whole household as it was before the restore, and
+  /// on a device without encryption it is readable.
   Future<void> clear() async {
     if (await folder.exists()) await folder.delete(recursive: true);
+    final directory = databaseFile.parent;
+    if (!await directory.exists()) return;
+    final damaged = '${p.basename(databaseFile.path)}.damaged-';
+    await for (final entry in directory.list(followLinks: false)) {
+      if (entry is File && p.basename(entry.path).startsWith(damaged)) {
+        await _deleteQuietly(entry);
+      }
+    }
+  }
+
+  /// Removes what an earlier run left half written and did not get to
+  /// remove: the app stopped in the middle of a copy. Only ones an hour
+  /// old, so that a copy another window is taking right now stays.
+  Future<void> _deleteLeftoverParts() async {
+    final now = DateTime.now().toUtc();
+    final prefix = '${_stem()}-';
+    await for (final entry in folder.list(followLinks: false)) {
+      if (entry is! File) continue;
+      final name = p.basename(entry.path);
+      if (!name.startsWith(prefix) || !name.endsWith('.sqlite.part')) continue;
+      try {
+        final modified = (await entry.stat()).modified.toUtc();
+        if (now.difference(modified) < const Duration(hours: 1)) continue;
+      } on FileSystemException {
+        continue;
+      }
+      await _deleteQuietly(entry);
+    }
+  }
+
+  static Future<void> _deleteQuietly(File file) async {
+    try {
+      if (await file.exists()) await file.delete();
+    } on FileSystemException {
+      // Next time.
+    }
   }
 
   /// Puts [snapshot] in place of the database, which must be closed.

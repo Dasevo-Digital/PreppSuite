@@ -138,4 +138,61 @@ void main() {
     expect(snapshots.folder.existsSync(), isFalse);
     expect(await snapshots.list(), isEmpty);
   });
+
+  test('and the damaged one a restore set aside (#406)', () async {
+    final snapshots = DatabaseSnapshots(live);
+    final copy = (await snapshots.takeIfDue(db.snapshotTo, now: day))!;
+    await db.close();
+    File('${live.path}-journal').writeAsStringSync('half a transaction');
+    await snapshots.restore(copy, now: day.add(const Duration(days: 1)));
+    // Set aside by "start over", for a key that may turn up: not this
+    // household's to delete.
+    final locked = File('${live.path}.locked-2026-10-09T08-00-00.000Z')
+      ..writeAsStringSync('gesperrt');
+    db = AppDatabase.forTesting(NativeDatabase(live));
+    await db.customSelect('SELECT 1').get();
+
+    await snapshots.clear();
+
+    final names = dir.listSync().map((e) => e.path.split('/').last).toList();
+    expect(names.where((name) => name.contains('.damaged-')), isEmpty);
+    expect(names, contains('preppsuite.sqlite'));
+    expect(locked.existsSync(), isTrue);
+  });
+
+  test('a copy that fails leaves nothing half written (#406)', () async {
+    final snapshots = DatabaseSnapshots(live);
+
+    await expectLater(
+      snapshots.takeIfDue((path) async {
+        File(path).writeAsStringSync('halb');
+        throw const FileSystemException('disk full');
+      }, now: day),
+      throwsA(isA<FileSystemException>()),
+    );
+
+    expect(snapshots.folder.listSync(), isEmpty);
+  });
+
+  test('what an earlier run left half written goes with the next copy '
+      '(#406)', () async {
+    final snapshots = DatabaseSnapshots(live);
+    snapshots.folder.createSync();
+    final stale =
+        File('${snapshots.folder.path}/preppsuite-20261001T080000.sqlite.part')
+          ..writeAsStringSync('abgebrochen')
+          ..setLastModifiedSync(
+            DateTime.now().subtract(const Duration(hours: 2)),
+          );
+    // Another window taking its copy right now.
+    final running = File(
+      '${snapshots.folder.path}/preppsuite-20261009T075959.sqlite.part',
+    )..writeAsStringSync('läuft');
+
+    await snapshots.takeIfDue(db.snapshotTo, now: day);
+
+    expect(stale.existsSync(), isFalse);
+    expect(running.existsSync(), isTrue);
+    expect(await snapshots.list(), hasLength(1));
+  });
 }

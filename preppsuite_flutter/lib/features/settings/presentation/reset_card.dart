@@ -17,6 +17,7 @@ import '../../home/application/home_screen_widget.dart';
 import '../../household/application/household_providers.dart';
 import '../../household/application/lock_screen_card_file.dart';
 import '../../inventory/application/inventory_photo_service.dart';
+import '../../inventory/application/photo_content_index.dart';
 import '../../knowledge/application/personal_document_index.dart';
 import '../../knowledge/application/personal_document_store.dart';
 import '../../maps/application/map_source_preference.dart';
@@ -126,8 +127,12 @@ class ResetCard extends ConsumerWidget {
     // Pictures first: the rows are the only record of which files were
     // this household's.
     await deleteHouseholdPhotos(db, householdId: profile.id);
+    // And what was learned about them: every picture's name and hash, in
+    // the clear (#406).
+    await PhotoContentIndex.instance.clear();
     await db.deleteHouseholdData(profile.id);
-    // The daily copies hold the same household (#140).
+    // The daily copies hold the same household (#140), and so does the
+    // damaged database a restore from one of them set aside (#406).
     try {
       await DatabaseSnapshots(
         LocalDatabaseEncryption.instance.databaseFile(localDatabaseFilePrefix),

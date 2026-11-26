@@ -95,6 +95,17 @@ class PhotoContentIndex {
     await _store.save(known);
   }
 
+  /// Forgets everything it has learned, here and where it is kept.
+  ///
+  /// For a household that is deleted (#406): the names of its pictures and
+  /// what they hold are kept in the clear, and a household set up here
+  /// afterwards has no pictures they could belong to.
+  Future<void> clear() async {
+    _known = {};
+    _unsaved = false;
+    await _store.clear();
+  }
+
   /// Lets go of files that are no longer in [directory].
   Future<void> prune(Directory directory) async {
     final known = await _loaded();
@@ -114,6 +125,7 @@ class PhotoContentIndex {
 abstract interface class PhotoHashStore {
   Future<Map<String, String>> load();
   Future<void> save(Map<String, String> hashes);
+  Future<void> clear();
 }
 
 /// The app's own: one preferences entry. A store that cannot be reached
@@ -150,6 +162,16 @@ class PreferencesPhotoHashStore implements PhotoHashStore {
       // Learned again on the next reading.
     }
   }
+
+  @override
+  Future<void> clear() async {
+    try {
+      await (await SharedPreferences.getInstance()).remove(_key);
+    } on Object {
+      // Not reachable now. What it names is gone, and `prune` lets go of
+      // it the next time it runs.
+    }
+  }
 }
 
 /// A store held in memory, for tests.
@@ -165,4 +187,7 @@ class MemoryPhotoHashStore implements PhotoHashStore {
       ..clear()
       ..addAll(next);
   }
+
+  @override
+  Future<void> clear() async => hashes.clear();
 }

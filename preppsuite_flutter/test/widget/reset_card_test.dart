@@ -1,3 +1,6 @@
+import 'dart:convert';
+import 'dart:io';
+
 import 'package:drift/native.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -9,6 +12,7 @@ import 'package:preppsuite_flutter/features/home/application/check_in.dart';
 import 'package:preppsuite_flutter/features/inventory/application/charge_reminder_provider.dart';
 import 'package:preppsuite_flutter/features/inventory/application/expiry_reminder_planner.dart';
 import 'package:preppsuite_flutter/features/inventory/application/expiry_reminder_provider.dart';
+import 'package:preppsuite_flutter/features/inventory/application/photo_content_index.dart';
 import 'package:preppsuite_flutter/features/knowledge/application/personal_document_store.dart';
 import 'package:preppsuite_flutter/features/maps/application/personal_place.dart';
 import 'package:preppsuite_flutter/features/preparedness/application/preparedness_hub_store.dart';
@@ -132,6 +136,28 @@ void main() {
       reason: 'nothing of the household outlives it on this device',
     );
     expect(left['themeModeOverride'], isNotNull);
+  });
+
+  testWidgets('deleting the household forgets what its pictures held '
+      '(#406)', (tester) async {
+    // Every picture's name and hash, in the clear in the preferences.
+    final index = PhotoContentIndex.instance;
+    await index.remember(File('/fotos/a.jpg'), 'a' * 64);
+    await index.flush();
+    final prefs = await SharedPreferences.getInstance();
+    expect(prefs.getString('photoContentHashes.v1'), contains('a.jpg'));
+
+    await show(tester);
+    await reset(tester, 'Haushalt und lokale Daten löschen');
+
+    expect(prefs.getString('photoContentHashes.v1'), isNull);
+    // Nor does what was held in memory come back with the next picture.
+    await index.remember(File('/fotos/b.jpg'), 'b' * 64);
+    await index.flush();
+    expect(
+      (jsonDecode(prefs.getString('photoContentHashes.v1')!) as Map).keys,
+      ['b.jpg'],
+    );
   });
 
   testWidgets('resetting the settings reaches the running app, not only '
