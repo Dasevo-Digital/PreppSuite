@@ -30,7 +30,10 @@ Ohne Schlüssel bleiben Datenbank, Fotos und private Einstellungen
 unverschlüsselt: in der mitgeführten Fassung auf einem USB-Stick (der
 Schlüssel liegt im Schlüsselbund des jeweiligen Rechners und reist nicht
 mit), auf Geräten ohne nutzbaren Schlüsselspeicher und solange eine
-Installation auf ihre Wiederherstellung wartet.
+Installation auf ihre Wiederherstellung wartet. Übernimmt die mitgeführte
+Fassung beim ersten Start den Haushalt einer verschlüsselten Installation,
+legt sie ihn deshalb entschlüsselt in ihren Ordner; die Installation selbst
+bleibt verschlüsselt.
 
 **Das gilt derzeit für jede Mac-Installation.** Die macOS-Pakete sind noch
 nicht mit einem Entwicklerzertifikat signiert, und ohne Signatur verweigert

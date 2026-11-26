@@ -57,11 +57,33 @@ beinahe tun. Die Datei ist absichtlich lesbares JSON.
 
 ## Übernahme beim ersten Start
 
-Beim ersten Start mit einem neuen Ordner übernimmt die App einmalig, was
-auf diesem Rechner liegt: Datenbanken und Fotos. **Kopiert, nicht
-verschoben** — die Installation auf dem Rechner ist weiterhin die von
-jemandem und wird weiter gestartet. Ein Ordner, der schon einmal benutzt
-wurde, wird nie überschrieben.
+Beim ersten Start mit einem neuen, leeren Ordner übernimmt die App
+einmalig, was auf diesem Rechner liegt: Datenbanken, Fotos und
+Einstellungen. **Kopiert, nicht verschoben** — die Installation auf dem
+Rechner ist weiterhin die von jemandem und wird weiter gestartet; sie
+wird dabei nur gelesen. Ein Ordner, in dem schon eine Datenbank oder eine
+Einstellung liegt, bekommt nichts dazu, auch bei keinem späteren Start.
+
+Die Übernahme geschieht ganz oder gar nicht. Alles wird zuerst im
+Unterordner `.preppsuite-uebernahme` zusammengestellt und erst danach an
+seinen Platz gelegt. Bricht der Start dabei ab, räumt der nächste Start
+fertig ein, bevor irgendetwas den Ordner öffnet. Datenbanken werden über
+SQLite kopiert, als eine in sich stimmige Datei; ein Journal der
+Installation kommt nie mit.
+
+**Unverschlüsselt.** Ein mitgeführter Ordner muss an jedem Rechner
+aufgehen, und der Schlüssel einer Installation bleibt in deren
+Schlüsselbund. Deshalb werden die Datenbanken beim Kopieren entschlüsselt
+und versiegelte Einstellungen und Fotos mit dem Schlüssel der Installation
+geöffnet. Lässt sich dieser Schlüssel nicht lesen oder steckt die
+Installation mitten in ihrer Umstellung, wird nichts übernommen, und die
+Karte „Datenordner“ sagt das. Mitnehmen lässt sich der Haushalt dann über
+eine Sicherung.
+
+Der Schlüsselspeicher des Rechners gehört der Installation: Die
+mitgeführte Fassung liest daraus nur den Schlüssel, für das, was eine
+frühere Fassung im Ordner verschlüsselt oder versiegelt hat, und schreibt
+nichts hinein. Neue Dateien im Ordner sind immer unverschlüsselt.
 
 ## Pfade, die sich ändern
 
@@ -81,10 +103,12 @@ unter Windows geschriebener Eintrag unter Linux lesbar ist. Alles
 außerhalb behält seinen absoluten Pfad — eine Datei auf der Platte des
 Rechners ist genauso auffindbar wie eh und je.
 
-Fotos haben zusätzlich einen Rückfall: Wird ein Haushalt übernommen,
-kamen die Bilder mit, aber ihre gespeicherten Pfade nennen noch den alten
-Rechner. Gibt es die Datei dort nicht, wird derselbe Dateiname im
-Fotoordner dieser Fassung gesucht — dorthin hat die Übernahme sie gelegt.
+Fotos sucht die mitgeführte Fassung immer im eigenen Fotoordner: Wird ein
+Haushalt übernommen, kamen die Bilder mit, aber ihre gespeicherten Pfade
+nennen noch die Installation. Gesucht wird deshalb derselbe Dateiname im
+Fotoordner dieser Fassung — dorthin hat die Übernahme sie gelegt — und nie
+der alte Pfad. Auf demselben Rechner läge dort das Foto der Installation,
+und „Haushalt löschen“ auf dem Datenträger hätte es mitgelöscht.
 
 ## Was auf einem fremden Rechner trotzdem klemmt
 
