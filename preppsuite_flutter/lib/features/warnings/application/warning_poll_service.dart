@@ -7,6 +7,8 @@ import 'dwd_areas.dart';
 import 'meteoalarm_client.dart';
 import 'warning_ingest.dart';
 import 'warning_poll_status_store.dart';
+import 'warning_region_filter.dart';
+import 'warning_relevance.dart';
 import 'warning_severity_l10n.dart';
 
 /// What one poll did, so the caller can log or display it without having
@@ -403,7 +405,37 @@ class WarningPollService {
     return !waited.isNegative && waited < unplacedDetailWait;
   }
 
+  /// Marks [warnings] as told. Pass all of [pendingNotifications], not only
+  /// what [announcementsFor] chose: the other areas of an announced
+  /// message were told with it.
   Future<void> markNotified(List<Warning> warnings) {
     return _db.markWarningsNotified(warnings);
   }
+}
+
+/// What of [pending] goes out as a notification: one per message (#395).
+///
+/// MeteoAlarm keeps a row per message and area, and one message can name
+/// a hundred districts. A household that follows a Land, or none, would
+/// have had a notification for every one of them, all saying the same.
+/// The one shown is the area nearest the household by
+/// [warningRelevanceRank], the first of them at a tie; the others are
+/// marked as told with it ([WarningPollService.markNotified]).
+List<Warning> announcementsFor(
+  List<Warning> pending, {
+  required WarningRegionFilter filter,
+}) {
+  final chosen = <String, Warning>{};
+  for (final warning in pending) {
+    final message = warning.source == WarningSource.meteoalarm.name
+        ? '${warning.source}\u0000${meteoAlarmMessageId(warning.externalId)}'
+        : '${warning.source}\u0000${warning.externalId}';
+    final held = chosen[message];
+    if (held == null ||
+        warningRelevanceRank(warning: warning, filter: filter) >
+            warningRelevanceRank(warning: held, filter: filter)) {
+      chosen[message] = warning;
+    }
+  }
+  return chosen.values.toList();
 }

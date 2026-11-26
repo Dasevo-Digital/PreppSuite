@@ -343,4 +343,73 @@ void main() {
     final status = await const WarningPollStatusStore().load();
     expect(status.isBlocked, isTrue);
   });
+
+  test('a MeteoAlarm message for several districts is one notification, '
+      'and all of them are told (#395)', () async {
+    SharedPreferences.setMockInitialValues({'notificationsEnabled': true});
+    // Ravensburg, whose Land the message's other district is in.
+    await const WarningRegionStore().save(
+      const WarningRegionFilter(
+        countryCode: 'DE',
+        ownRegionKey: '084360000000',
+      ),
+    );
+    final notifications = _RecordingNotifications();
+
+    await runWarningBackgroundPoll(
+      database: db,
+      notifications: notifications,
+      pollService: _MessagePollService(db, {
+        'DE271': '08435',
+        'DE344': '08436',
+      }),
+    );
+
+    expect(notifications.shown.map((w) => w.regionKey), ['08436']);
+    final rows = await db.warningsBySource('meteoalarm');
+    expect(rows, hasLength(2));
+    expect(rows.values.every((w) => w.notified), isTrue);
+  });
+}
+
+/// Writes one MeteoAlarm message with a row for each of [areas], code to
+/// district, as the ingest stores it.
+class _MessagePollService extends WarningPollService {
+  _MessagePollService(this._db, this.areas) : super(database: _db);
+
+  final AppDatabase _db;
+  final Map<String, String> areas;
+
+  @override
+  Future<WarningPollResult> poll({
+    required String countryCode,
+    String? kreisSchluessel,
+    Iterable<String> extraKreisSchluessel = const [],
+  }) async {
+    final now = DateTime.now().toUtc();
+    for (final MapEntry(key: code, value: district) in areas.entries) {
+      await _db.upsertWarning(
+        WarningsCompanion.insert(
+          source: 'meteoalarm',
+          externalId: '2.49.0.0.276.0.DWD.PVW.1795681980000.6eaf5b45.MUL#$code',
+          countryCode: countryCode,
+          regionKey: Value(district),
+          severity: 'moderate',
+          eventType: 'icy surfaces',
+          headline: 'Orange Icy Surfaces Warning - $code',
+          areaDescription: Value(code),
+          effective: now,
+          expires: Value(now.add(const Duration(hours: 6))),
+          sent: now,
+          updatedAt: now,
+        ),
+      );
+    }
+    return const WarningPollResult(
+      fetched: 2,
+      newsworthy: [],
+      retired: 0,
+      complete: true,
+    );
+  }
 }

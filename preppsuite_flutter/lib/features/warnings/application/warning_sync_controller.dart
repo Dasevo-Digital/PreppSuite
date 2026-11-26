@@ -174,7 +174,7 @@ class WarningSyncController extends Notifier<AsyncValue<void>> {
     if (!await notifications.systemAllowsNotifications()) return;
 
     final language = (await appLocaleWithoutContext()).languageCode;
-    for (final warning in pending) {
+    for (final warning in announcementsFor(pending, filter: filter)) {
       await notifications.showLocalWarning(warning, language: language);
     }
     await service.markNotified(pending);

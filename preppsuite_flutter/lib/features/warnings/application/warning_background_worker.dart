@@ -121,7 +121,8 @@ Future<bool> runWarningBackgroundPoll({
     // back, as long as it is still in force.
     if (pending.isNotEmpty && await notifier.systemAllowsNotifications()) {
       final language = (await appLocaleWithoutContext()).languageCode;
-      for (final warning in pending) {
+      // One per message: a MeteoAlarm message is a row per area (#395).
+      for (final warning in announcementsFor(pending, filter: filter)) {
         await notifier.showLocalWarning(warning, language: language);
       }
       await service.markNotified(pending);

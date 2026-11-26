@@ -1,9 +1,15 @@
 import 'package:drift/drift.dart'
-    show ApplyInterceptor, BatchedStatements, QueryExecutor, QueryInterceptor;
+    show
+        ApplyInterceptor,
+        BatchedStatements,
+        QueryExecutor,
+        QueryInterceptor,
+        Value;
 import 'package:drift/native.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:preppsuite_flutter/features/warnings/application/bbk_client.dart';
 import 'package:preppsuite_flutter/features/warnings/application/dwd_areas.dart';
+import 'package:preppsuite_flutter/features/warnings/application/meteoalarm_client.dart';
 import 'package:preppsuite_flutter/features/warnings/application/warning_ingest.dart';
 import 'package:preppsuite_flutter/local_db/database.dart';
 
@@ -647,6 +653,102 @@ Vogelsbergkreis;06535;HE
       final before = cleaned.updatedAt;
       await ingest.ingestBbk([compact], countryCode: 'DE');
       expect((await stored()).updatedAt, before);
+    });
+  });
+
+  group('a MeteoAlarm message for several districts (#395)', () {
+    // The live feed of 2026-11-26: one DWD message for icy surfaces, one
+    // entry each for the Bodenseekreis and the Kreis Ravensburg.
+    const identifier =
+        '2.49.0.0.276.0.DWD.PVW.1795681980000.'
+        '6eaf5b45-7fe5-4e2f-aed7-e0686aeaf2ab.MUL';
+    final areas = DwdAreas.parse("""
+# name;district;state
+Bodenseekreis;08435;BW
+Kreis Ravensburg;08436;BW
+""");
+
+    MeteoAlarmRawWarning entry(String area, String code) =>
+        MeteoAlarmRawWarning(
+          identifier: identifier,
+          title: 'Orange Icy Surfaces Warning issued for Germany - $area',
+          areaDesc: area,
+          areaCode: code,
+          event: 'icy surfaces',
+          severity: 'Moderate',
+          sent: '2026-11-26T08:33:00+00:00',
+          onset: '2026-11-26T08:33:00+00:00',
+          expires: '2026-11-26T15:00:00+00:00',
+          raw: const {},
+        );
+    final both = [
+      entry('Bodenseekreis', 'DE271'),
+      entry('Kreis Ravensburg', 'DE344'),
+    ];
+
+    test('is stored once for each of them', () async {
+      await ingest.ingestMeteoAlarm(both, countryCode: 'DE', areas: areas);
+
+      final rows = (await db.warningsBySource('meteoalarm')).values;
+      expect(rows.map((w) => w.regionKey), unorderedEquals(['08435', '08436']));
+      expect(
+        rows.map((w) => meteoAlarmMessageId(w.externalId)).toSet(),
+        {identifier},
+      );
+    });
+
+    /// The row a version before this kept for the whole message: the last
+    /// entry's area, under the identifier alone.
+    Future<void> storedWhole({required bool notified}) => db.upsertWarning(
+      WarningsCompanion.insert(
+        source: 'meteoalarm',
+        externalId: identifier,
+        countryCode: 'DE',
+        regionKey: const Value('08436'),
+        severity: 'moderate',
+        eventType: 'icy surfaces',
+        headline: 'Orange Icy Surfaces Warning issued for Germany',
+        areaDescription: const Value('Kreis Ravensburg'),
+        effective: DateTime.utc(2026, 11, 26, 8, 33),
+        expires: Value(DateTime.utc(2026, 11, 26, 15)),
+        sent: DateTime.utc(2026, 11, 26, 8, 33),
+        updatedAt: DateTime.utc(2026, 11, 26, 8, 35),
+        notified: Value(notified),
+      ),
+    );
+
+    test('a message stored whole and announced is not announced again '
+        'for its areas', () async {
+      await storedWhole(notified: true);
+
+      final news = await ingest.ingestMeteoAlarm(
+        both,
+        countryCode: 'DE',
+        areas: areas,
+      );
+
+      expect(news, isEmpty);
+      final rows = await db.warningsBySource('meteoalarm');
+      expect(
+        rows.values.where((w) => w.externalId != identifier),
+        everyElement(
+          isA<Warning>().having((w) => w.notified, 'notified', true),
+        ),
+      );
+    });
+
+    test('nor does its announcement stand in for one it never had', () async {
+      await storedWhole(notified: false);
+
+      await ingest.ingestMeteoAlarm(both, countryCode: 'DE', areas: areas);
+
+      final rows = await db.warningsBySource('meteoalarm');
+      expect(
+        rows.values.where((w) => w.externalId != identifier),
+        everyElement(
+          isA<Warning>().having((w) => w.notified, 'notified', false),
+        ),
+      );
     });
   });
 }

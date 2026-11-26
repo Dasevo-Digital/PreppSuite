@@ -21,6 +21,7 @@ class MeteoAlarmRawWarning {
     required this.onset,
     required this.expires,
     required this.raw,
+    this.areaCode,
   });
 
   final String identifier;
@@ -32,11 +33,32 @@ class MeteoAlarmRawWarning {
   final String? onset;
   final String? expires;
   final Map<String, dynamic> raw;
+
+  /// The area's own code in MeteoAlarm, its `EMMA_ID` geocode (`DE271`),
+  /// where the entry carries one.
+  final String? areaCode;
 }
 
 /// What a MeteoAlarm entry is stored under, and what a full read of its
-/// feed is checked against.
-String meteoAlarmExternalId(MeteoAlarmRawWarning warning) => warning.identifier;
+/// feed is checked against: its message and its area (#395).
+///
+/// The feed has one entry per message and area, and one message can name
+/// many areas. On 2026-11-26 the German feed held 1,167 entries under 66
+/// identifiers, one of them for 156 districts. Stored by the identifier
+/// alone, every entry of a message wrote the same row, the last one won,
+/// and a warning for 156 districts stood in the list as a warning for one
+/// of them -- and was nobody else's.
+String meteoAlarmExternalId(MeteoAlarmRawWarning warning) {
+  final area =
+      warning.areaCode ?? (warning.areaDesc.isEmpty ? null : warning.areaDesc);
+  return area == null ? warning.identifier : '${warning.identifier}#$area';
+}
+
+/// The message a stored MeteoAlarm row is one area of, from its id.
+String meteoAlarmMessageId(String externalId) {
+  final area = externalId.indexOf('#');
+  return area == -1 ? externalId : externalId.substring(0, area);
+}
 
 /// One look at a country's feed.
 class MeteoAlarmFeed {
@@ -167,8 +189,22 @@ class MeteoAlarmClient {
         entry.getElement(name, namespaceUri: _capNs)?.innerText ?? '';
     String? capOrNull(String name) =>
         entry.getElement(name, namespaceUri: _capNs)?.innerText;
+    // `valueName` and `value` sit in the feed's default namespace, not in
+    // CAP's.
+    String? geocode(String name) {
+      for (final code in entry.findElements('geocode', namespaceUri: _capNs)) {
+        if (code.getElement('valueName', namespaceUri: '*')?.innerText.trim() !=
+            name) {
+          continue;
+        }
+        final value = code.getElement('value', namespaceUri: '*')?.innerText;
+        if (value != null && value.trim().isNotEmpty) return value.trim();
+      }
+      return null;
+    }
 
     return MeteoAlarmRawWarning(
+      areaCode: geocode('EMMA_ID'),
       identifier: cap('identifier'),
       title: entry.getElement('title')?.innerText ?? cap('areaDesc'),
       areaDesc: cap('areaDesc'),

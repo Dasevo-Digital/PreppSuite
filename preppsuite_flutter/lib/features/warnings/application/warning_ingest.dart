@@ -118,8 +118,16 @@ class WarningIngest {
       if (sent == null) continue;
 
       final externalId = meteoAlarmExternalId(warning);
+      final stored = existing[externalId];
       final result = _prepare(
-        existing: existing[externalId],
+        existing: stored,
+        // A row an older version stored under the message alone, before
+        // its areas were told apart (#395). Its announcement covers every
+        // area of the message, so they are not announced again.
+        predecessors: [
+          if (stored == null && externalId != warning.identifier)
+            ?existing[warning.identifier],
+        ],
         source: WarningSource.meteoalarm,
         externalId: externalId,
         countryCode: countryCode,
@@ -165,8 +173,13 @@ class WarningIngest {
   /// [existing] is passed in rather than looked up: the caller has already
   /// loaded every row of this source in one query, and this used to repeat
   /// that lookup per warning. Returns null when there is nothing to write.
+  ///
+  /// [predecessors] are stored rows this one continues under another id.
+  /// One of them announced at this level or higher has told the household
+  /// already, so this one is not news, and it counts as announced (#395).
   _Prepared? _prepare({
     required Warning? existing,
+    Iterable<Warning> predecessors = const [],
     required WarningSource source,
     required String externalId,
     required String countryCode,
@@ -275,9 +288,15 @@ class WarningIngest {
         existing != null &&
         warningSeverityRank(severity) >
             warningSeverityRank(warningSeverityFromName(existing.severity));
+    final told = predecessors.any(
+      (earlier) =>
+          earlier.notified &&
+          warningSeverityRank(warningSeverityFromName(earlier.severity)) >=
+              warningSeverityRank(severity),
+    );
 
-    final newsworthy = existing == null || escalated;
-    final wasAnnounced = existing?.notified ?? false;
+    final newsworthy = existing == null ? !told : escalated;
+    final wasAnnounced = (existing?.notified ?? false) || told;
 
     return (
       newsworthy: newsworthy,
