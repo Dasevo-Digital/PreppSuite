@@ -1,3 +1,6 @@
+import 'dart:async';
+
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_tts/flutter_tts.dart';
 
 import '../../../core/speech_capabilities.dart';
@@ -19,6 +22,11 @@ abstract interface class StepSpeech {
   Future<bool> isAvailable(String languageCode);
 
   /// Speaks [text], interrupting whatever was being said.
+  ///
+  /// Completes when the text has been said to the end, when it is cut
+  /// off by [stop] or by the next [speak], or when it fails -- not when
+  /// the engine merely begins. A button that offers "stop" while this
+  /// runs goes back to "read aloud" when it completes (#412).
   Future<void> speak(String text, {required String languageCode});
 
   Future<void> stop();
@@ -28,6 +36,20 @@ class PlatformStepSpeech implements StepSpeech {
   PlatformStepSpeech([FlutterTts? engine]) : _engine = engine ?? FlutterTts();
 
   final FlutterTts _engine;
+
+  /// Completed when what is being said now is cut off.
+  ///
+  /// The engine does not say so on every platform: with
+  /// `awaitSpeakCompletion`, Android answers a stopped utterance, iOS and
+  /// macOS answer only one that was said to its end, and the future of
+  /// a stopped one never completes there.
+  Completer<void>? _cut;
+
+  void _cutOff() {
+    final cut = _cut;
+    _cut = null;
+    if (cut != null && !cut.isCompleted) cut.complete();
+  }
 
   @override
   Future<bool> isAvailable(String languageCode) async {
@@ -48,21 +70,31 @@ class PlatformStepSpeech implements StepSpeech {
   @override
   Future<void> speak(String text, {required String languageCode}) async {
     if (text.trim().isEmpty) return;
+    _cutOff();
+    final cut = _cut = Completer<void>();
     try {
       await _engine.stop();
       await _engine.setLanguage(languageCode);
       // Slower than the default. These are instructions somebody is
       // acting on while they hear them, not a paragraph being read.
       await _engine.setSpeechRate(0.45);
-      await _engine.speak(text);
+      // Without it the engine answers `speak` as soon as it begins, and
+      // a caller had no way of knowing when the voice ended (#412).
+      await _engine.awaitSpeakCompletion(true);
+      // Stopped while it was being set up: not a word after that.
+      if (cut.isCompleted) return;
+      await Future.any([_engine.speak(text), cut.future]);
     } on Object {
       // Silence is the failure mode, and it is an acceptable one: the
       // steps are on the screen either way.
+    } finally {
+      if (identical(_cut, cut)) _cut = null;
     }
   }
 
   @override
   Future<void> stop() async {
+    _cutOff();
     try {
       await _engine.stop();
     } on Object {
@@ -70,3 +102,11 @@ class PlatformStepSpeech implements StepSpeech {
     }
   }
 }
+
+/// The voice of the first aid guides.
+///
+/// A provider rather than an engine per button, so a test can stand in
+/// for a device that speaks.
+final firstAidSpeechProvider = Provider<StepSpeech>(
+  (ref) => PlatformStepSpeech(),
+);

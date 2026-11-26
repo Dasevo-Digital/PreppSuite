@@ -395,30 +395,41 @@ class _Videos extends StatelessWidget {
 /// German voice has nothing to say the words with. Asking the engine is
 /// the only way to know, so the button appears a frame late — which is
 /// better than a button that turns out to do nothing.
-class _ReadAloudButton extends StatefulWidget {
+///
+/// It goes back to "read aloud" when the voice ends. It used to stay on
+/// "stop" for good: `speak` returned as soon as the engine began, and
+/// nothing told the button that it had finished (#412).
+class _ReadAloudButton extends ConsumerStatefulWidget {
   const _ReadAloudButton({required this.guide, required this.l10n});
 
   final FirstAidGuide guide;
   final AppLocalizations l10n;
 
   @override
-  State<_ReadAloudButton> createState() => _ReadAloudButtonState();
+  ConsumerState<_ReadAloudButton> createState() => _ReadAloudButtonState();
 }
 
-class _ReadAloudButtonState extends State<_ReadAloudButton> {
-  final StepSpeech _speech = PlatformStepSpeech();
+class _ReadAloudButtonState extends ConsumerState<_ReadAloudButton> {
+  // Kept, not read again: leaving the guide stops the voice, and by then
+  // the widget may no longer ask anything of the container.
+  late final StepSpeech _speech;
   bool _available = false;
   bool _speaking = false;
+
+  /// Which reading is the current one, so that the end of one that was
+  /// stopped cannot reset the button for the next.
+  var _reading = 0;
 
   @override
   void initState() {
     super.initState();
+    _speech = ref.read(firstAidSpeechProvider);
     _ask();
   }
 
   @override
   void dispose() {
-    _speech.stop();
+    if (_speaking) _speech.stop();
     super.dispose();
   }
 
@@ -445,12 +456,16 @@ class _ReadAloudButtonState extends State<_ReadAloudButton> {
 
   Future<void> _toggle() async {
     if (_speaking) {
+      _reading++;
+      setState(() => _speaking = false);
       await _speech.stop();
-      if (mounted) setState(() => _speaking = false);
       return;
     }
+    final reading = ++_reading;
     setState(() => _speaking = true);
     await _speech.speak(_text, languageCode: _language);
+    // Said to the end, or failed: offered again.
+    if (mounted && reading == _reading) setState(() => _speaking = false);
   }
 
   @override
