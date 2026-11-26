@@ -134,6 +134,43 @@ void main() {
       final round = knowledgeRound(knowledgeQuestionsDe, random: Random(4));
       expect(round.map((q) => q.id).toSet().length, round.length);
     });
+
+    test('the right answer is not where it was written (#400)', () {
+      // Every question is written with the right answer first. Asked in
+      // that order, the pattern shows after two or three questions, and a
+      // round answered by position is stored as knowledge.
+      for (final questions in [knowledgeQuestionsDe, knowledgeQuestionsEn]) {
+        final byId = {for (final q in questions) q.id: q};
+        final positions = <String, Set<int>>{};
+        final random = Random(5);
+        for (var round = 0; round < 40; round++) {
+          final asked = knowledgeRound(questions, random: random);
+          expect(
+            asked.map((q) => q.correct).toSet(),
+            hasLength(greaterThan(1)),
+            reason: 'one round with the right answer in one place',
+          );
+          for (final question in asked) {
+            final written = byId[question.id]!;
+            // The same answers, and the right one still marked right.
+            expect(
+              question.answers.toList()..sort(),
+              written.answers.toList()..sort(),
+            );
+            expect(
+              question.answers[question.correct],
+              written.answers[written.correct],
+              reason: question.id,
+            );
+            positions.putIfAbsent(question.id, () => {}).add(question.correct);
+          }
+        }
+        expect(positions.keys, hasLength(questions.length));
+        for (final MapEntry(key: id, value: places) in positions.entries) {
+          expect(places, hasLength(greaterThan(1)), reason: id);
+        }
+      }
+    });
   });
 
   group('what is remembered', () {

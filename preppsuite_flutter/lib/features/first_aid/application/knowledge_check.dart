@@ -49,6 +49,26 @@ class KnowledgeQuestion {
 
   /// Why — in the words of the guide it came from.
   final String because;
+
+  /// The same question with its answers in another order, [correct]
+  /// moved along with the right one.
+  ///
+  /// Every question is written with the right answer first, which is the
+  /// order that is easiest to check against the guide. Asked in that
+  /// order, two or three questions teach where the answer is rather than
+  /// what it is, and a round answered by position is stored as knowledge
+  /// nobody showed (#400).
+  KnowledgeQuestion withAnswersShuffled(Random random) {
+    final order = [for (var i = 0; i < answers.length; i++) i]..shuffle(random);
+    return KnowledgeQuestion(
+      id: id,
+      guideId: guideId,
+      question: question,
+      answers: [for (final i in order) answers[i]],
+      correct: order.indexOf(correct),
+      because: because,
+    );
+  }
 }
 
 /// The questions in [languageCode], English for anything not German.
@@ -69,6 +89,9 @@ const knowledgeRoundLength = 8;
 /// knows is a round that never reaches what they do not. The ones still
 /// open come first, shuffled among themselves; the rest fill up behind
 /// them, so a household that knows everything still gets asked.
+///
+/// The answers of every question are shuffled too, afresh each round, so
+/// the right one is not always in the same place (#400).
 List<KnowledgeQuestion> knowledgeRound(
   List<KnowledgeQuestion> questions, {
   Set<String> passed = const {},
@@ -84,5 +107,8 @@ List<KnowledgeQuestion> knowledgeRound(
     for (final question in questions)
       if (passed.contains(question.id)) question,
   ]..shuffle(shuffle);
-  return [...open, ...known].take(length).toList();
+  return [
+    for (final question in [...open, ...known].take(length))
+      question.withAnswersShuffled(shuffle),
+  ];
 }
