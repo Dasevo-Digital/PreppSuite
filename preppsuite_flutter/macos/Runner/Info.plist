@@ -31,13 +31,13 @@
 	<key>NSLocalNetworkUsageDescription</key>
 	<string>PreppSuite gleicht den Haushalt direkt mit einem zweiten Gerät im selben Netz ab. Die Daten verlassen das örtliche Netz dabei nicht.</string>
 	<key>NSLocationWhenInUseUsageDescription</key>
-	<string>PreppSuite verwendet deinen Standort, um dein Bundesland für genauere Warnmeldungen zu bestimmen.</string>
+	<string>PreppSuite verwendet deinen Standort, um dein Bundesland für genauere Warnmeldungen zu bestimmen, Schutzräume, Defibrillatoren und Notfallpunkte in der Nähe zu finden, deine Position für einen Notruf oder ein Lebenszeichen anzuzeigen und den Weg zum Treffpunkt zu zeigen.</string>
 	<!-- macOS asks for this key by name: geolocator only calls
 	     requestAlwaysAuthorization when NSLocationUsageDescription is
 	     present, and without it no permission dialog ever appears. The
 	     WhenInUse key above is the one iOS reads. -->
 	<key>NSLocationUsageDescription</key>
-	<string>PreppSuite verwendet deinen Standort, um dein Bundesland für genauere Warnmeldungen zu bestimmen.</string>
+	<string>PreppSuite verwendet deinen Standort, um dein Bundesland für genauere Warnmeldungen zu bestimmen, Schutzräume, Defibrillatoren und Notfallpunkte in der Nähe zu finden, deine Position für einen Notruf oder ein Lebenszeichen anzuzeigen und den Weg zum Treffpunkt zu zeigen.</string>
 	<key>NSMainNibFile</key>
 	<string>MainMenu</string>
 	<key>NSPrincipalClass</key>

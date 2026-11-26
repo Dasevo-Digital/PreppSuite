@@ -81,4 +81,43 @@ void main() {
       }
     }
   });
+
+  test('the location text names every use of the position (#390)', () {
+    // Since the position is measured precisely for the emergency call, the
+    // check-in, the meeting point and the defibrillators, the text that
+    // asks for it says so, not only "region and shelters".
+    const named = {
+      'de': [
+        'Bundesland',
+        'Schutzräume',
+        'Defibrillatoren',
+        'Notruf',
+        'Treffpunkt',
+      ],
+      'en': [
+        'region',
+        'shelters',
+        'defibrillators',
+        'emergency call',
+        'meeting point',
+      ],
+      'es': [
+        'estado federado',
+        'refugios',
+        'desfibriladores',
+        'emergencia',
+        'punto de encuentro',
+      ],
+    };
+    for (final platform in ['ios', 'macos']) {
+      for (final MapEntry(key: language, value: words) in named.entries) {
+        final location = strings(
+          '$platform/Runner/$language.lproj/InfoPlist.strings',
+        )['NSLocationWhenInUseUsageDescription']!;
+        for (final word in words) {
+          expect(location, contains(word), reason: '$platform $language');
+        }
+      }
+    }
+  });
 }

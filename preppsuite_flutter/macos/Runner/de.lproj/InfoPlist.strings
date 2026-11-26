@@ -8,7 +8,7 @@
 "NSLocalNetworkUsageDescription" = "PreppSuite gleicht den Haushalt direkt mit einem zweiten Gerät im selben Netz ab. Die Daten verlassen das örtliche Netz dabei nicht.";
 
 /* Warum die App den Standort braucht */
-"NSLocationWhenInUseUsageDescription" = "PreppSuite verwendet deinen Standort, um dein Bundesland für genauere Warnmeldungen zu bestimmen.";
+"NSLocationWhenInUseUsageDescription" = "PreppSuite verwendet deinen Standort, um dein Bundesland für genauere Warnmeldungen zu bestimmen, Schutzräume, Defibrillatoren und Notfallpunkte in der Nähe zu finden, deine Position für einen Notruf oder ein Lebenszeichen anzuzeigen und den Weg zum Treffpunkt zu zeigen.";
 
 /* Warum die App den Standort braucht (der Schlüssel, nach dem macOS fragt) */
-"NSLocationUsageDescription" = "PreppSuite verwendet deinen Standort, um dein Bundesland für genauere Warnmeldungen zu bestimmen.";
+"NSLocationUsageDescription" = "PreppSuite verwendet deinen Standort, um dein Bundesland für genauere Warnmeldungen zu bestimmen, Schutzräume, Defibrillatoren und Notfallpunkte in der Nähe zu finden, deine Position für einen Notruf oder ein Lebenszeichen anzuzeigen und den Weg zum Treffpunkt zu zeigen.";

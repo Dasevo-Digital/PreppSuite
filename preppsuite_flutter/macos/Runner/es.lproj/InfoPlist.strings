@@ -8,7 +8,7 @@
 "NSLocalNetworkUsageDescription" = "PreppSuite sincroniza el hogar directamente con un segundo dispositivo de la misma red. Los datos no salen de la red local.";
 
 /* Por qué la app necesita la ubicación */
-"NSLocationWhenInUseUsageDescription" = "PreppSuite usa tu ubicación para determinar tu estado federado y darte avisos más precisos.";
+"NSLocationWhenInUseUsageDescription" = "PreppSuite usa tu ubicación para determinar tu estado federado y darte avisos más precisos, para encontrar refugios, desfibriladores y puntos de emergencia cercanos, para mostrar tu posición en una llamada de emergencia o un mensaje de que estás bien, y para indicarte el camino al punto de encuentro.";
 
 /* Por qué la app necesita la ubicación (la clave que pide macOS) */
-"NSLocationUsageDescription" = "PreppSuite usa tu ubicación para determinar tu estado federado y darte avisos más precisos.";
+"NSLocationUsageDescription" = "PreppSuite usa tu ubicación para determinar tu estado federado y darte avisos más precisos, para encontrar refugios, desfibriladores y puntos de emergencia cercanos, para mostrar tu posición en una llamada de emergencia o un mensaje de que estás bien, y para indicarte el camino al punto de encuentro.";

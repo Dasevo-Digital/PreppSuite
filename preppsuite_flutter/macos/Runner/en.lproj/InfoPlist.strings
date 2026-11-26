@@ -8,7 +8,7 @@
 "NSLocalNetworkUsageDescription" = "PreppSuite syncs the household directly with a second device on the same network. The data does not leave the local network.";
 
 /* Why the app needs location */
-"NSLocationWhenInUseUsageDescription" = "PreppSuite uses your location to determine your region for more precise warnings.";
+"NSLocationWhenInUseUsageDescription" = "PreppSuite uses your location to determine your region for more precise warnings, to find nearby shelters, defibrillators and emergency points, to show your position for an emergency call or a check-in message, and to show the way to your meeting point.";
 
 /* Why the app needs location (the key macOS asks for) */
-"NSLocationUsageDescription" = "PreppSuite uses your location to determine your region for more precise warnings.";
+"NSLocationUsageDescription" = "PreppSuite uses your location to determine your region for more precise warnings, to find nearby shelters, defibrillators and emergency points, to show your position for an emergency call or a check-in message, and to show the way to your meeting point.";
