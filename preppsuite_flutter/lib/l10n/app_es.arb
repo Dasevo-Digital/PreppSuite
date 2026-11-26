@@ -2050,7 +2050,7 @@
   "transferConflictMerge": "Fusionarlos",
   "transferConflictMergeBody": "{count,plural,=0{Este dispositivo no tiene nada que aportar y simplemente se une al otro hogar.}=1{La única entrada propia pasa al otro hogar, y los datos de ese hogar vienen aquí. No se pierde nada.}other{Las {count} entradas propias pasan al otro hogar, y los datos de ese hogar vienen aquí. No se pierde nada.}}",
   "transferConflictReplace": "Descartar los datos de este dispositivo",
-  "transferConflictReplaceBody": "{count,plural,=1{Se elimina la única entrada propia.}other{Se eliminan las {count} entradas propias.}} Después aquí solo queda el otro hogar.",
+  "transferConflictReplaceBody": "{count,plural,=0{No hay entradas propias que eliminar.}=1{Se elimina la única entrada propia.}other{Se eliminan las {count} entradas propias.}} Después aquí solo queda el otro hogar.",
   "transferConflictKeep": "No cambiar nada",
   "transferConflictKeepBody": "No se incorpora nada. Si es el otro dispositivo el que debe unirse a este, muestra el código allí y léelo allí.",
   "transferConflictCancelled": "Cancelado. No se ha cambiado nada.",

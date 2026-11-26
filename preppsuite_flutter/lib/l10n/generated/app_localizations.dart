@@ -12418,7 +12418,7 @@ abstract class AppLocalizations {
   /// No description provided for @transferConflictReplaceBody.
   ///
   /// In en, this message translates to:
-  /// **'{count,plural,=1{The one entry of its own is deleted.}other{The {count} entries of its own are deleted.}} Only the other household remains here afterwards.'**
+  /// **'{count,plural,=0{There are no entries of its own to delete.}=1{The one entry of its own is deleted.}other{The {count} entries of its own are deleted.}} Only the other household remains here afterwards.'**
   String transferConflictReplaceBody(int count);
 
   /// No description provided for @transferConflictKeep.

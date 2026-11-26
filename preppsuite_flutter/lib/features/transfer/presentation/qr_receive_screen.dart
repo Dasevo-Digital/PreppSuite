@@ -144,12 +144,11 @@ class _QrReceiveScreenState extends ConsumerState<QrReceiveScreen> {
     await _finish();
   }
 
-  /// The row counts this device would be bringing along.
-  Future<int> _ownRows() async => (await readHouseholdSnapshot(
-    ref.read(appDatabaseProvider),
-    deviceId: 'conflict',
-    householdId: widget.householdId,
-  )).rowCount;
+  /// The entries this device would be bringing along: made or changed
+  /// here, not the built-in lists every device has, and no tombstones
+  /// (#399).
+  Future<int> _ownRows() =>
+      countOwnEntries(ref.read(appDatabaseProvider), widget.householdId);
 
   /// Settles a differing household, then says where to carry on.
   ///

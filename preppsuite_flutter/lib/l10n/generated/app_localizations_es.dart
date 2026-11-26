@@ -7560,6 +7560,7 @@ class AppLocalizationsEs extends AppLocalizations {
       locale: localeName,
       other: 'Se eliminan las $count entradas propias.',
       one: 'Se elimina la única entrada propia.',
+      zero: 'No hay entradas propias que eliminar.',
     );
     return '$_temp0 Después aquí solo queda el otro hogar.';
   }

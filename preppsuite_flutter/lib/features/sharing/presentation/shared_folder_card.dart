@@ -212,15 +212,13 @@ class _Body extends ConsumerWidget {
     final db = ref.read(appDatabaseProvider);
     final int rows;
     try {
-      rows = (await readHouseholdSnapshot(
-        db,
-        deviceId: 'conflict',
-        householdId: profile.id,
-      )).rowCount;
+      // Entries somebody made, not rows that travel (#399).
+      rows = await countOwnEntries(db, profile.id);
     } on Object catch (error) {
-      // A stock row that cannot travel threw out of here unanswered, and
-      // picking the folder did nothing at all (#397). Say what, and join
-      // nothing: the question cannot be asked without the count.
+      // A failure here threw out unanswered, and picking the folder did
+      // nothing at all (#397): a stock row that cannot travel did, while
+      // this still read the whole snapshot. Say what, and join nothing:
+      // the question cannot be asked without the count.
       if (context.mounted) _tell(context, describeError(l10n, error));
       return null;
     }

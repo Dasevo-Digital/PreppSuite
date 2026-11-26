@@ -7505,6 +7505,7 @@ class AppLocalizationsEn extends AppLocalizations {
       locale: localeName,
       other: 'The $count entries of its own are deleted.',
       one: 'The one entry of its own is deleted.',
+      zero: 'There are no entries of its own to delete.',
     );
     return '$_temp0 Only the other household remains here afterwards.';
   }

@@ -7538,6 +7538,7 @@ class AppLocalizationsDe extends AppLocalizations {
       locale: localeName,
       other: 'Die $count eigenen Einträge werden gelöscht.',
       one: 'Der eine eigene Eintrag wird gelöscht.',
+      zero: 'Hier gibt es keine eigenen Einträge zu löschen.',
     );
     return '$_temp0 Danach gilt hier nur noch der andere Haushalt.';
   }

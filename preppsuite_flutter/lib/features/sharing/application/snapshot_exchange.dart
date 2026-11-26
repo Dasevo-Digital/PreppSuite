@@ -1,6 +1,7 @@
 import 'package:drift/drift.dart' show Value;
 
 import '../../../local_db/database.dart';
+import '../../checklists/application/checklist_seeder.dart';
 import '../../inventory/application/inventory_numbers.dart';
 import 'device_snapshot.dart';
 import 'settings_sync.dart';
@@ -116,6 +117,56 @@ Future<DeviceSnapshot> readHouseholdSnapshot(
         encodeNeighbourOffer(row),
     ],
   );
+}
+
+/// How many entries of its own [householdId] would bring into another
+/// household, or lose by giving way to it: the number the question about
+/// two households puts on screen (#399).
+///
+/// Not [DeviceSnapshot.rowCount]. That counts what travels, and a
+/// household that had typed nothing carried some 230 rows all the same:
+/// every built-in checklist line the seeder writes, besides every
+/// tombstone. The dialog's "nothing to bring" was never shown. Here a
+/// deleted row is no entry, and a built-in list or line counts only once
+/// it has been changed -- the seeder stamps all of them
+/// [ChecklistSeeder.seededAt], and any edit moves that on.
+///
+/// Read from the tables rather than through [readHouseholdSnapshot],
+/// which refuses a household holding a stock row that cannot travel:
+/// asking the question must not depend on that.
+Future<int> countOwnEntries(AppDatabase db, String householdId) async {
+  bool live(DateTime? deletedAt) => deletedAt == null;
+  bool changed(DateTime updatedAt) =>
+      !updatedAt.isAtSameMomentAs(ChecklistSeeder.seededAt);
+
+  var count = 0;
+  for (final row in await db.inventoryItemsForSync(householdId)) {
+    if (live(row.deletedAt)) count++;
+  }
+  for (final row in await db.checklistTemplatesForSync(householdId)) {
+    if (live(row.deletedAt) && (!row.isBuiltIn || changed(row.updatedAt))) {
+      count++;
+    }
+  }
+  for (final row in await db.checklistItemsForSync(householdId)) {
+    if (live(row.deletedAt) && changed(row.updatedAt)) count++;
+  }
+  for (final row in await db.budgetEntriesForSync(householdId)) {
+    if (live(row.deletedAt)) count++;
+  }
+  for (final row in await db.householdPlansForSync(householdId)) {
+    if (live(row.deletedAt)) count++;
+  }
+  for (final row in await db.householdMembersForSync(householdId)) {
+    if (live(row.deletedAt)) count++;
+  }
+  for (final row in await db.possessionsForSync(householdId)) {
+    if (live(row.deletedAt)) count++;
+  }
+  for (final row in await db.neighbourOffersForSync(householdId)) {
+    if (live(row.deletedAt)) count++;
+  }
+  return count;
 }
 
 /// Merges [snapshot] in and answers how many rows it taught us.

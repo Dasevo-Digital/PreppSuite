@@ -84,6 +84,9 @@ void main() {
       find.textContaining('hat nichts einzubringen'),
       findsOneWidget,
     );
+    // Not "Die 0 eigenen Einträge werden gelöscht" (#399).
+    expect(find.textContaining('keine eigenen Einträge zu löschen'), findsOne);
+    expect(find.textContaining('Die 0'), findsNothing);
   });
 
   testWidgets('one entry is one entry, not "1 Einträge"', (tester) async {

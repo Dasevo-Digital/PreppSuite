@@ -3186,7 +3186,7 @@
     }
   },
   "transferConflictReplace": "Eigene Daten verwerfen",
-  "transferConflictReplaceBody": "{count,plural,=1{Der eine eigene Eintrag wird gelöscht.}other{Die {count} eigenen Einträge werden gelöscht.}} Danach gilt hier nur noch der andere Haushalt.",
+  "transferConflictReplaceBody": "{count,plural,=0{Hier gibt es keine eigenen Einträge zu löschen.}=1{Der eine eigene Eintrag wird gelöscht.}other{Die {count} eigenen Einträge werden gelöscht.}} Danach gilt hier nur noch der andere Haushalt.",
   "@transferConflictReplaceBody": {
     "placeholders": {
       "count": {
