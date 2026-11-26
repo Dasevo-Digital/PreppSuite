@@ -84,9 +84,9 @@ class BbkRawWarning {
 }
 
 /// The message ids in a CAP `references`: a list of `sender,id,sent`,
-/// separated by spaces. Confirmed on the DWD's detail on 2026-11-26:
-/// `<sender>,dwdmap.2.49.0.0.276.0.DWD.PVW.1795610940000.….MUL,
-/// 2026-11-25T12:49:00-00:00`, the sender being the DWD's address.
+/// separated by spaces. Confirmed on the DWD's detail on 2026-11-26: the
+/// DWD's sender address, `dwdmap.2.49.0.0.276.0.DWD.PVW.1795610940000.….MUL`
+/// and `2026-11-25T12:49:00-00:00`, joined by commas.
 List<String> bbkReferencedIds(String references) => [
   for (final triplet in references.trim().split(RegExp(r'\s+')))
     if (triplet.split(',') case [_, final id, ...] when id.isNotEmpty) id,
