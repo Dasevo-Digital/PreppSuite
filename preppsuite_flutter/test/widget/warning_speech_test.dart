@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
@@ -13,15 +15,22 @@ class _FakeSpeech implements StepSpeech {
 
   final Set<String> voices;
   final spoken = <(String, String)>[];
+  final readings = <Completer<void>>[];
   var stopped = 0;
 
   @override
   Future<bool> isAvailable(String languageCode) async =>
       voices.contains(languageCode);
 
+  /// Still speaking until the test completes the reading, and a stop
+  /// that does not end it, as on iOS.
   @override
-  Future<void> speak(String text, {required String languageCode}) async =>
-      spoken.add((text, languageCode));
+  Future<void> speak(String text, {required String languageCode}) {
+    spoken.add((text, languageCode));
+    final reading = Completer<void>();
+    readings.add(reading);
+    return reading.future;
+  }
 
   @override
   Future<void> stop() async => stopped++;
@@ -111,5 +120,44 @@ void main() {
     await pump(tester, _FakeSpeech({'en-GB'}), warning(), WarningSource.bbk);
 
     expect(find.byType(TextButton), findsNothing);
+  });
+
+  testWidgets('it offers reading again once the voice has finished (#412)', (
+    tester,
+  ) async {
+    // It stayed on "stop" for good: nothing told it the voice had ended.
+    final speech = _FakeSpeech({'de-DE'});
+    await pump(tester, speech, warning(), WarningSource.bbk);
+
+    await tester.tap(find.text('Leer en voz alta'));
+    await tester.pump();
+    expect(find.text('Dejar de leer'), findsOneWidget);
+
+    speech.readings.single.complete();
+    await tester.pump();
+    expect(find.text('Leer en voz alta'), findsOneWidget);
+  });
+
+  testWidgets('the end of a stopped reading leaves the next one alone', (
+    tester,
+  ) async {
+    final speech = _FakeSpeech({'de-DE'});
+    await pump(tester, speech, warning(), WarningSource.bbk);
+
+    await tester.tap(find.text('Leer en voz alta'));
+    await tester.pump();
+    await tester.tap(find.text('Dejar de leer'));
+    await tester.pump();
+    await tester.tap(find.text('Leer en voz alta'));
+    await tester.pump();
+    final [stopped, current] = speech.readings;
+
+    stopped.complete();
+    await tester.pump();
+    expect(find.text('Dejar de leer'), findsOneWidget);
+
+    current.complete();
+    await tester.pump();
+    expect(find.text('Leer en voz alta'), findsOneWidget);
   });
 }

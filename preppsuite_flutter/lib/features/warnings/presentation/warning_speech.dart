@@ -61,6 +61,10 @@ class _SpeakWarningButtonState extends ConsumerState<SpeakWarningButton> {
   late final StepSpeech _speech;
   bool _speaking = false;
 
+  // Counts readings, so that the end of a stopped one cannot reset the
+  // button for the reading that followed it (#412).
+  var _reading = 0;
+
   @override
   void initState() {
     super.initState();
@@ -77,15 +81,19 @@ class _SpeakWarningButtonState extends ConsumerState<SpeakWarningButton> {
 
   Future<void> _toggle(String voice, String language) async {
     if (_speaking) {
+      _reading++;
       setState(() => _speaking = false);
       await _speech.stop();
       return;
     }
+    final reading = ++_reading;
     setState(() => _speaking = true);
     await _speech.speak(
       warningSpeechText(widget.warning, language: language),
       languageCode: voice,
     );
+    // Said to the end, or failed: offered again.
+    if (mounted && reading == _reading) setState(() => _speaking = false);
   }
 
   @override
