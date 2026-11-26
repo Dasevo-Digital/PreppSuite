@@ -79,24 +79,46 @@ class PortablePreferencesStore extends SharedPreferencesStorePlatform {
     }
   }
 
-  Future<void> _write() {
+  /// [strict] has a failed write throw instead of passing in silence.
+  Future<void> _write({bool strict = false}) {
     final snapshot = Map<String, Object>.from(_values);
-    return _writing = _writing.then((_) async {
-      try {
-        // Written beside and renamed over, so a pull of the stick
-        // half-way through leaves the previous settings rather than half
-        // of the new ones. On a carried disk that is not a theoretical
-        // failure — it is how the disk usually goes away.
-        final temporary = File('${file.path}.neu');
-        await temporary.writeAsString(jsonEncode(snapshot), flush: true);
-        await temporary.rename(file.path);
-      } on Object {
-        // The disk is gone or full. The value is still in memory, so the
-        // session behaves; there is nowhere to report this from, and
-        // taking down the app over a saved filter would be absurd.
-        return;
-      }
+    final written = _writing.then((_) async {
+      // Written beside and renamed over, so a pull of the stick half-way
+      // through leaves the previous settings rather than half of the new
+      // ones. On a carried disk that is not a theoretical failure — it is
+      // how the disk usually goes away.
+      final temporary = File('${file.path}.neu');
+      await temporary.writeAsString(jsonEncode(snapshot), flush: true);
+      await temporary.rename(file.path);
     });
+    // The disk is gone or full. The value is still in memory, so the
+    // session behaves; there is nowhere to report this from, and taking
+    // down the app over a saved filter would be absurd.
+    _writing = written.catchError((Object _) {});
+    return strict ? written : _writing;
+  }
+
+  /// Adds every value in [values] whose key this store does not hold yet,
+  /// in one write, and throws when that write fails.
+  ///
+  /// For taking over an installation's settings (`portable_takeover.dart`):
+  /// a value the folder already has is never written over, and the copy
+  /// they come from is only let go once they are on the disk.
+  Future<void> putAllAbsent(Map<String, Object> values) async {
+    await _read();
+    var changed = false;
+    for (final MapEntry(:key, :value) in values.entries) {
+      if (_values.containsKey(key)) continue;
+      if (value is List) {
+        _values[key] = [for (final item in value) '$item'];
+      } else if (value is bool || value is num || value is String) {
+        _values[key] = value;
+      } else {
+        continue;
+      }
+      changed = true;
+    }
+    if (changed) await _write(strict: true);
   }
 
   @override
@@ -152,45 +174,3 @@ class PortablePreferencesStore extends SharedPreferencesStorePlatform {
     return true;
   }
 }
-
-/// Copies the settings an installed copy left behind into [store], once.
-///
-/// Without this, putting the folder beside the program turns a working
-/// installation into an empty one: the household is still in the
-/// database, but which map archive is in use, which warning regions are
-/// watched and where downloads go are all preferences, and they would be
-/// gone. Copied rather than moved, because the installed copy may still
-/// be used on this machine — the stick is a second way in, not a
-/// replacement.
-///
-/// Runs only when the portable file has nothing in it at all. A folder
-/// that has been used once is never written over.
-/// [installed] is the platform's own store, which has to be taken hold of
-/// **before** this one is registered in its place — on Linux and Windows
-/// it is an ordinary Dart object, not a channel, so there is no getting
-/// it back afterwards.
-Future<void> adoptInstalledPreferences(
-  PortablePreferencesStore store,
-  SharedPreferencesStorePlatform installed,
-) async {
-  if ((await store.getAll()).isNotEmpty) return;
-
-  final Map<String, Object> existing;
-  try {
-    existing = await installed.getAll();
-  } on Object {
-    return;
-  }
-
-  for (final entry in existing.entries) {
-    await store.setValue(_typeName(entry.value), entry.key, entry.value);
-  }
-}
-
-String _typeName(Object value) => switch (value) {
-  bool() => 'Bool',
-  int() => 'Int',
-  double() => 'Double',
-  String() => 'String',
-  _ => 'StringList',
-};

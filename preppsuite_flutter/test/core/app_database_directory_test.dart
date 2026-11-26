@@ -97,6 +97,53 @@ void main() {
     expect(File('${legacy.path}/preppsuite.sqlite').existsSync(), isTrue);
   });
 
+  test('a journal never goes beside a database that stayed (#392)', () async {
+    // Read beside the other database, the old one's journal would be
+    // rolled back into it.
+    write(legacy, 'preppsuite.sqlite', 'alt und verlassen');
+    write(legacy, 'preppsuite.sqlite-journal', 'heisses Journal');
+    write(target, 'preppsuite.sqlite', 'in Benutzung');
+
+    await adoptLegacyDatabases(legacy: legacy, target: target);
+
+    expect(
+      File('${target.path}/preppsuite.sqlite-journal').existsSync(),
+      isFalse,
+    );
+    expect(
+      File('${legacy.path}/preppsuite.sqlite-journal').readAsStringSync(),
+      'heisses Journal',
+    );
+  });
+
+  test('nor does one without its database (#392)', () async {
+    write(legacy, 'preppsuite.sqlite-journal', 'ohne Datenbank');
+
+    await adoptLegacyDatabases(legacy: legacy, target: target);
+
+    expect(target.listSync(), isEmpty);
+  });
+
+  test('a database goes with its journal, or not at all (#392)', () async {
+    write(legacy, 'preppsuite.sqlite', 'haushalt');
+    write(legacy, 'preppsuite.sqlite-journal', 'journal');
+    // A journal already there belongs to nobody this can tell.
+    write(target, 'preppsuite.sqlite-journal', 'fremd');
+
+    await adoptLegacyDatabases(legacy: legacy, target: target);
+
+    expect(File('${target.path}/preppsuite.sqlite').existsSync(), isFalse);
+    expect(
+      File('${target.path}/preppsuite.sqlite-journal').readAsStringSync(),
+      'fremd',
+    );
+    expect(File('${legacy.path}/preppsuite.sqlite').existsSync(), isTrue);
+    expect(
+      File('${legacy.path}/preppsuite.sqlite-journal').existsSync(),
+      isTrue,
+    );
+  });
+
   test('running it twice is harmless', () async {
     write(legacy, 'preppsuite.sqlite', 'haushalt');
 

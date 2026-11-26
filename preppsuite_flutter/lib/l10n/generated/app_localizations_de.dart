@@ -5782,7 +5782,15 @@ class AppLocalizationsDe extends AppLocalizations {
 
   @override
   String get portableTakeover =>
-      'Beim ersten Start mit einem neuen Ordner übernimmt die App einmalig, was auf diesem Rechner liegt – kopiert, nicht verschoben. Die Installation hier bleibt unberührt.';
+      'Beim ersten Start mit einem neuen, leeren Ordner übernimmt die App einmalig, was auf diesem Rechner liegt – kopiert, nicht verschoben, und unverschlüsselt, damit der Ordner auch an anderen Rechnern aufgeht. Die Installation hier bleibt unberührt.';
+
+  @override
+  String get portableTakeoverLocked =>
+      'Der Haushalt auf diesem Rechner wurde nicht übernommen: Er ist verschlüsselt, und der Schlüssel dazu ließ sich nicht lesen. Mitnehmen lässt er sich über eine Sicherung, die ohne Datenordner auf diesem Rechner angelegt und hier wiederhergestellt wird.';
+
+  @override
+  String get portableTakeoverFailed =>
+      'Der Haushalt auf diesem Rechner ließ sich nicht übernehmen; dort ist nichts verändert. Mitnehmen lässt er sich über eine Sicherung, die ohne Datenordner auf diesem Rechner angelegt und hier wiederhergestellt wird.';
 
   @override
   String get portableRelativeNote =>

@@ -128,22 +128,18 @@ class InventoryPhotoService {
 
   /// The stored path as a file on this machine.
   ///
-  /// Three cases, in order. A path written down relative to the data
-  /// folder resolves against it. An absolute one written by an installed
-  /// copy is used as it stands. And an absolute one that is *not* there
-  /// — the case that turns up when a household is taken over onto a
-  /// carried copy, where the photos came along but their paths named the
-  /// old machine — is looked for by name in this copy's own photo
-  /// folder, which is where the copy put it.
+  /// An installed copy uses the path as it stands. A carried copy keeps
+  /// its pictures in its own folder: a path written down relative to it
+  /// resolves against it, and any other is looked for there by name. That
+  /// other path is the one a household taken over onto the carried copy
+  /// brought along, and it names the installation's own picture. Used as
+  /// it stood, the carried copy read that installation's file whenever it
+  /// was on the same computer, and deleted it with its household (#392).
   static String resolvePhotoPath(String stored) {
     final located = readLocation(stored);
-    if (File(located).existsSync()) return located;
-
     final folder = photoDirectoryPath;
-    if (folder == null) return located;
-
-    final candidate = p.join(folder, p.basename(located));
-    return File(candidate).existsSync() ? candidate : located;
+    if (folder == null || p.isWithin(folder, located)) return located;
+    return p.join(folder, p.basename(located));
   }
 
   /// Where this copy keeps photos, once that is known.

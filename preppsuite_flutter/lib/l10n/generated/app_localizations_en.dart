@@ -5751,7 +5751,15 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get portableTakeover =>
-      'The first time a new folder is used, the app takes over once what is on this machine — copied, not moved. The installation here is left untouched.';
+      'The first time a new, empty folder is used, the app takes over once what is on this machine — copied, not moved, and unencrypted, so that the folder opens on other machines too. The installation here is left untouched.';
+
+  @override
+  String get portableTakeoverLocked =>
+      'The household on this machine was not taken over: it is encrypted, and its key could not be read. It can be taken along with a backup made on this machine without the data folder and restored here.';
+
+  @override
+  String get portableTakeoverFailed =>
+      'The household on this machine could not be taken over; nothing there was changed. It can be taken along with a backup made on this machine without the data folder and restored here.';
 
   @override
   String get portableRelativeNote =>

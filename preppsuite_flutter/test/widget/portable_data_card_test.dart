@@ -1,5 +1,10 @@
+import 'dart:io';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:path/path.dart' as p;
+import 'package:shared_preferences/shared_preferences.dart';
+import 'package:shared_preferences_platform_interface/shared_preferences_platform_interface.dart';
 import 'package:preppsuite_flutter/core/portable_data.dart';
 import 'package:preppsuite_flutter/features/settings/presentation/portable_data_card.dart';
 import 'package:preppsuite_flutter/l10n/generated/app_localizations.dart';
@@ -72,5 +77,58 @@ void main() {
     await show(tester);
 
     await expectAccessible(tester);
+  });
+
+  group('the household installed here (#392)', () {
+    late Directory workspace;
+    late SharedPreferencesStorePlatform platform;
+
+    setUp(() {
+      workspace = Directory.systemTemp.createTempSync('portable-card');
+      SharedPreferences.setMockInitialValues({});
+      platform = SharedPreferencesStorePlatform.instance;
+    });
+
+    tearDown(() {
+      SharedPreferencesStorePlatform.instance = platform;
+      workspace.deleteSync(recursive: true);
+    });
+
+    Future<void> carry(WidgetTester tester, Directory installation) async {
+      final folder = Directory(p.join(workspace.path, 'PreppSuite-Daten'))
+        ..createSync();
+      await tester.runAsync(
+        () => startPortableData(
+          environment: {portableEnvironmentVariable: folder.path},
+          installationDirectory: () async => installation,
+        ),
+      );
+    }
+
+    testWidgets('a refusal to take it over is said', (tester) async {
+      // An installation in the middle of its upgrade is not copied. The
+      // carried copy then starts empty, which looks like a lost household
+      // unless something says why.
+      final installation = Directory(p.join(workspace.path, 'installiert'))
+        ..createSync();
+      File(
+        p.join(installation.path, 'preppsuite.sqlite.plaintext-recovery'),
+      ).writeAsStringSync('');
+      await carry(tester, installation);
+      expect(portableTakeover, PortableTakeover.failed);
+
+      await show(tester);
+
+      expect(find.textContaining('ließ sich nicht übernehmen'), findsOneWidget);
+    }, skip: !supportsPortableData);
+
+    testWidgets('nothing of the kind without one', (tester) async {
+      await carry(tester, workspace);
+
+      await show(tester);
+
+      expect(find.textContaining('nicht übernehmen'), findsNothing);
+      expect(find.textContaining('nicht übernommen'), findsNothing);
+    }, skip: !supportsPortableData);
   });
 }

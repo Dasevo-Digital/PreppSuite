@@ -65,90 +65,54 @@ Future<Directory> _prepare() async {
   // anyone remembering to mark it.
   await excludeFromBackup(target.path);
 
+  // A carried folder took over the household installed on this computer
+  // before anything got here, once and only into an empty folder (see
+  // `portable_takeover.dart`). Copying what it lacks at every start, as
+  // until 3.0.3, filled a disk with a household of its own with another
+  // household's pictures and indexes (#392).
+  if (carried) return target;
+
   Directory legacy;
   try {
-    legacy = carried
-        // A carried copy takes what an installed one on this machine has,
-        // once, so that putting the folder beside the program does not
-        // turn a working household into an empty one.
-        ? await getApplicationSupportDirectory()
-        : await getApplicationDocumentsDirectory();
+    legacy = await getApplicationDocumentsDirectory();
   } on Object {
     // A platform without one, or a plugin that is not there. Nothing to
     // carry over, and nothing worth failing startup for.
     return target;
   }
 
-  // Copied and not moved when the copy is carried: the installation on
-  // this machine is still somebody's, and a stick plugged in once must
-  // not take the household off it. The move is right the other way round
-  // — that case is one installation succeeding another.
-  await adoptLegacyDatabases(legacy: legacy, target: target, move: !carried);
-  // The photos with them, or the household arrives on the disk with
-  // every picture missing. Only when the copy is carried: between two
-  // installed versions the photos never moved in the first place.
-  if (carried) await adoptPhotos(legacy: legacy, target: target);
+  // One installation succeeding another: moved, there is no reason to
+  // keep two.
+  await adoptLegacyDatabases(legacy: legacy, target: target);
   return target;
 }
 
-/// Copies the product photos from [legacy] into [target], once.
-///
-/// Only ever adds: a photo already in [target] is the one this copy took
-/// and is never written over. Best-effort throughout — a picture that
-/// does not arrive costs a thumbnail, and the item beside it is
-/// unaffected, so there is nothing here worth failing startup for.
-Future<void> adoptPhotos({
-  required Directory legacy,
-  required Directory target,
-}) async {
-  const folder = 'inventory_photos';
-  final from = Directory('${legacy.path}${Platform.pathSeparator}$folder');
-  final to = Directory('${target.path}${Platform.pathSeparator}$folder');
-  if (from.path == to.path) return;
+/// The journals SQLite keeps beside a database.
+const _journalSuffixes = ['-journal', '-wal', '-shm'];
 
-  try {
-    if (!await from.exists()) return;
-    await to.create(recursive: true);
-    await for (final entry in from.list(followLinks: false)) {
-      if (entry is! File) continue;
-      final name = entry.uri.pathSegments.last;
-      final destination = '${to.path}${Platform.pathSeparator}$name';
-      if (await File(destination).exists()) continue;
-      await entry.copy(destination);
-    }
-  } on Object {
-    return;
-  }
-}
+/// The databases an older version left in the documents folder: the
+/// household database and the per-archive full-text indexes.
+bool _isOurDatabase(String name) =>
+    name.startsWith('preppsuite') && name.endsWith('.sqlite');
 
-/// The file names an older version left in the documents folder.
+/// Takes the databases in [legacy] over into [target], by moving them.
 ///
-/// The household database and the per-archive full-text indexes, each
-/// possibly with the two journal files SQLite writes beside it.
-bool _isOurDatabase(String name) {
-  if (!name.startsWith('preppsuite')) return false;
-  return name.contains('.sqlite');
-}
-
-/// Takes the databases in [legacy] over into [target].
-///
-/// Runs once, before anything opens them. A file already present in
+/// Runs once, before anything opens them. A database already present in
 /// [target] is left alone and the old one with it: overwriting a database
 /// that is in use with one that was abandoned would lose exactly the data
 /// this is meant to preserve.
 ///
-/// [move] decides whether the old file is left behind. It is moved when
-/// one installation succeeds another — there is no reason to keep two —
-/// and copied when a carried copy is taking over what an installation on
-/// this machine has, because that installation is still somebody's and
-/// will be started again.
+/// A journal goes only with its own database (#392). Beside a database
+/// that stayed where it was, the old one's journal would be read as the
+/// journal of the other, and rolled back into it. So the journals are
+/// moved first and the database after them, and when the database cannot
+/// follow they are moved back.
 ///
 /// Takes both directories rather than looking them up, so that what it
 /// does can be tested without a platform underneath it.
 Future<void> adoptLegacyDatabases({
   required Directory legacy,
   required Directory target,
-  bool move = true,
 }) async {
   if (legacy.path == target.path) return;
 
@@ -176,24 +140,59 @@ Future<void> adoptLegacyDatabases({
     if (!_isOurDatabase(name)) continue;
 
     final destination = '${target.path}${Platform.pathSeparator}$name';
-
     try {
       if (await File(destination).exists()) continue;
-      if (!move) {
-        await entry.copy(destination);
-        continue;
+      // Only into a place that holds no journal of its own: one there
+      // without its database belongs to nobody this could tell.
+      var occupied = false;
+      for (final suffix in _journalSuffixes) {
+        if (await File('$destination$suffix').exists()) occupied = true;
       }
-      await entry.rename(destination);
-    } on FileSystemException {
-      // Rename cannot cross a volume boundary — and a carried copy is
-      // always on another volume. Copying and deleting can, and if even
-      // that fails the old file simply stays put.
-      try {
-        await entry.copy(destination);
-        if (move) await entry.delete();
-      } on Object {
-        continue;
+      if (occupied) continue;
+    } on Object {
+      continue;
+    }
+
+    final moved = <(File, String)>[];
+    try {
+      for (final suffix in _journalSuffixes) {
+        final journal = File('${entry.path}$suffix');
+        if (!await journal.exists()) continue;
+        moved.add((await _move(journal, '$destination$suffix'), journal.path));
+      }
+      await _move(entry, destination);
+    } on Object {
+      // The old database stays where it is, and its journals go back to
+      // it.
+      for (final (journal, origin) in moved.reversed) {
+        try {
+          await _move(journal, origin);
+        } on Object {
+          // Left beside nothing: there is no database of that name there.
+        }
       }
     }
+  }
+}
+
+/// Moves [file] to [destination]. Rename cannot cross a volume boundary;
+/// copying and deleting can. Where the original cannot be deleted, the
+/// copy goes again: one file in two places is two databases.
+Future<File> _move(File file, String destination) async {
+  try {
+    return await file.rename(destination);
+  } on FileSystemException {
+    final copy = await file.copy(destination);
+    try {
+      await file.delete();
+    } on Object {
+      try {
+        await copy.delete();
+      } on Object {
+        // Nothing more to try.
+      }
+      rethrow;
+    }
+    return copy;
   }
 }

@@ -31,6 +31,9 @@ const _encryptingSuffix = '.encrypting';
 
 enum LocalDatabaseEncryptionMode { plaintext, encrypted, recoveryRequired }
 
+/// What [LocalDatabaseEncryption.readInstallationKey] found.
+typedef InstallationKey = ({String? key, bool upgrading});
+
 /// This installation holds databases it cannot open.
 ///
 /// A type of its own rather than a `StateError`, so that the screens can
@@ -713,6 +716,33 @@ class LocalDatabaseEncryption {
   Future<bool> _hasExistingDatabases(Directory directory) async =>
       (await _databaseBaseFiles(directory)).isNotEmpty;
 
+  /// The databases in [directory], by the name each has when nothing is
+  /// in flight -- including one only there under a migration copy's name.
+  static Future<List<File>> databaseFilesIn(Directory directory) =>
+      _databaseBaseFiles(directory);
+
+  /// Whether [file] is a database that does not start like a plain one.
+  static Future<bool> isEncryptedDatabase(File file) => _isEncryptedFile(file);
+
+  /// The key of the installation on this computer, for a carried copy
+  /// taking its household over (#392). Read, never written.
+  ///
+  /// [InstallationKey.upgrading] when that installation is in the middle
+  /// of its upgrade: its files are then not in a state to be copied.
+  static Future<InstallationKey> readInstallationKey([
+    LocalDatabaseKeyStorage storage = const SecureLocalDatabaseKeyStorage(),
+  ]) async {
+    String? mode;
+    String? key;
+    try {
+      mode = await storage.read(_modeKey);
+      key = await storage.read(_keyKey);
+    } on Object {
+      // Nothing to read: whatever is sealed stays where it is.
+    }
+    return (key: _isValidKey(key) ? key : null, upgrading: mode == 'migrating');
+  }
+
   /// Every database this installation owns, named by the file it would have
   /// when nothing is in flight.
   ///
@@ -833,6 +863,81 @@ class LocalDatabaseEncryption {
     } finally {
       await handle.close();
     }
+  }
+}
+
+/// Copies the database at [source] to [target] as a plain file (#392).
+///
+/// For a carried folder taking over the household of an installation on
+/// this computer: the folder is opened on other computers, which do not
+/// have this one's key. [key] opens [source] where it is encrypted.
+///
+/// Through SQLite rather than as a file: `VACUUM INTO` takes one
+/// consistent state of the database, whatever its journal holds, so no
+/// journal travels without its database or the other way round. An
+/// encrypted copy is then decrypted with an empty `PRAGMA rekey`. Throws
+/// unless the copy is plain and holds the original's tables and row
+/// counts; the original is only read.
+///
+/// On its own isolate: a knowledge index can be gigabytes.
+Future<void> copyDatabaseAsPlaintext(
+  String source,
+  String target, {
+  String? key,
+}) => Isolate.run(() => _copyAsPlaintextSync(source, target, key));
+
+void _copyAsPlaintextSync(String source, String target, String? key) {
+  final encrypted = _isEncryptedFileSync(File(source));
+  if (encrypted && key == null) {
+    throw StateError('$source is encrypted, and there is no key.');
+  }
+  final partial = File('$target.part');
+  if (partial.existsSync()) partial.deleteSync();
+
+  // Read and write, as the installation itself opens it: a journal left
+  // by a write that was cut off is rolled back first, which is what the
+  // installation does at its next start anyway.
+  final original = sqlite3.open(source, mode: OpenMode.readWrite);
+  try {
+    if (encrypted) _configureCipher(original, key!);
+    _waitForOtherConnections(original);
+    original.execute('VACUUM INTO ${_sqlLiteral(partial.path)}');
+  } finally {
+    original.close();
+  }
+
+  try {
+    // `VACUUM INTO` keeps the cipher: the copy is as encrypted as its
+    // original until it is rekeyed to nothing.
+    if (encrypted) {
+      final copy = sqlite3.open(partial.path);
+      try {
+        _configureCipher(copy, key!);
+        copy.execute("PRAGMA rekey = ''");
+      } finally {
+        copy.close();
+      }
+    }
+    if (!_isPlaintextFileSync(partial)) {
+      throw StateError('The copy of $source is not plain.');
+    }
+
+    final from = sqlite3.open(source, mode: OpenMode.readOnly);
+    final copy = sqlite3.open(partial.path, mode: OpenMode.readOnly);
+    try {
+      if (encrypted) _configureCipher(from, key!);
+      _waitForOtherConnections(from);
+      if (!_sameRowCounts(_rowCounts(from), _rowCounts(copy))) {
+        throw StateError('The copy of $source does not match it.');
+      }
+    } finally {
+      copy.close();
+      from.close();
+    }
+    partial.renameSync(target);
+  } on Object {
+    if (partial.existsSync()) partial.deleteSync();
+    rethrow;
   }
 }
 
@@ -972,18 +1077,17 @@ bool _isPlaintextFileSync(File file) {
 void _expectSameContents(String path, dynamic copy) {
   final original = sqlite3.open(path, mode: OpenMode.readOnly);
   try {
-    final expected = _rowCounts(original);
-    final copied = _rowCounts(copy);
-    final same =
-        expected.length == copied.length &&
-        expected.entries.every((table) => copied[table.key] == table.value);
-    if (!same) {
+    if (!_sameRowCounts(_rowCounts(original), _rowCounts(copy))) {
       throw StateError('The encrypted copy does not match the original.');
     }
   } finally {
     original.close();
   }
 }
+
+bool _sameRowCounts(Map<String, int> expected, Map<String, int> copied) =>
+    expected.length == copied.length &&
+    expected.entries.every((table) => copied[table.key] == table.value);
 
 Map<String, int> _rowCounts(dynamic database) {
   final tables = database.select(

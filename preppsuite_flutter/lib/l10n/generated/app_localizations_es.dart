@@ -5793,7 +5793,15 @@ class AppLocalizationsEs extends AppLocalizations {
 
   @override
   String get portableTakeover =>
-      'La primera vez que se usa una carpeta nueva, la app incorpora una vez lo que hay en este equipo: copiado, no movido. La instalación de aquí no se toca.';
+      'La primera vez que se usa una carpeta nueva y vacía, la app incorpora una vez lo que hay en este equipo: copiado, no movido, y sin cifrar, para que la carpeta se abra también en otros equipos. La instalación de aquí no se toca.';
+
+  @override
+  String get portableTakeoverLocked =>
+      'El hogar de este equipo no se ha incorporado: está cifrado y no se ha podido leer su clave. Se puede llevar con una copia de seguridad hecha en este equipo sin la carpeta de datos y restaurada aquí.';
+
+  @override
+  String get portableTakeoverFailed =>
+      'No se ha podido incorporar el hogar de este equipo; allí no se ha cambiado nada. Se puede llevar con una copia de seguridad hecha en este equipo sin la carpeta de datos y restaurada aquí.';
 
   @override
   String get portableRelativeNote =>

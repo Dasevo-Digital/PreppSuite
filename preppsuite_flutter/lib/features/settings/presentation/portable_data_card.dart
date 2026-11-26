@@ -193,6 +193,24 @@ class _PortableDataCardState extends State<PortableDataCard> {
             ),
             const SizedBox(height: 8),
             Text(l10n.portableTakeover, style: theme.textTheme.bodySmall),
+            // Said here for as long as the folder is in use: the first
+            // start that refused it went straight to an empty household,
+            // and that looks like a lost one (#392).
+            if (location.isPortable)
+              if (switch (portableTakeover) {
+                    PortableTakeover.locked => l10n.portableTakeoverLocked,
+                    PortableTakeover.failed => l10n.portableTakeoverFailed,
+                    PortableTakeover.none || PortableTakeover.taken => null,
+                  }
+                  case final refusal?) ...[
+                const SizedBox(height: 8),
+                Text(
+                  refusal,
+                  style: theme.textTheme.bodySmall?.copyWith(
+                    color: theme.colorScheme.error,
+                  ),
+                ),
+              ],
             const SizedBox(height: 8),
             Text(l10n.portableRelativeNote, style: theme.textTheme.bodySmall),
           ],

@@ -3,6 +3,7 @@ import 'dart:isolate';
 import 'dart:typed_data';
 
 import 'package:cryptography/cryptography.dart';
+import 'package:path/path.dart' as p;
 import 'package:uuid/uuid.dart';
 
 import 'local_database_encryption.dart';
@@ -146,7 +147,9 @@ class PhotoVault {
     final key = await _openingKey();
     if (key == null) return null;
     final clear = await _open(stored, key);
-    if (clear != null && portableLocation.isPortable) {
+    // Only a picture in the carried folder: one an installation keeps is
+    // that installation's, sealed as it should be.
+    if (clear != null && _inCarriedFolder(file.path)) {
       try {
         await _replace(file, clear);
       } on Object {
@@ -178,7 +181,7 @@ class PhotoVault {
   Future<int> sealDirectory(Directory directory) async {
     if (!await directory.exists()) return 0;
     final seal = await _key();
-    final open = seal == null && portableLocation.isPortable
+    final open = seal == null && _inCarriedFolder(directory.path)
         ? await _openingKey()
         : null;
     if (seal == null && open == null) return 0;
@@ -204,6 +207,13 @@ class PhotoVault {
       }
     }
     return changed;
+  }
+
+  /// Whether [path] is the carried folder or inside it.
+  static bool _inCarriedFolder(String path) {
+    final root = portableSupportDirectory?.path;
+    if (root == null) return false;
+    return p.equals(root, path) || p.isWithin(root, path);
   }
 
   /// As much of [file] as [isSealed] looks at.

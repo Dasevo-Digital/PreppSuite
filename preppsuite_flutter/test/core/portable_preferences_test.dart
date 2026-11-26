@@ -107,34 +107,36 @@ void main() {
     expect((await reopened.getAll()).length, 20);
   });
 
-  test('the settings of an installed copy are taken over once', () async {
-    final installed = InMemorySharedPreferencesStore.withData({
-      'flutter.archive': '/irgendwo/wikipedia.zim',
-      'flutter.days': 10,
-    });
-
-    final store = await PortablePreferencesStore.open(workspace);
-    await adoptInstalledPreferences(store, installed);
-
-    expect(
-      (await store.getAll())['flutter.archive'],
-      '/irgendwo/wikipedia.zim',
-    );
-    expect((await store.getAll())['flutter.days'], 10);
-  });
-
-  test('a folder that has been used once is never written over', () async {
+  test('values taken over are added, never over one the folder has', () async {
     final store = await PortablePreferencesStore.open(workspace);
     await store.setValue('String', 'flutter.archive', '/auf/dem/stick.zim');
 
-    await adoptInstalledPreferences(
-      store,
-      InMemorySharedPreferencesStore.withData({
-        'flutter.archive': '/auf/dem/rechner.zim',
-      }),
+    await store.putAllAbsent({
+      'flutter.archive': '/auf/dem/rechner.zim',
+      'flutter.days': 10,
+      'flutter.roads': <Object?>['A2', 'A39'],
+    });
+
+    final reopened = await (await PortablePreferencesStore.open(
+      workspace,
+    )).getAll();
+    expect(reopened['flutter.archive'], '/auf/dem/stick.zim');
+    expect(reopened['flutter.days'], 10);
+    expect(reopened['flutter.roads'], ['A2', 'A39']);
+  });
+
+  test('taking values over says so when they could not be written', () async {
+    // An ordinary setting that is not saved costs nothing worth stopping
+    // for; a takeover that thinks it was saved lets go of its only copy.
+    final store = PortablePreferencesStore(
+      File('${workspace.path}/weg/${PortablePreferencesStore.fileName}'),
     );
 
-    expect((await store.getAll())['flutter.archive'], '/auf/dem/stick.zim');
+    await expectLater(
+      store.putAllAbsent({'flutter.days': 10}),
+      throwsA(isA<FileSystemException>()),
+    );
+    expect(await store.setValue('Int', 'flutter.days', 11), isTrue);
   });
 
   test(

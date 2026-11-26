@@ -9577,8 +9577,20 @@ abstract class AppLocalizations {
   /// No description provided for @portableTakeover.
   ///
   /// In en, this message translates to:
-  /// **'The first time a new folder is used, the app takes over once what is on this machine — copied, not moved. The installation here is left untouched.'**
+  /// **'The first time a new, empty folder is used, the app takes over once what is on this machine — copied, not moved, and unencrypted, so that the folder opens on other machines too. The installation here is left untouched.'**
   String get portableTakeover;
+
+  /// No description provided for @portableTakeoverLocked.
+  ///
+  /// In en, this message translates to:
+  /// **'The household on this machine was not taken over: it is encrypted, and its key could not be read. It can be taken along with a backup made on this machine without the data folder and restored here.'**
+  String get portableTakeoverLocked;
+
+  /// No description provided for @portableTakeoverFailed.
+  ///
+  /// In en, this message translates to:
+  /// **'The household on this machine could not be taken over; nothing there was changed. It can be taken along with a backup made on this machine without the data folder and restored here.'**
+  String get portableTakeoverFailed;
 
   /// No description provided for @portableRelativeNote.
   ///
