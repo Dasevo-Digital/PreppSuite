@@ -338,9 +338,13 @@ class WarningPollService {
     return result;
   }
 
+  /// How long a BBK warning that names no place waits for the detail that
+  /// says where it is (#395): two rounds of the poll.
+  static const unplacedDetailWait = Duration(minutes: 30);
+
   /// The subset of [candidates] that should actually produce a
-  /// notification: severe enough, not already expired, and not already
-  /// announced.
+  /// notification: severe enough, not already expired, not already
+  /// announced, and placed as well as it can be.
   ///
   /// Reads the stored rows rather than trusting the caller's list, so a
   /// crash between polling and notifying cannot lose an announcement — the
@@ -356,9 +360,30 @@ class WarningPollService {
         if (warningSeverityRank(warningSeverityFromName(warning.severity)) >=
                 floor &&
             !(warning.expires?.isBefore(now) ?? false) &&
+            !waitsForItsDetail(warning, now: now) &&
             isRelevant(warning))
           warning,
     ];
+  }
+
+  /// Whether [warning] is held back until its detail says where it is.
+  ///
+  /// A BBK warning whose id names no Land -- the DWD's, KATWARN's, BIWAPP's
+  /// -- is placed by the area in its detail. When that request failed or
+  /// the poll ran out of time, the row had no area and no key, and no key
+  /// reads as "concerns everyone": the warning went out to every household
+  /// in Germany in the same run, with an empty text, and the next poll
+  /// placed it in the one Land it was for. It now waits for the detail,
+  /// which the next poll asks for again, and for [unplacedDetailWait] at
+  /// most, counted from when it was stored without one: a source that
+  /// serves no detail must not keep its warnings from anybody.
+  static bool waitsForItsDetail(Warning warning, {required DateTime now}) {
+    if (warning.source != WarningSource.bbk.name) return false;
+    if (warning.regionKey != null || !lacksBbkDetail(warning)) return false;
+    final waited = now.difference(warning.updatedAt);
+    // Stored "in the future" is a clock that was set back: no reason to
+    // hold anything for as long as that.
+    return !waited.isNegative && waited < unplacedDetailWait;
   }
 
   Future<void> markNotified(List<Warning> warnings) {

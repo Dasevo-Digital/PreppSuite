@@ -60,6 +60,8 @@ void main() {
             source: 'bbk',
             externalId: 'escalation',
             countryCode: 'DE',
+            // Placed, so that it does not wait for a detail (#395).
+            regionKey: const Value('NI'),
             severity: severity,
             eventType: 'Test',
             headline: 'Test',
@@ -798,6 +800,114 @@ void main() {
 
       expect(first, hasLength(1));
       expect(second, isEmpty);
+    });
+  });
+
+  group('a warning that names no place, without its detail (#395)', () {
+    // A DWD warning as the nationwide map carries it: no Land in the id,
+    // and nothing else until the detail is read.
+    const id =
+        'dwdmap.2.49.0.0.276.0.DWD.PVW.1795681620000.'
+        '9690190b-af72-47aa-b370-0036c57d2679.MUL';
+    final sent = DateTime.now().toUtc().subtract(const Duration(minutes: 2));
+    final mapData = jsonEncode([
+      {
+        'id': id,
+        'version': 22,
+        'startDate': sent.toIso8601String(),
+        'severity': 'Severe',
+        'type': 'Alert',
+        'i18nTitle': {'de': 'Amtliche UNWETTERWARNUNG vor SCHNEEFALL'},
+      },
+    ]);
+    final detail = jsonEncode({
+      'identifier': id,
+      'sender': 'opendata@dwd.de',
+      'msgType': 'Alert',
+      'info': [
+        {
+          'language': 'de-DE',
+          'event': 'SCHNEEFALL',
+          'headline': 'Amtliche UNWETTERWARNUNG vor SCHNEEFALL',
+          'description': 'Es tritt oberhalb 800 m Schneefall auf.',
+          'area': [
+            {'areaDesc': 'Gemeinde Mittenwald, Gemeinde Krün'},
+          ],
+        },
+      ],
+    });
+    Map<String, String> feeds({bool withDetail = false}) => {
+      for (final source in [
+        'mowas',
+        'dwd',
+        'katwarn',
+        'biwapp',
+        'lhp',
+        'police',
+      ])
+        '$bbkBase/$source/mapData.json': source == 'dwd' ? mapData : '[]',
+      if (withDetail) '$bbkBase/warnings/$id.json': detail,
+    };
+
+    setUp(() => SharedPreferences.setMockInitialValues({}));
+
+    Future<List<Warning>> pending() =>
+        service({}).pendingNotifications(isRelevant: (_) => true);
+
+    test('waits for it rather than going to the whole country', () async {
+      // The detail request fails: the fixture client answers 404.
+      await service(feeds()).poll(countryCode: 'DE');
+
+      final stored = (await db.warningsBySource('bbk'))[id]!;
+      expect(stored.regionKey, isNull);
+      expect(stored.areaDescription, isNull);
+      expect(await pending(), isEmpty);
+    });
+
+    test('and is announced once the next poll brings it', () async {
+      await service(feeds()).poll(countryCode: 'DE');
+      expect(await pending(), isEmpty);
+
+      await service(feeds(withDetail: true)).poll(countryCode: 'DE');
+
+      final waiting = await pending();
+      expect(waiting.map((w) => w.externalId), [id]);
+      expect(waiting.single.areaDescription, contains('Mittenwald'));
+    });
+
+    test('not for longer than half an hour', () async {
+      await service(feeds()).poll(countryCode: 'DE');
+      final stored = (await db.warningsBySource('bbk'))[id]!;
+      await db.upsertWarning(
+        stored
+            .copyWith(
+              updatedAt: DateTime.now().toUtc().subtract(
+                WarningPollService.unplacedDetailWait,
+              ),
+            )
+            .toCompanion(false),
+      );
+
+      expect((await pending()).map((w) => w.externalId), [id]);
+    });
+
+    test('a warning whose id names its Land does not wait', () async {
+      await db.upsertWarning(
+        WarningsCompanion.insert(
+          source: 'bbk',
+          externalId: 'mow.DE-NI-BS-SE129-20261016-157-000',
+          countryCode: 'DE',
+          regionKey: const Value('NI'),
+          severity: 'severe',
+          eventType: 'Test',
+          headline: 'Test',
+          effective: sent,
+          sent: sent,
+          updatedAt: DateTime.now().toUtc(),
+        ),
+      );
+
+      expect(await pending(), hasLength(1));
     });
   });
 }
