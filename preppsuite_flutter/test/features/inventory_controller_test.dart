@@ -207,6 +207,81 @@ void main() {
     },
   );
 
+  group('a row changed after the screen opened it (#403)', () {
+    // What a sync brings in from the laptop while the form or the consume
+    // dialog is open on this device.
+    Future<void> laptopEdits(InventoryItem row) async {
+      final snapshot = DeviceSnapshot(
+        deviceId: 'laptop',
+        householdId: householdId,
+        writtenAt: DateTime.now().toUtc(),
+        inventoryItems: [
+          {
+            ...encodeInventoryItem(row),
+            'name': 'Vollkornnudeln',
+            'quantity': 8.0,
+            'notes': 'vom Laptop',
+            'updatedAt': DateTime.now()
+                .toUtc()
+                .add(const Duration(minutes: 1))
+                .toIso8601String(),
+          },
+        ],
+      );
+      expect(await applyHouseholdSnapshot(db, snapshot), 1);
+    }
+
+    Future<InventoryItem> storedEvenIfDeleted() async =>
+        (await db.inventoryItemsForSync(householdId)).single;
+
+    test('deleting keeps the other device\'s edit, and so does undo', () async {
+      await addItem(quantity: 5);
+      final opened = await storedItem();
+      await laptopEdits(opened);
+
+      await controller.deleteItem(opened);
+
+      final tombstone = await storedEvenIfDeleted();
+      expect(tombstone.deletedAt, isNotNull);
+      expect(tombstone.dirty, isTrue);
+      expect(tombstone.name, 'Vollkornnudeln');
+      expect(tombstone.quantity, 8);
+      expect(tombstone.notes, 'vom Laptop');
+
+      await controller.restoreItem(opened.clientId);
+      final restored = await storedItem();
+      expect(restored.name, 'Vollkornnudeln');
+      expect(restored.quantity, 8);
+      expect(restored.notes, 'vom Laptop');
+    });
+
+    test('consuming takes off what is stored, and keeps the rest', () async {
+      await addItem(quantity: 5);
+      final opened = await storedItem();
+      await laptopEdits(opened);
+
+      await controller.consumeQuantity(opened, 2);
+
+      final after = await storedItem();
+      expect(after.quantity, 6);
+      expect(after.name, 'Vollkornnudeln');
+      expect(after.notes, 'vom Laptop');
+      expect(after.dirty, isTrue);
+    });
+
+    test('consuming what was deleted meanwhile brings nothing back', () async {
+      await addItem(quantity: 5);
+      final opened = await storedItem();
+      await controller.deleteItem(opened);
+
+      await controller.consumeQuantity(opened, 2);
+
+      final row = await storedEvenIfDeleted();
+      expect(row.deletedAt, isNotNull);
+      expect(row.quantity, 5);
+    });
+  });
+
   test(
     'undo restores a deletion with a newer version and can sync again',
     () async {

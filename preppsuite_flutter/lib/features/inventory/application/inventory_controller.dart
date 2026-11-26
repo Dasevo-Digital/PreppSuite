@@ -355,43 +355,40 @@ class InventoryController {
   /// A staple that ran out is exactly what the low-stock badge and the
   /// missing-equipment report are for; deleting it would quietly drop it
   /// off both, which is the opposite of what an emptied supply should do.
+  ///
+  /// Taken off the row as stored, in one transaction, not off [existing]
+  /// (#403): that is the copy the dialog was opened on, and a sync may
+  /// have brought another device's edit since -- a new name, a new
+  /// count, a picture. Writing the copy back undid that edit here and,
+  /// once published, everywhere. A row deleted meanwhile is left alone.
   Future<void> consumeQuantity(InventoryItem existing, double amount) async {
-    if (!isNonNegativeFinite(amount) || hasInvalidInventoryNumbers(existing)) {
+    if (!isNonNegativeFinite(amount)) {
       throw const InvalidInventoryNumbers();
     }
-    // From what is there today: a pack in daily use has been taken from
-    // since it was counted, and the new count starts now (#268).
-    final onHand = stockToday(existing);
-    final remaining = (onHand - amount).clamp(0.0, onHand);
-
-    await _db.upsertInventoryItem(
-      InventoryItemsCompanion.insert(
-        clientId: existing.clientId,
-        householdId: existing.householdId,
-        name: existing.name,
-        category: existing.category,
-        barcode: Value(existing.barcode),
-        offProductId: Value(existing.offProductId),
-        quantity: remaining,
-        unit: existing.unit,
-        storageLocation: existing.storageLocation,
-        expirationDate: Value(existing.expirationDate),
-        minQuantity: Value(existing.minQuantity),
-        notes: Value(existing.notes),
-        // The photos are left out: a booking does not move them, and the
-        // copy of the row this was read from may be older than a picture
-        // that has arrived since (#376).
-        calories: Value(existing.calories),
-        proteinGrams: Value(existing.proteinGrams),
-        carbohydrateGrams: Value(existing.carbohydrateGrams),
-        fatGrams: Value(existing.fatGrams),
-        fiberGrams: Value(existing.fiberGrams),
-        // Booking down is counting: what is left is now known (#150).
-        stockCountedAt: Value(DateTime.now().toUtc()),
-        updatedAt: DateTime.now().toUtc(),
-        dirty: const Value(true),
-      ),
-    );
+    final now = DateTime.now().toUtc();
+    await _db.transaction(() async {
+      final row = await _stored(existing.clientId);
+      if (row == null || row.deletedAt != null) return;
+      if (hasInvalidInventoryNumbers(row)) {
+        throw const InvalidInventoryNumbers();
+      }
+      // From what is there today: a pack in daily use has been taken from
+      // since it was counted, and the new count starts now (#268).
+      final onHand = stockToday(row, now: now);
+      final remaining = (onHand - amount).clamp(0.0, onHand);
+      await _db.upsertInventoryItem(
+        row
+            .toCompanion(false)
+            .copyWith(
+              quantity: Value(remaining),
+              // Booking down is counting: what is left is now known
+              // (#150).
+              stockCountedAt: Value(now),
+              updatedAt: Value(now),
+              dirty: const Value(true),
+            ),
+      );
+    });
   }
 
   /// Books what was bought into stock (#265): [bought] maps an item's
@@ -599,34 +596,29 @@ class InventoryController {
     );
   }
 
+  /// Tombstones [existing]: the row as stored with `deletedAt` set, and
+  /// nothing else changed (#403).
+  ///
+  /// [existing] is the copy the form was opened on. Written back, it put
+  /// the form's old name, count and notes over whatever another device
+  /// had changed since, and "Rückgängig" then brought back the old state
+  /// as the newest version, so the other device's edit was gone
+  /// everywhere.
   Future<void> deleteItem(InventoryItem existing) async {
-    await _db.upsertInventoryItem(
-      InventoryItemsCompanion.insert(
-        clientId: existing.clientId,
-        householdId: existing.householdId,
-        name: existing.name,
-        category: existing.category,
-        barcode: Value(existing.barcode),
-        offProductId: Value(existing.offProductId),
-        quantity: existing.quantity,
-        unit: existing.unit,
-        storageLocation: existing.storageLocation,
-        expirationDate: Value(existing.expirationDate),
-        minQuantity: Value(existing.minQuantity),
-        notes: Value(existing.notes),
-        // The photos are left out: a booking does not move them, and the
-        // copy of the row this was read from may be older than a picture
-        // that has arrived since (#376).
-        calories: Value(existing.calories),
-        proteinGrams: Value(existing.proteinGrams),
-        carbohydrateGrams: Value(existing.carbohydrateGrams),
-        fatGrams: Value(existing.fatGrams),
-        fiberGrams: Value(existing.fiberGrams),
-        updatedAt: DateTime.now().toUtc(),
-        dirty: const Value(true),
-        deletedAt: Value(DateTime.now().toUtc()),
-      ),
-    );
+    final now = DateTime.now().toUtc();
+    await _db.transaction(() async {
+      final row = await _stored(existing.clientId);
+      if (row == null || row.deletedAt != null) return;
+      await _db.upsertInventoryItem(
+        row
+            .toCompanion(false)
+            .copyWith(
+              deletedAt: Value(now),
+              updatedAt: Value(now),
+              dirty: const Value(true),
+            ),
+      );
+    });
   }
 }
 
