@@ -27,9 +27,9 @@
 	<key>NSFaceIDUsageDescription</key>
 	<string>PreppSuite entsperrt die App-Sperre auf Wunsch mit Face ID statt mit der Passphrase.</string>
 	<key>NSCameraUsageDescription</key>
-	<string>PreppSuite verwendet die Kamera, um Barcodes von Vorratsartikeln zu scannen.</string>
+	<string>PreppSuite verwendet die Kamera, um Barcodes und QR-Codes zu scannen.</string>
 	<key>NSLocalNetworkUsageDescription</key>
-	<string>PreppSuite gleicht den Haushalt direkt mit einem zweiten Geraet im selben Netz ab. Die Daten verlassen das oertliche Netz dabei nicht.</string>
+	<string>PreppSuite gleicht den Haushalt direkt mit einem zweiten Gerät im selben Netz ab. Die Daten verlassen das örtliche Netz dabei nicht.</string>
 	<key>NSLocationWhenInUseUsageDescription</key>
 	<string>PreppSuite verwendet deinen Standort, um dein Bundesland für genauere Warnmeldungen zu bestimmen.</string>
 	<!-- macOS asks for this key by name: geolocator only calls

@@ -1,8 +1,14 @@
 /* Warum die App die Kamera braucht */
-"NSCameraUsageDescription" = "PreppSuite verwendet die Kamera, um Barcodes von Vorratsartikeln zu scannen.";
+"NSCameraUsageDescription" = "PreppSuite verwendet die Kamera, um Barcodes und QR-Codes zu scannen und um Vorräte oder Text für den Übersetzer zu fotografieren.";
+
+/* Warum die App Face ID braucht */
+"NSFaceIDUsageDescription" = "PreppSuite entsperrt die App-Sperre auf Wunsch mit Face ID statt mit der Passphrase.";
+
+/* Warum die App das örtliche Netz braucht */
+"NSLocalNetworkUsageDescription" = "PreppSuite gleicht den Haushalt direkt mit einem zweiten Gerät im selben Netz ab. Die Daten verlassen das örtliche Netz dabei nicht.";
 
 /* Warum die App den Standort braucht */
 "NSLocationWhenInUseUsageDescription" = "PreppSuite verwendet deinen Standort, um dein Bundesland für genauere Warnmeldungen zu bestimmen und Schutzräume in der Nähe zu finden.";
 
 /* Warum die App auf Fotos zugreift */
-"NSPhotoLibraryUsageDescription" = "PreppSuite greift auf deine Fotos zu, damit du einem Vorratsartikel ein Bild zuordnen kannst.";
+"NSPhotoLibraryUsageDescription" = "PreppSuite greift auf deine Fotos zu, damit du einem Vorratsartikel ein Bild zuordnen oder den Text auf einem Foto übersetzen kannst.";

@@ -1,0 +1,14 @@
+/* Warum die App die Kamera braucht */
+"NSCameraUsageDescription" = "PreppSuite verwendet die Kamera, um Barcodes und QR-Codes zu scannen.";
+
+/* Warum die App Face ID braucht */
+"NSFaceIDUsageDescription" = "PreppSuite entsperrt die App-Sperre auf Wunsch mit Face ID statt mit der Passphrase.";
+
+/* Warum die App das örtliche Netz braucht */
+"NSLocalNetworkUsageDescription" = "PreppSuite gleicht den Haushalt direkt mit einem zweiten Gerät im selben Netz ab. Die Daten verlassen das örtliche Netz dabei nicht.";
+
+/* Warum die App den Standort braucht */
+"NSLocationWhenInUseUsageDescription" = "PreppSuite verwendet deinen Standort, um dein Bundesland für genauere Warnmeldungen zu bestimmen.";
+
+/* Warum die App den Standort braucht (der Schlüssel, nach dem macOS fragt) */
+"NSLocationUsageDescription" = "PreppSuite verwendet deinen Standort, um dein Bundesland für genauere Warnmeldungen zu bestimmen.";

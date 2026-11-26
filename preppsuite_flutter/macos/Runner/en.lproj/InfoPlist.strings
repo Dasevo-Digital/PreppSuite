@@ -1,0 +1,14 @@
+/* Why the app needs the camera */
+"NSCameraUsageDescription" = "PreppSuite uses the camera to scan barcodes and QR codes.";
+
+/* Why the app needs Face ID */
+"NSFaceIDUsageDescription" = "If you turn it on, PreppSuite unlocks the app lock with Face ID instead of the passphrase.";
+
+/* Why the app needs the local network */
+"NSLocalNetworkUsageDescription" = "PreppSuite syncs the household directly with a second device on the same network. The data does not leave the local network.";
+
+/* Why the app needs location */
+"NSLocationWhenInUseUsageDescription" = "PreppSuite uses your location to determine your region for more precise warnings.";
+
+/* Why the app needs location (the key macOS asks for) */
+"NSLocationUsageDescription" = "PreppSuite uses your location to determine your region for more precise warnings.";

@@ -27,6 +27,7 @@
 		33CC10F12044A3C60003C045 /* AppDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = 33CC10F02044A3C60003C045 /* AppDelegate.swift */; };
 		33CC10F32044A3C60003C045 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 33CC10F22044A3C60003C045 /* Assets.xcassets */; };
 		33CC10F62044A3C60003C045 /* MainMenu.xib in Resources */ = {isa = PBXBuildFile; fileRef = 33CC10F42044A3C60003C045 /* MainMenu.xib */; };
+		A1B2C3D420261126AA000002 /* InfoPlist.strings in Resources */ = {isa = PBXBuildFile; fileRef = A1B2C3D420261126AA000001 /* InfoPlist.strings */; };
 		33CC11132044BFA00003C045 /* MainFlutterWindow.swift in Sources */ = {isa = PBXBuildFile; fileRef = 33CC11122044BFA00003C045 /* MainFlutterWindow.swift */; };
 		A1B2C3D420260907AA000002 /* StorageBridge.swift in Sources */ = {isa = PBXBuildFile; fileRef = A1B2C3D420260907AA000001 /* StorageBridge.swift */; };
 		EED363486A11E76874FD2388 /* TextRecognitionBridge.swift in Sources */ = {isa = PBXBuildFile; fileRef = B3B037779F176EBC7C99FC3A /* TextRecognitionBridge.swift */; };
@@ -74,6 +75,9 @@
 		33CC10F02044A3C60003C045 /* AppDelegate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppDelegate.swift; sourceTree = "<group>"; };
 		33CC10F22044A3C60003C045 /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; name = Assets.xcassets; path = Runner/Assets.xcassets; sourceTree = "<group>"; };
 		33CC10F52044A3C60003C045 /* Base */ = {isa = PBXFileReference; lastKnownFileType = file.xib; name = Base; path = Base.lproj/MainMenu.xib; sourceTree = "<group>"; };
+		A1B2C3D420261126AA000003 /* de */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = de; path = de.lproj/InfoPlist.strings; sourceTree = "<group>"; };
+		A1B2C3D420261126AA000004 /* en */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = en; path = en.lproj/InfoPlist.strings; sourceTree = "<group>"; };
+		A1B2C3D420261126AA000005 /* es */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = es; path = es.lproj/InfoPlist.strings; sourceTree = "<group>"; };
 		33CC10F72044A3C60003C045 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; name = Info.plist; path = Runner/Info.plist; sourceTree = "<group>"; };
 		33CC11122044BFA00003C045 /* MainFlutterWindow.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MainFlutterWindow.swift; sourceTree = "<group>"; };
 		A1B2C3D420260907AA000001 /* StorageBridge.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = StorageBridge.swift; sourceTree = "<group>"; };
@@ -162,6 +166,7 @@
 			children = (
 				33CC10F22044A3C60003C045 /* Assets.xcassets */,
 				33CC10F42044A3C60003C045 /* MainMenu.xib */,
+				A1B2C3D420261126AA000001 /* InfoPlist.strings */,
 				33CC10F72044A3C60003C045 /* Info.plist */,
 			);
 			name = Resources;
@@ -304,6 +309,8 @@
 			knownRegions = (
 				en,
 				Base,
+				de,
+				es,
 			);
 			mainGroup = 33CC10E42044A3C60003C045;
 			packageReferences = (
@@ -334,6 +341,7 @@
 			files = (
 				33CC10F32044A3C60003C045 /* Assets.xcassets in Resources */,
 				33CC10F62044A3C60003C045 /* MainMenu.xib in Resources */,
+				A1B2C3D420261126AA000002 /* InfoPlist.strings in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -499,6 +507,17 @@
 				33CC10F52044A3C60003C045 /* Base */,
 			);
 			name = MainMenu.xib;
+			path = Runner;
+			sourceTree = "<group>";
+		};
+		A1B2C3D420261126AA000001 /* InfoPlist.strings */ = {
+			isa = PBXVariantGroup;
+			children = (
+				A1B2C3D420261126AA000003 /* de */,
+				A1B2C3D420261126AA000004 /* en */,
+				A1B2C3D420261126AA000005 /* es */,
+			);
+			name = InfoPlist.strings;
 			path = Runner;
 			sourceTree = "<group>";
 		};

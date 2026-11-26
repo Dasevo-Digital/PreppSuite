@@ -113,6 +113,7 @@
 		F84B960CA942FCA49B2D7DDD /* PreppSuiteWidget.appex */ = {isa = PBXFileReference; explicitFileType = "wrapper.app-extension"; includeInIndex = 0; path = PreppSuiteWidget.appex; sourceTree = BUILT_PRODUCTS_DIR; };
 		PS0000000000000000000001 /* de */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = de; path = de.lproj/InfoPlist.strings; sourceTree = "<group>"; };
 		PS0000000000000000000002 /* en */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = en; path = en.lproj/InfoPlist.strings; sourceTree = "<group>"; };
+		PS0000000000000000000005 /* es */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = es; path = es.lproj/InfoPlist.strings; sourceTree = "<group>"; };
 		7F3A2C1E5D48409BAE12F379 /* PrivacyInfo.xcprivacy */ = {isa = PBXFileReference; lastKnownFileType = text.xml; path = PrivacyInfo.xcprivacy; sourceTree = "<group>"; };
 		7F3A2C1E5D48409BAE12F381 /* PrivacyInfo.xcprivacy */ = {isa = PBXFileReference; lastKnownFileType = text.xml; path = PrivacyInfo.xcprivacy; sourceTree = "<group>"; };
 /* End PBXFileReference section */
@@ -601,6 +602,7 @@
 			children = (
 				PS0000000000000000000001 /* de */,
 				PS0000000000000000000002 /* en */,
+				PS0000000000000000000005 /* es */,
 			);
 			name = InfoPlist.strings;
 			sourceTree = "<group>";
