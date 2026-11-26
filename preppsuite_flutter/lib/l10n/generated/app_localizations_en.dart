@@ -4249,6 +4249,11 @@ class AppLocalizationsEn extends AppLocalizations {
   String get radioCbTitle => 'CB radio: calling and assistance channels';
 
   @override
+  String radioCbChannel(int channel, String mode) {
+    return 'Channel $channel $mode';
+  }
+
+  @override
   String get radioCbHintsTitle => 'CB radio guidance';
 
   @override
@@ -4258,6 +4263,12 @@ class AppLocalizationsEn extends AppLocalizations {
   @override
   String get radioAmateurTitle =>
       'Amateur radio: IARU emergency centres of activity';
+
+  @override
+  String get radioAmateurRegionalCalling => 'Regional calling channel';
+
+  @override
+  String get radioAmateurInternational => 'International';
 
   @override
   String get radioLegalTitle => 'Legal notice';

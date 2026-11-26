@@ -4277,6 +4277,11 @@ class AppLocalizationsDe extends AppLocalizations {
   String get radioCbTitle => 'CB-Funk: Anruf- und Hilfekanäle';
 
   @override
+  String radioCbChannel(int channel, String mode) {
+    return 'Kanal $channel $mode';
+  }
+
+  @override
   String get radioCbHintsTitle => 'Hinweise zum CB-Funk';
 
   @override
@@ -4285,6 +4290,12 @@ class AppLocalizationsDe extends AppLocalizations {
 
   @override
   String get radioAmateurTitle => 'Amateurfunk: IARU-Notfunk-Schwerpunkte';
+
+  @override
+  String get radioAmateurRegionalCalling => 'Regionaler Anrufkanal';
+
+  @override
+  String get radioAmateurInternational => 'International';
 
   @override
   String get radioLegalTitle => 'Rechtlicher Hinweis';

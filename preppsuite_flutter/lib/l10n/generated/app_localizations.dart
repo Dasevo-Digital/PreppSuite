@@ -7102,6 +7102,12 @@ abstract class AppLocalizations {
   /// **'CB radio: calling and assistance channels'**
   String get radioCbTitle;
 
+  /// A CB channel with its mode, e.g. 'Channel 9 AM'.
+  ///
+  /// In en, this message translates to:
+  /// **'Channel {channel} {mode}'**
+  String radioCbChannel(int channel, String mode);
+
   /// No description provided for @radioCbHintsTitle.
   ///
   /// In en, this message translates to:
@@ -7119,6 +7125,18 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Amateur radio: IARU emergency centres of activity'**
   String get radioAmateurTitle;
+
+  /// No description provided for @radioAmateurRegionalCalling.
+  ///
+  /// In en, this message translates to:
+  /// **'Regional calling channel'**
+  String get radioAmateurRegionalCalling;
+
+  /// No description provided for @radioAmateurInternational.
+  ///
+  /// In en, this message translates to:
+  /// **'International'**
+  String get radioAmateurInternational;
 
   /// No description provided for @radioLegalTitle.
   ///

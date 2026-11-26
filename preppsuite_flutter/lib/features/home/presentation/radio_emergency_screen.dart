@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:intl/intl.dart';
 import 'package:url_launcher/url_launcher.dart';
 
 import '../../../core/adaptive_columns.dart';
@@ -12,6 +13,12 @@ class RadioEmergencyScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context)!;
+    // In the reader's own numbers, as the emergency directory writes its
+    // bands: "149,0250 MHz" was in the code, which an English reader
+    // takes for two values (#412).
+    String mhz(num value, int digits) =>
+        '${_radioFigure(l10n.localeName, value, digits)} MHz';
+    final raster = '${_radioFigure(l10n.localeName, 12.5, 1)} kHz';
     return Scaffold(
       appBar: AppBar(title: Text(l10n.radioEmergencyTitle)),
       body: AdaptiveColumns(
@@ -67,13 +74,20 @@ class RadioEmergencyScreen extends StatelessWidget {
               const SizedBox(height: 8),
               _FrequencyCard(
                 color: Theme.of(context).colorScheme.secondary,
-                rows: const [
-                  _FrequencyRow('Freenet 1', '149,0250 MHz', '12,5 kHz'),
-                  _FrequencyRow('Freenet 2', '149,0375 MHz', '12,5 kHz'),
-                  _FrequencyRow('Freenet 3', '149,0500 MHz', '12,5 kHz'),
-                  _FrequencyRow('Freenet 4', '149,0875 MHz', '12,5 kHz'),
-                  _FrequencyRow('Freenet 5', '149,1000 MHz', '12,5 kHz'),
-                  _FrequencyRow('Freenet 6', '149,1125 MHz', '12,5 kHz'),
+                rows: [
+                  for (final (channel, frequency) in const [
+                    (1, 149.025),
+                    (2, 149.0375),
+                    (3, 149.05),
+                    (4, 149.0875),
+                    (5, 149.1),
+                    (6, 149.1125),
+                  ])
+                    _FrequencyRow(
+                      'Freenet $channel',
+                      mhz(frequency, 4),
+                      raster,
+                    ),
                 ],
               ),
               _HintCard(
@@ -95,13 +109,13 @@ class RadioEmergencyScreen extends StatelessWidget {
                 color: Theme.of(context).colorScheme.tertiary,
                 rows: [
                   _FrequencyRow(
-                    'Kanal 9 AM',
-                    '27,065 MHz',
+                    l10n.radioCbChannel(9, 'AM'),
+                    mhz(27.065, 3),
                     l10n.radioCbCallingChannel,
                   ),
                   _FrequencyRow(
-                    'Kanal 19 FM',
-                    '27,185 MHz',
+                    l10n.radioCbChannel(19, 'FM'),
+                    mhz(27.185, 3),
                     l10n.radioCbRoadChannel,
                   ),
                 ],
@@ -129,21 +143,33 @@ class RadioEmergencyScreen extends StatelessWidget {
               const SizedBox(height: 8),
               _FrequencyCard(
                 color: Theme.of(context).colorScheme.primary,
-                rows: const [
-                  _FrequencyRow('80 m · LSB', '3,760 MHz', 'IARU Region 1'),
-                  _FrequencyRow('40 m · LSB', '7,110 MHz', 'IARU Region 1'),
-                  _FrequencyRow('20 m · USB', '14,300 MHz', 'International'),
-                  _FrequencyRow('17 m · USB', '18,160 MHz', 'International'),
-                  _FrequencyRow('15 m · USB', '21,360 MHz', 'International'),
+                rows: [
+                  _FrequencyRow('80 m · LSB', mhz(3.76, 3), 'IARU Region 1'),
+                  _FrequencyRow('40 m · LSB', mhz(7.11, 3), 'IARU Region 1'),
+                  _FrequencyRow(
+                    '20 m · USB',
+                    mhz(14.3, 3),
+                    l10n.radioAmateurInternational,
+                  ),
+                  _FrequencyRow(
+                    '17 m · USB',
+                    mhz(18.16, 3),
+                    l10n.radioAmateurInternational,
+                  ),
+                  _FrequencyRow(
+                    '15 m · USB',
+                    mhz(21.36, 3),
+                    l10n.radioAmateurInternational,
+                  ),
                   _FrequencyRow(
                     '2 m · FM',
-                    '145,500 MHz',
-                    'Regionaler Anrufkanal',
+                    mhz(145.5, 3),
+                    l10n.radioAmateurRegionalCalling,
                   ),
                   _FrequencyRow(
                     '70 cm · FM',
-                    '433,500 MHz',
-                    'Regionaler Anrufkanal',
+                    mhz(433.5, 3),
+                    l10n.radioAmateurRegionalCalling,
                   ),
                 ],
               ),
@@ -177,6 +203,15 @@ class RadioEmergencyScreen extends StatelessWidget {
     );
   }
 }
+
+/// [value] to exactly [digits] places in [localeName]'s numbers, without
+/// grouping: a channel raster keeps its last zero ("149,0250").
+String _radioFigure(String localeName, num value, int digits) =>
+    (NumberFormat.decimalPattern(localeName)
+          ..turnOffGrouping()
+          ..minimumFractionDigits = digits
+          ..maximumFractionDigits = digits)
+        .format(value);
 
 /// One band with everything that belongs to it, kept in one column.
 class _Band extends StatelessWidget {

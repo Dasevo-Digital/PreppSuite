@@ -6,7 +6,10 @@ import 'package:preppsuite_flutter/l10n/generated/app_localizations.dart';
 import 'accessibility.dart';
 
 void main() {
-  Future<void> show(WidgetTester tester) async {
+  Future<void> show(
+    WidgetTester tester, {
+    Locale locale = const Locale('de'),
+  }) async {
     // Tall enough that the whole list is built: a `ListView` builds only
     // what it can show, and this screen is now long.
     tester.view.physicalSize = const Size(1200, 6000);
@@ -14,11 +17,11 @@ void main() {
     addTearDown(tester.view.reset);
 
     await tester.pumpWidget(
-      const MaterialApp(
-        locale: Locale('de'),
+      MaterialApp(
+        locale: locale,
         localizationsDelegates: AppLocalizations.localizationsDelegates,
         supportedLocales: AppLocalizations.supportedLocales,
-        home: RadioEmergencyScreen(),
+        home: const RadioEmergencyScreen(),
       ),
     );
     await tester.pumpAndSettle();
@@ -106,6 +109,38 @@ void main() {
     expect(find.textContaining('Ortsfeste Funkstellen'), findsOneWidget);
     expect(find.textContaining('kein Gateway'), findsOneWidget);
     expect(find.textContaining('180 Sekunden'), findsOneWidget);
+  });
+
+  testWidgets('English reads its own words and numbers (#412)', (
+    tester,
+  ) async {
+    // "Kanal 9 AM", "Regionaler Anrufkanal" and "149,0250 MHz" were
+    // written into the code, German on every locale -- and a decimal
+    // comma an English reader takes for two values.
+    await show(tester, locale: const Locale('en'));
+
+    expect(find.text('Channel 9 AM'), findsOneWidget);
+    expect(find.text('Channel 19 FM'), findsOneWidget);
+    expect(find.textContaining('27.065 MHz'), findsOneWidget);
+    expect(find.textContaining('149.0250 MHz'), findsOneWidget);
+    expect(find.textContaining('149.1125 MHz\n12.5 kHz'), findsOneWidget);
+    expect(find.textContaining('3.760 MHz'), findsOneWidget);
+    expect(find.textContaining('433.500 MHz'), findsOneWidget);
+    expect(find.textContaining('Regional calling channel'), findsNWidgets(2));
+
+    expect(find.textContaining('Kanal'), findsNothing);
+    expect(find.textContaining('Regionaler'), findsNothing);
+    expect(find.textContaining(RegExp(r'\d,\d+ [kM]Hz')), findsNothing);
+  });
+
+  testWidgets('Spanish keeps the decimal comma', (tester) async {
+    await show(tester, locale: const Locale('es'));
+
+    expect(find.text('Canal 9 AM'), findsOneWidget);
+    expect(find.textContaining('27,065 MHz'), findsOneWidget);
+    expect(find.textContaining('149,0250 MHz'), findsOneWidget);
+    expect(find.textContaining('Canal de llamada regional'), findsNWidgets(2));
+    expect(find.textContaining('Internacional'), findsNWidgets(3));
   });
 
   testWidgets('is accessible', (tester) async {
