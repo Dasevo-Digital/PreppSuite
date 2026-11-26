@@ -352,6 +352,10 @@ class AppLocalizationsEn extends AppLocalizations {
       'Product not found — fill in the details by hand.';
 
   @override
+  String get productNutritionLeftOut =>
+      'Open Food Facts gives nutrition figures that are not possible per 100 g or 100 ml, usually the whole package’s. They were not filled in — please copy them from the label.';
+
+  @override
   String get itemPhotoLabel => 'Photo';
 
   @override
@@ -7699,6 +7703,11 @@ class AppLocalizationsEn extends AppLocalizations {
   }
 
   @override
+  String caloriesPer100Implausible(int limit, String basis) {
+    return 'No food has more than $limit kcal per $basis. Is this the figure for the whole package?';
+  }
+
+  @override
   String get unitInfoAction => 'Why a measure?';
 
   @override
@@ -7726,6 +7735,16 @@ class AppLocalizationsEn extends AppLocalizations {
   @override
   String nutritionPer100Label(String nutrient, String basis) {
     return '$nutrient per $basis';
+  }
+
+  @override
+  String nutrientPer100Implausible(int limit, String basis) {
+    return '$basis holds at most $limit g.';
+  }
+
+  @override
+  String nutrientsSumPer100Implausible(int limit, String basis) {
+    return 'More than $limit g per $basis together.';
   }
 
   @override

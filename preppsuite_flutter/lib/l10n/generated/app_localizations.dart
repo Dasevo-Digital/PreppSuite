@@ -706,6 +706,12 @@ abstract class AppLocalizations {
   /// **'Product not found — fill in the details by hand.'**
   String get productNotFound;
 
+  /// No description provided for @productNutritionLeftOut.
+  ///
+  /// In en, this message translates to:
+  /// **'Open Food Facts gives nutrition figures that are not possible per 100 g or 100 ml, usually the whole package’s. They were not filled in — please copy them from the label.'**
+  String get productNutritionLeftOut;
+
   /// No description provided for @itemPhotoLabel.
   ///
   /// In en, this message translates to:
@@ -12745,6 +12751,12 @@ abstract class AppLocalizations {
   /// **'Calories per {basis} (kcal, optional)'**
   String caloriesPer100Label(String basis);
 
+  /// No description provided for @caloriesPer100Implausible.
+  ///
+  /// In en, this message translates to:
+  /// **'No food has more than {limit} kcal per {basis}. Is this the figure for the whole package?'**
+  String caloriesPer100Implausible(int limit, String basis);
+
   /// No description provided for @unitInfoAction.
   ///
   /// In en, this message translates to:
@@ -12792,6 +12804,18 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'{nutrient} per {basis}'**
   String nutritionPer100Label(String nutrient, String basis);
+
+  /// No description provided for @nutrientPer100Implausible.
+  ///
+  /// In en, this message translates to:
+  /// **'{basis} holds at most {limit} g.'**
+  String nutrientPer100Implausible(int limit, String basis);
+
+  /// No description provided for @nutrientsSumPer100Implausible.
+  ///
+  /// In en, this message translates to:
+  /// **'More than {limit} g per {basis} together.'**
+  String nutrientsSumPer100Implausible(int limit, String basis);
 
   /// No description provided for @foodWithoutMeasureTitle.
   ///

@@ -138,6 +138,7 @@
   "scannerTorchOff": "Licht ausschalten",
   "scannedBarcodeLabel": "Barcode: {barcode}",
   "productNotFound": "Produkt nicht gefunden — bitte manuell ausfüllen.",
+  "productNutritionLeftOut": "Open Food Facts nennt Nährwerte, die je 100 g oder 100 ml nicht möglich sind, meist die der ganzen Packung. Sie sind nicht eingetragen – bitte vom Etikett abschreiben.",
   "itemPhotoLabel": "Foto",
   "addPhotoButton": "Foto hinzufügen",
   "takePhotoButton": "Foto aufnehmen",
@@ -3286,6 +3287,17 @@
       }
     }
   },
+  "caloriesPer100Implausible": "Mehr als {limit} kcal je {basis} hat kein Lebensmittel. Steht hier der Wert der ganzen Packung?",
+  "@caloriesPer100Implausible": {
+    "placeholders": {
+      "limit": {
+        "type": "int"
+      },
+      "basis": {
+        "type": "String"
+      }
+    }
+  },
   "unitInfoAction": "Warum ein Maß?",
   "unitInfoTitle": "Warum g, kg, ml oder l?",
   "unitInfoWhy": "Nährwerte stehen auf jeder Packung je 100 g oder je 100 ml. Aus einem Vorrat wird erst dann eine Tagesration, wenn sich die Menge auch in Gramm sagen lässt – und was sechs Dosen wiegen, steht auf der Dose und nicht in dieser App.",
@@ -3298,6 +3310,28 @@
     "placeholders": {
       "nutrient": {
         "type": "String"
+      },
+      "basis": {
+        "type": "String"
+      }
+    }
+  },
+  "nutrientPer100Implausible": "In {basis} passen höchstens {limit} g.",
+  "@nutrientPer100Implausible": {
+    "placeholders": {
+      "limit": {
+        "type": "int"
+      },
+      "basis": {
+        "type": "String"
+      }
+    }
+  },
+  "nutrientsSumPer100Implausible": "Zusammen mehr als {limit} g je {basis}.",
+  "@nutrientsSumPer100Implausible": {
+    "placeholders": {
+      "limit": {
+        "type": "int"
       },
       "basis": {
         "type": "String"

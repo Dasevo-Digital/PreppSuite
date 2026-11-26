@@ -169,4 +169,64 @@ void main() {
 
     expect(tester.state<FormState>(find.byType(Form)).validate(), isTrue);
   });
+
+  group('what 100 g cannot hold is refused (#402)', () {
+    Finder gramsField(
+      WidgetTester tester,
+      String Function(AppLocalizations) of,
+    ) {
+      final l10n = AppLocalizations.of(
+        tester.element(find.byType(InventoryItemFormScreen)),
+      )!;
+      return find.widgetWithText(
+        TextFormField,
+        l10n.nutritionPer100Label(of(l10n), '100 g'),
+      );
+    }
+
+    bool validate(WidgetTester tester) =>
+        tester.state<FormState>(find.byType(Form)).validate();
+
+    testWidgets('more than 900 kcal per 100 g', (tester) async {
+      // The whole package in the per-100 field, the common slip on Open
+      // Food Facts: 400 g at 1250 would count 5000 kcal.
+      await open(tester, bread());
+      await tester.enterText(calorieField(tester), '1250');
+      await tester.pumpAndSettle();
+      expect(validate(tester), isFalse);
+
+      await tester.enterText(calorieField(tester), '900');
+      await tester.pumpAndSettle();
+      expect(validate(tester), isTrue);
+    });
+
+    testWidgets('a nutrient heavier than 100 g', (tester) async {
+      await open(tester, bread());
+      await tester.enterText(gramsField(tester, (l) => l.fatLabel), '160');
+      await tester.pumpAndSettle();
+      expect(validate(tester), isFalse);
+
+      await tester.enterText(gramsField(tester, (l) => l.fatLabel), '100');
+      await tester.pumpAndSettle();
+      expect(validate(tester), isTrue);
+    });
+
+    testWidgets('nutrients heavier than 100 g together', (tester) async {
+      await open(tester, bread());
+      await tester.enterText(gramsField(tester, (l) => l.fatLabel), '50');
+      await tester.enterText(
+        gramsField(tester, (l) => l.carbohydrateLabel),
+        '60',
+      );
+      await tester.pumpAndSettle();
+      expect(validate(tester), isFalse);
+
+      await tester.enterText(
+        gramsField(tester, (l) => l.carbohydrateLabel),
+        '45,5',
+      );
+      await tester.pumpAndSettle();
+      expect(validate(tester), isTrue);
+    });
+  });
 }

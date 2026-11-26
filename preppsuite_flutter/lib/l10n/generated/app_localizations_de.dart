@@ -356,6 +356,10 @@ class AppLocalizationsDe extends AppLocalizations {
       'Produkt nicht gefunden — bitte manuell ausfüllen.';
 
   @override
+  String get productNutritionLeftOut =>
+      'Open Food Facts nennt Nährwerte, die je 100 g oder 100 ml nicht möglich sind, meist die der ganzen Packung. Sie sind nicht eingetragen – bitte vom Etikett abschreiben.';
+
+  @override
   String get itemPhotoLabel => 'Foto';
 
   @override
@@ -7733,6 +7737,11 @@ class AppLocalizationsDe extends AppLocalizations {
   }
 
   @override
+  String caloriesPer100Implausible(int limit, String basis) {
+    return 'Mehr als $limit kcal je $basis hat kein Lebensmittel. Steht hier der Wert der ganzen Packung?';
+  }
+
+  @override
   String get unitInfoAction => 'Warum ein Maß?';
 
   @override
@@ -7761,6 +7770,16 @@ class AppLocalizationsDe extends AppLocalizations {
   @override
   String nutritionPer100Label(String nutrient, String basis) {
     return '$nutrient je $basis';
+  }
+
+  @override
+  String nutrientPer100Implausible(int limit, String basis) {
+    return 'In $basis passen höchstens $limit g.';
+  }
+
+  @override
+  String nutrientsSumPer100Implausible(int limit, String basis) {
+    return 'Zusammen mehr als $limit g je $basis.';
   }
 
   @override

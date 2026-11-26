@@ -1,5 +1,6 @@
 import 'package:openfoodfacts/openfoodfacts.dart';
 
+import 'food_amount.dart';
 import 'package_nutrition.dart';
 
 /// Reads the per-100 figures off a scanned product, and does nothing else
@@ -21,8 +22,25 @@ import 'package_nutrition.dart';
 /// and per 100 g or 100 ml is the label's own figure; the packaging is
 /// preferred, and an estimate is never taken -- it would put a guessed
 /// calorie count into the supply calculator as if somebody had read it.
-PackageNutrition packageNutritionOf(Map<String, dynamic>? nutrition) {
+PackageNutrition packageNutritionOf(Map<String, dynamic>? nutrition) =>
+    _nutritionIn(_labelSet(nutrition?['input_sets']));
+
+/// What a scan may fill in: the label's figures without those that 100 g,
+/// or 100 ml on a drink, cannot hold, and whether any were left out
+/// (#402). See [plausibleNutrition].
+({PackageNutrition nutrition, bool leftOut}) scannedNutritionOf(
+  Map<String, dynamic>? nutrition,
+) {
   final set = _labelSet(nutrition?['input_sets']);
+  return plausibleNutrition(
+    _nutritionIn(set),
+    base: set?.key.perSize == PerSize.oneHundredMilliliters
+        ? FoodBase.volume
+        : FoodBase.mass,
+  );
+}
+
+PackageNutrition _nutritionIn(NutritionSet? set) {
   double? per100(Nutrient nutrient) {
     final value = set?.nutritionValues?[nutrient];
     final number = value?.value;
@@ -71,6 +89,7 @@ class OpenFoodFactsProduct {
     this.brand,
     this.quantity,
     this.nutrition = const PackageNutrition(),
+    this.nutritionLeftOut = false,
   });
 
   final String barcode;
@@ -95,6 +114,12 @@ class OpenFoodFactsProduct {
   /// it in by hand, so getting it from the barcode is what makes that
   /// screen work at all.
   final PackageNutrition nutrition;
+
+  /// Whether the label held figures that 100 g or 100 ml cannot hold,
+  /// which [nutrition] leaves out (#402). The form says so, so that the
+  /// empty field is read off the packet rather than taken for "not
+  /// stated".
+  final bool nutritionLeftOut;
 }
 
 /// Thin wrapper around the `openfoodfacts` package. Configure once via
@@ -133,12 +158,14 @@ class OpenFoodFactsService {
       final name = product?.productName;
       if (product == null || name == null || name.isEmpty) return null;
 
+      final label = scannedNutritionOf(product.nutrition);
       return OpenFoodFactsProduct(
         barcode: barcode,
         name: name,
         brand: product.brands,
         quantity: product.quantity,
-        nutrition: packageNutritionOf(product.nutrition),
+        nutrition: label.nutrition,
+        nutritionLeftOut: label.leftOut,
       );
     } catch (_) {
       // Network error, timeout, malformed response, etc. — the user can

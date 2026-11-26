@@ -402,11 +402,19 @@ class _InventoryItemFormScreenState
       }
     });
 
-    if (product == null && mounted) {
-      final l10n = AppLocalizations.of(context)!;
+    if (!mounted) return;
+    final l10n = AppLocalizations.of(context)!;
+    if (product == null) {
       ScaffoldMessenger.of(
         context,
       ).showSnackBar(SnackBar(content: Text(l10n.productNotFound)));
+    } else if (product.nutritionLeftOut) {
+      // A figure 100 g cannot hold was not filled in (#402). Said, so
+      // that the empty field is read off the packet rather than taken
+      // for a label that did not say.
+      ScaffoldMessenger.of(
+        context,
+      ).showSnackBar(SnackBar(content: Text(l10n.productNutritionLeftOut)));
     }
   }
 
@@ -625,12 +633,30 @@ class _InventoryItemFormScreenState
       _category == InventoryItemCategory.food ||
       _category == InventoryItemCategory.water;
 
+  /// The basis the nutrition fields are read against, following the
+  /// unit the household typed: per 100 ml for a volume, per 100 g
+  /// otherwise.
+  FoodBase get _per100Base =>
+      oneOf(_unitController.text)?.base ?? FoodBase.mass;
+
   /// The basis the nutrition fields are labelled with: "100 g" or
-  /// "100 ml", following the unit the household typed.
-  String get _per100Unit => switch (oneOf(_unitController.text)?.base) {
+  /// "100 ml".
+  String get _per100Unit => switch (_per100Base) {
     FoodBase.volume => '100 ml',
-    _ => '100 g',
+    FoodBase.mass => '100 g',
   };
+
+  /// The four nutrient fields as they stand; one that is empty or not a
+  /// number counts for nothing.
+  List<double?> _nutrientGrams() => [
+    for (final controller in [
+      _proteinController,
+      _carbohydrateController,
+      _fatController,
+      _fiberController,
+    ])
+      readNonNegativeNumber(controller.text.trim()),
+  ];
 
   /// The stock reduced to grams or millilitres, or null where it cannot
   /// be.
@@ -1252,6 +1278,7 @@ class _InventoryItemFormScreenState
                             // not on the label is how this was misread
                             // twice before.
                             labelText: l10n.caloriesPer100Label(_per100Unit),
+                            errorMaxLines: 3,
                           ),
                           keyboardType: const TextInputType.numberWithOptions(
                             decimal: true,
@@ -1259,9 +1286,17 @@ class _InventoryItemFormScreenState
                           validator: (value) {
                             final trimmed = value?.trim() ?? '';
                             if (trimmed.isEmpty) return null;
-                            return _decimal(trimmed) == null
-                                ? l10n.invalidNumber
-                                : null;
+                            final kcal = _decimal(trimmed);
+                            if (kcal == null) return l10n.invalidNumber;
+                            // Most often the whole package in the
+                            // per-100 field (#402), which the supply
+                            // calculator would multiply by the stock.
+                            return plausibleKcalPer100(kcal)
+                                ? null
+                                : l10n.caloriesPer100Implausible(
+                                    maxKcalPer100.round(),
+                                    _per100Unit,
+                                  );
                           },
                         ),
                         // The multiplication, spelled out. A number that
@@ -1372,12 +1407,24 @@ class _InventoryItemFormScreenState
 
   /// Accepts a comma as the decimal mark, because a German keyboard puts
   /// one there and `double.parse` does not take it.
+  ///
+  /// Refuses what 100 g (or 100 ml) cannot hold, alone or with the other
+  /// three (#402): the common Open Food Facts slip of the whole package's
+  /// figure in the per-100 field.
   String? Function(String?) _gramsValidator(AppLocalizations l10n) {
     return (value) {
       final trimmed = (value ?? '').trim().replaceAll(',', '.');
       if (trimmed.isEmpty) return null;
       final parsed = readNonNegativeNumber(trimmed);
       if (parsed == null || parsed < 0) return l10n.invalidNumber;
+      final base = _per100Base;
+      final limit = maxGramsPer100(base).round();
+      if (!plausibleGramsPer100(parsed, base)) {
+        return l10n.nutrientPer100Implausible(limit, _per100Unit);
+      }
+      if (!plausibleGramsSumPer100(_nutrientGrams(), base)) {
+        return l10n.nutrientsSumPer100Implausible(limit, _per100Unit);
+      }
       return null;
     };
   }
@@ -1543,7 +1590,11 @@ class _GramsField extends StatelessWidget {
   Widget build(BuildContext context) {
     return TextFormField(
       controller: controller,
-      decoration: InputDecoration(labelText: label, suffixText: 'g'),
+      decoration: InputDecoration(
+        labelText: label,
+        suffixText: 'g',
+        errorMaxLines: 3,
+      ),
       keyboardType: const TextInputType.numberWithOptions(decimal: true),
       validator: validator,
     );

@@ -165,6 +165,7 @@
     }
   },
   "productNotFound": "Product not found — fill in the details by hand.",
+  "productNutritionLeftOut": "Open Food Facts gives nutrition figures that are not possible per 100 g or 100 ml, usually the whole package’s. They were not filled in — please copy them from the label.",
   "itemPhotoLabel": "Photo",
   "addPhotoButton": "Add photo",
   "takePhotoButton": "Take photo",
@@ -4424,6 +4425,17 @@
       }
     }
   },
+  "caloriesPer100Implausible": "No food has more than {limit} kcal per {basis}. Is this the figure for the whole package?",
+  "@caloriesPer100Implausible": {
+    "placeholders": {
+      "limit": {
+        "type": "int"
+      },
+      "basis": {
+        "type": "String"
+      }
+    }
+  },
   "unitInfoAction": "Why a measure?",
   "unitInfoTitle": "Why g, kg, ml or l?",
   "unitInfoWhy": "Nutrition is printed on every packet per 100 g or per 100 ml. A stock only becomes a day’s ration if the amount can be said in grams too — and what six tins weigh is on the tin, not in this app.",
@@ -4436,6 +4448,28 @@
     "placeholders": {
       "nutrient": {
         "type": "String"
+      },
+      "basis": {
+        "type": "String"
+      }
+    }
+  },
+  "nutrientPer100Implausible": "{basis} holds at most {limit} g.",
+  "@nutrientPer100Implausible": {
+    "placeholders": {
+      "limit": {
+        "type": "int"
+      },
+      "basis": {
+        "type": "String"
+      }
+    }
+  },
+  "nutrientsSumPer100Implausible": "More than {limit} g per {basis} together.",
+  "@nutrientsSumPer100Implausible": {
+    "placeholders": {
+      "limit": {
+        "type": "int"
       },
       "basis": {
         "type": "String"

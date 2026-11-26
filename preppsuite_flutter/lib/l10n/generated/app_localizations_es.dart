@@ -355,6 +355,10 @@ class AppLocalizationsEs extends AppLocalizations {
       'Producto no encontrado: rellena los datos a mano.';
 
   @override
+  String get productNutritionLeftOut =>
+      'Open Food Facts da valores nutricionales que no son posibles por 100 g o 100 ml, normalmente los del envase entero. No se han rellenado: cópialos de la etiqueta.';
+
+  @override
   String get itemPhotoLabel => 'Foto';
 
   @override
@@ -7758,6 +7762,11 @@ class AppLocalizationsEs extends AppLocalizations {
   }
 
   @override
+  String caloriesPer100Implausible(int limit, String basis) {
+    return 'Ningún alimento tiene más de $limit kcal por $basis. ¿Es el valor del envase entero?';
+  }
+
+  @override
   String get unitInfoAction => '¿Por qué una medida?';
 
   @override
@@ -7785,6 +7794,16 @@ class AppLocalizationsEs extends AppLocalizations {
   @override
   String nutritionPer100Label(String nutrient, String basis) {
     return '$nutrient por $basis';
+  }
+
+  @override
+  String nutrientPer100Implausible(int limit, String basis) {
+    return 'En $basis caben como máximo $limit g.';
+  }
+
+  @override
+  String nutrientsSumPer100Implausible(int limit, String basis) {
+    return 'Más de $limit g por $basis en total.';
   }
 
   @override

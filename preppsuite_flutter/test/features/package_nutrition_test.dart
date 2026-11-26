@@ -1,5 +1,7 @@
 import 'package:flutter_test/flutter_test.dart';
+import 'package:preppsuite_flutter/features/inventory/application/food_amount.dart';
 import 'package:preppsuite_flutter/features/inventory/application/open_food_facts_service.dart';
+import 'package:preppsuite_flutter/features/inventory/application/package_nutrition.dart';
 
 void main() {
   // The shape API 3.5 answers with: one set per source and basis.
@@ -137,6 +139,79 @@ void main() {
     test('a product with no nutrition data at all is empty', () {
       // A tin of candles is in Open Food Facts too.
       expect(packageNutritionOf(null).isEmpty, isTrue);
+    });
+  });
+
+  group('what 100 g cannot hold is not filled in (#402)', () {
+    test('a whole package typed in as per 100 g is left out', () {
+      // 1250 kcal and 60 g of fat "per 100 g": the figures of a 500 g
+      // pack. Filled in, the supply calculator counted the stock five
+      // times over.
+      final scanned = scannedNutritionOf(
+        nutriments({'energy-kcal': 1250, 'proteins': 8, 'fat': 160}),
+      );
+
+      expect(scanned.leftOut, isTrue);
+      expect(scanned.nutrition.kcal, isNull);
+      expect(scanned.nutrition.fatGrams, isNull);
+      expect(scanned.nutrition.proteinGrams, closeTo(8, 0.001));
+    });
+
+    test('nutrients that only fail together are all left out', () {
+      // Each could be right; together they weigh more than the 100 g they
+      // are in, and there is no telling which one is wrong.
+      final scanned = scannedNutritionOf(
+        nutriments({
+          'energy-kcal': 500,
+          'proteins': 10,
+          'carbohydrates': 60,
+          'fat': 50,
+        }),
+      );
+
+      expect(scanned.leftOut, isTrue);
+      expect(scanned.nutrition.kcal, 500);
+      expect(scanned.nutrition.proteinGrams, isNull);
+      expect(scanned.nutrition.carbohydrateGrams, isNull);
+      expect(scanned.nutrition.fatGrams, isNull);
+    });
+
+    test('the most a label can say is taken as it is', () {
+      // Oil: 900 kcal and 100 g of fat per 100 g.
+      final oil = scannedNutritionOf(
+        nutriments({'energy-kcal': 900, 'fat': 100}),
+      );
+      expect(oil.leftOut, isFalse);
+      expect(oil.nutrition.kcal, 900);
+      expect(oil.nutrition.fatGrams, 100);
+
+      expect(packageNutritionOf(null).isEmpty, isTrue);
+      expect(scannedNutritionOf(null).leftOut, isFalse);
+    });
+
+    test('100 ml may weigh more than 100 g, never more than 150', () {
+      // Syrup is denser than water: 110 g of sugar in 100 ml is a label.
+      final syrup = scannedNutritionOf({
+        'input_sets': [
+          labelSet({'energy-kcal': 440, 'carbohydrates': 110}, per: '100ml'),
+        ],
+      });
+      expect(syrup.leftOut, isFalse);
+      expect(syrup.nutrition.carbohydrateGrams, closeTo(110, 0.001));
+
+      expect(
+        plausibleNutrition(
+          const PackageNutrition(carbohydrateGrams: 110),
+        ).leftOut,
+        isTrue,
+      );
+      expect(
+        plausibleNutrition(
+          const PackageNutrition(carbohydrateGrams: 160),
+          base: FoodBase.volume,
+        ).leftOut,
+        isTrue,
+      );
     });
   });
 }
