@@ -100,7 +100,7 @@ class NeighbourOfferController {
 
     await _db.upsertNeighbourOffer(
       NeighbourOffersCompanion.insert(
-        clientId: const Uuid().v4(),
+        clientId: receivedOfferClientId(householdId, offer),
         householdId: householdId,
         received: const Value(true),
         kind: offer.kind.name,
@@ -108,11 +108,43 @@ class NeighbourOfferController {
         contact: Value(offer.contact),
         offeredOn: _storedDay(offer.offeredOn),
         updatedAt: DateTime.now().toUtc(),
+        // Said, because the id may be that of an offer deleted here
+        // before: filmed again, it is back, and an update leaves alone
+        // what the companion does not name.
+        deletedAt: const Value(null),
         dirty: const Value(true),
       ),
     );
     return true;
   }
+
+  /// The id a neighbour's offer is kept under, the same on every device
+  /// of [householdId] that films the same notice (#399).
+  ///
+  /// A random one made two rows of one notice that two of the household's
+  /// phones had scanned, and the folder carried both to every device. Made
+  /// from what the code says -- kind, text, contact and day, as the rows
+  /// compare them -- and the household, so that another household's copy
+  /// of the same notice stays its own row.
+  static String receivedOfferClientId(
+    String householdId,
+    NeighbourOfferCode offer,
+  ) {
+    final day = _storedDay(offer.offeredOn);
+    final name = [
+      householdId,
+      offer.kind.name,
+      offer.body,
+      offer.contact ?? '',
+      '${day.year}-${day.month}-${day.day}',
+    ].join('\n');
+    return const Uuid().v5(_receivedOfferNamespace, name);
+  }
+
+  /// This app's namespace for [receivedOfferClientId]; fixed for good,
+  /// because changing it splits every offer scanned before from its
+  /// copies scanned after.
+  static const _receivedOfferNamespace = '1f9f7ce6-099d-4ff9-898e-df4a039264ff';
 
   /// A tombstone, like every other row, so the deletion reaches the
   /// household's other devices instead of the row coming back from them.
