@@ -1,3 +1,4 @@
+import 'dart:async' show TimeoutException;
 import 'dart:io';
 import 'dart:convert';
 
@@ -158,6 +159,15 @@ class IoSyncFolder implements SyncFolder, SyncPhotoFolder {
     } on FormatException {
       // Not text, so a damaged file: that one, and not the run.
       return null;
+    } on InputTooLarge {
+      // Larger than any snapshot this app writes, or still growing: that
+      // file, and not the run (#399). It used to fail every run, before
+      // any seal was checked, so anybody who could write to the folder
+      // could stop it without the key.
+      return null;
+    } on TimeoutException {
+      // A file that does not finish arriving within the minute.
+      return null;
     }
   }
 
@@ -213,6 +223,8 @@ class IoSyncFolder implements SyncFolder, SyncPhotoFolder {
     } on FormatException {
       return null;
     } on InputTooLarge {
+      return null;
+    } on TimeoutException {
       return null;
     }
   }

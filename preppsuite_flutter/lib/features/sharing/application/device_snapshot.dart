@@ -284,7 +284,7 @@ InventoryItemsCompanion? decodeInventoryItem(Map<String, Object?> json) {
   final name = _string(json['name']);
   final category = _string(json['exactCategory']) ?? _string(json['category']);
   final quantity = _double(json['quantity']);
-  final updatedAt = asUtcDate(json['updatedAt']);
+  final updatedAt = rowVersion(json['updatedAt']);
   if (clientId == null ||
       householdId == null ||
       name == null ||
@@ -408,7 +408,7 @@ ChecklistTemplatesCompanion? decodeChecklistTemplate(
   final clientId = _string(json['clientId']);
   final title = _string(json['title']);
   final category = _string(json['category']);
-  final updatedAt = asUtcDate(json['updatedAt']);
+  final updatedAt = rowVersion(json['updatedAt']);
   if (clientId == null ||
       title == null ||
       category == null ||
@@ -449,7 +449,7 @@ ChecklistItemsCompanion? decodeChecklistItem(Map<String, Object?> json) {
   final clientId = _string(json['clientId']);
   final templateClientId = _string(json['templateClientId']);
   final title = _string(json['title']);
-  final updatedAt = asUtcDate(json['updatedAt']);
+  final updatedAt = rowVersion(json['updatedAt']);
   if (clientId == null ||
       templateClientId == null ||
       title == null ||
@@ -497,7 +497,7 @@ HouseholdMembersCompanion? decodeHouseholdMember(Map<String, Object?> json) {
   final clientId = _string(json['clientId']);
   final householdId = _string(json['householdId']);
   final name = _string(json['name']);
-  final updatedAt = asUtcDate(json['updatedAt']);
+  final updatedAt = rowVersion(json['updatedAt']);
   // A card without a name is not a card. Everything medical is optional:
   // one that says only "Lena, allergic to penicillin" is worth keeping.
   if (clientId == null ||
@@ -559,7 +559,7 @@ PossessionsCompanion? decodePossession(Map<String, Object?> json) {
   final clientId = _string(json['clientId']);
   final householdId = _string(json['householdId']);
   final name = _string(json['name']);
-  final updatedAt = asUtcDate(json['updatedAt']);
+  final updatedAt = rowVersion(json['updatedAt']);
   // A name and nothing else is a usable entry: "Waschmaschine" in a list
   // of forty is still worth more after a fire than a perfect record of
   // thirty-nine.
@@ -605,7 +605,7 @@ Map<String, Object?> encodeHouseholdPlan(HouseholdPlan row) => {
 HouseholdPlansCompanion? decodeHouseholdPlan(Map<String, Object?> json) {
   final clientId = _string(json['clientId']);
   final householdId = _string(json['householdId']);
-  final updatedAt = asUtcDate(json['updatedAt']);
+  final updatedAt = rowVersion(json['updatedAt']);
   // Every field of the plan itself is optional — a household that only
   // agreed a meeting point and nothing else has a perfectly good plan.
   // The three above are what makes the row addressable at all.
@@ -650,7 +650,7 @@ BudgetEntriesCompanion? decodeBudgetEntry(Map<String, Object?> json) {
   final amountCents = _int(json['amountCents']);
   final currency = _string(json['currency']);
   final category = _string(json['category']);
-  final updatedAt = asUtcDate(json['updatedAt']);
+  final updatedAt = rowVersion(json['updatedAt']);
   if (clientId == null ||
       householdId == null ||
       label == null ||
@@ -692,7 +692,7 @@ NeighbourOffersCompanion? decodeNeighbourOffer(Map<String, Object?> json) {
   final clientId = _string(json['clientId']);
   final householdId = _string(json['householdId']);
   final body = _string(json['body']);
-  final updatedAt = asUtcDate(json['updatedAt']);
+  final updatedAt = rowVersion(json['updatedAt']);
   if (clientId == null ||
       householdId == null ||
       body == null ||
@@ -725,6 +725,29 @@ DateTime? asUtcDate(Object? value) {
   return DateTime.tryParse(value)?.toUtc();
 }
 
+/// A row's `updatedAt` as it arrives, or null -- which costs the row --
+/// outside the years a version can carry (#399).
+///
+/// `DateTime` reaches to the year 275760, and a file that said so made a
+/// row nobody could edit again: the next local write stamps the stored
+/// second plus one, and that is past what `DateTime` holds. The bound is
+/// fixed rather than measured against the clock, so that every device
+/// takes or leaves the same row, and wide, so that a device whose clock
+/// was wrong does not lose genuine edits on the others; a fast clock
+/// winning is the merge rule's known limit, not something this cures.
+DateTime? rowVersion(Object? value) {
+  final version = asUtcDate(value);
+  if (version == null ||
+      version.isBefore(_earliestRowVersion) ||
+      !version.isBefore(_latestRowVersion)) {
+    return null;
+  }
+  return version;
+}
+
+final _earliestRowVersion = DateTime.utc(1970);
+final _latestRowVersion = DateTime.utc(10000);
+
 String? _string(Object? value) =>
     value is String && value.isNotEmpty ? value : null;
 
@@ -732,7 +755,11 @@ String? _string(Object? value) =>
 /// rather than an absence.
 String? _text(Object? value) => value is String ? value : null;
 
-int? _int(Object? value) => value is num ? value.toInt() : null;
+/// Finite numbers only (#399): `jsonDecode` reads `1e400` as infinity, and
+/// `toInt()` throws on it -- out of the merge, which failed the whole run
+/// on every device for one damaged row.
+int? _int(Object? value) =>
+    value is num && value.isFinite ? value.toInt() : null;
 
 double? _double(Object? value) =>
     value is num && value.toDouble().isFinite ? value.toDouble() : null;

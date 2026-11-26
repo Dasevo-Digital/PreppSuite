@@ -1,3 +1,4 @@
+import 'dart:async' show TimeoutException;
 import 'dart:convert';
 
 import 'package:path/path.dart' as p;
@@ -64,6 +65,12 @@ class NativeSyncFolder implements SyncFolder, SyncPhotoFolder {
       // costs this file and not the run, and the next run picks it up.
       if (error.code == 'read-failed') return null;
       rethrow;
+    } on InputTooLarge {
+      // Larger than any snapshot this app writes: that file, and not the
+      // run (#399), as for a picture below.
+      return null;
+    } on TimeoutException {
+      return null;
     }
   }
 
@@ -104,6 +111,8 @@ class NativeSyncFolder implements SyncFolder, SyncPhotoFolder {
       if (error.code == 'read-failed') return null;
       rethrow;
     } on InputTooLarge {
+      return null;
+    } on TimeoutException {
       return null;
     }
   }

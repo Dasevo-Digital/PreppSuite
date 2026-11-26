@@ -167,7 +167,7 @@ Future<int> applyHouseholdSnapshot(AppDatabase db, DeviceSnapshot snapshot) {
 IncomingRow<C>? incomingRow<C>(Map<String, Object?> json, C? companion) {
   if (companion == null) return null;
   final clientId = json['clientId'];
-  final updatedAt = asUtcDate(json['updatedAt']);
+  final updatedAt = rowVersion(json['updatedAt']);
   if (clientId is! String || updatedAt == null) return null;
   return (clientId: clientId, updatedAt: updatedAt, companion: companion);
 }
