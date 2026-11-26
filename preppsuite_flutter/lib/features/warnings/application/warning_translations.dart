@@ -123,7 +123,12 @@ class WarningTranslation {
 /// Whether a source's translated `headline` translates the headline. Only
 /// DWD's does; MoWaS names the event there, and for the others it is not
 /// known, so the German headline stays.
-bool bbkTranslatesHeadline(String externalId) => externalId.startsWith('dwd.');
+///
+/// The nationwide map lists DWD's warnings as `dwdmap.…`, a district's
+/// dashboard as `dwd.…`; asking for `dwd.` alone left every warning from
+/// the map with its German headline.
+bool bbkTranslatesHeadline(String externalId) =>
+    externalId.startsWith('dwd.') || externalId.startsWith('dwdmap.');
 
 /// [translated] reduced to what differs from [german]. Null when nothing
 /// does.

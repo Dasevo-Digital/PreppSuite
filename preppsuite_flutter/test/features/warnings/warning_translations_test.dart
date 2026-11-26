@@ -172,6 +172,26 @@ void main() {
     expect(es.instruction, 'Cubra las plantas.');
   });
 
+  test(
+    'a DWD warning from the nationwide map translates its headline too',
+    () async {
+      // The map lists DWD as `dwdmap.…`; only `dwd.…` was recognised.
+      const fromMap = BbkRawWarning(
+        id: 'dwdmap.2.49.0.0.276.0.DWD.PVW.1762840000000.frost',
+        startDate: '2026-11-11T08:00:00+01:00',
+        severity: 'Minor',
+        eventTitleDe: 'Amtliche WARNUNG vor FROST',
+        raw: {},
+        messageType: 'Alert',
+      );
+      final warning = await detailed(fromMap, dwdDetail);
+
+      expect(warning.translations!['es']!.headline, 'Aviso oficial de HELADAS');
+      expect(bbkTranslatesHeadline('dwdmap.x'), isTrue);
+      expect(bbkTranslatesHeadline('mow.DE-NI-x'), isFalse);
+    },
+  );
+
   group('stored', () {
     late AppDatabase db;
     setUp(() => db = AppDatabase.forTesting(NativeDatabase.memory()));
