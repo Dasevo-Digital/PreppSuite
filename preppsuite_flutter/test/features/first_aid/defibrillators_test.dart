@@ -11,6 +11,7 @@ import 'package:preppsuite_flutter/features/first_aid/application/defibrillators
 import 'package:preppsuite_flutter/features/shelters/application/geo_bounds.dart';
 import 'package:preppsuite_flutter/core/geolocation_service.dart';
 import 'package:preppsuite_flutter/features/first_aid/presentation/defibrillator_screen.dart';
+import 'package:preppsuite_flutter/features/maps/application/readable_position.dart';
 import 'package:preppsuite_flutter/features/shelters/application/overpass_shelter_client.dart';
 import 'package:preppsuite_flutter/l10n/generated/app_localizations.dart';
 import 'package:shared_preferences/shared_preferences.dart';
@@ -295,6 +296,50 @@ void main() {
       expect(await const DefibrillatorStore().load(), isNull);
     });
 
+    testWidgets('a list from the last known position names when that was '
+        '(#390)', (tester) async {
+      final taken = DateTime.now().subtract(const Duration(hours: 3));
+      await tester.pumpWidget(
+        MaterialApp(
+          locale: const Locale('de'),
+          localizationsDelegates: AppLocalizations.localizationsDelegates,
+          supportedLocales: AppLocalizations.supportedLocales,
+          home: DefibrillatorScreen(
+            client: DefibrillatorClient(
+              retryDelay: Duration.zero,
+              httpClient: MockClient(
+                (request) async =>
+                    http.Response.bytes(utf8.encode(answer), 200),
+              ),
+            ),
+            geolocation: _LastKnown(taken),
+            offlinePoints: _KeptWithMap(const []),
+          ),
+        ),
+      );
+      await tester.pumpAndSettle();
+      await tester.tap(find.text('Hier suchen'));
+      await tester.pumpAndSettle();
+
+      final when = ReadablePosition(
+        latitude: 0,
+        longitude: 0,
+        takenAt: taken,
+      ).takenAtLabel('de', DateTime.now())!;
+      expect(
+        find.textContaining('Keine frische Messung', skipOffstage: false),
+        findsOneWidget,
+      );
+      expect(
+        find.textContaining(
+          'an der Position von $when',
+          skipOffstage: false,
+        ),
+        findsOneWidget,
+      );
+      expect(find.textContaining(', hier,'), findsNothing);
+    });
+
     testWidgets('the live answer replaces the offline map\'s points', (
       tester,
     ) async {
@@ -353,4 +398,22 @@ class _KeptWithMap extends OfflineNearbyPointStore {
     defibrillators: defibrillators,
     points: const [],
   );
+}
+
+/// A device that got no fresh fix and handed over the one it had.
+class _LastKnown extends GeolocationService {
+  _LastKnown(this.taken);
+
+  final DateTime taken;
+
+  @override
+  Future<ReadablePosition> getCurrentFix() async => ReadablePosition(
+    latitude: 52.2689,
+    longitude: 10.5268,
+    accuracyMetres: 20,
+    takenAt: taken,
+  );
+
+  @override
+  void close() {}
 }

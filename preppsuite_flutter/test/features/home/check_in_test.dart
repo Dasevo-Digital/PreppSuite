@@ -4,7 +4,9 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:preppsuite_flutter/core/app_database_providers.dart';
+import 'package:preppsuite_flutter/core/geolocation_service.dart';
 import 'package:preppsuite_flutter/core/settings_arrival.dart';
+import 'package:preppsuite_flutter/features/maps/application/readable_position.dart';
 import 'package:preppsuite_flutter/features/home/application/check_in.dart';
 import 'package:preppsuite_flutter/features/home/presentation/check_in_screen.dart';
 import 'package:preppsuite_flutter/l10n/generated/app_localizations.dart';
@@ -59,6 +61,73 @@ void main() {
       'https://www.openstreetmap.org/?mlat=52.26890&mlon=10.52680#map=17/52.26890/10.52680',
       'Bin bei Nachbarn.',
     ]);
+  });
+
+  test('a position from earlier says when it was taken (#390)', () {
+    final text = composeCheckIn(
+      status: 'Mir geht es gut.',
+      time: 'Stand: 14:05',
+      location: describePosition(
+        52.26890,
+        10.52680,
+        accuracyMetres: 12,
+        takenAt: 'Position von 25. Nov., 21:40',
+      ),
+    );
+    expect(text.split('\n'), [
+      'Mir geht es gut.',
+      'Stand: 14:05',
+      '52.26890, 10.52680 (±12 m)',
+      'Position von 25. Nov., 21:40',
+      'https://www.openstreetmap.org/?mlat=52.26890&mlon=10.52680#map=17/52.26890/10.52680',
+    ]);
+  });
+
+  testWidgets('the last known position goes out as what it is, not as now '
+      '(#390)', (tester) async {
+    final db = AppDatabase.forTesting(NativeDatabase.memory());
+    addTearDown(db.close);
+    final taken = DateTime.now().subtract(const Duration(hours: 20));
+    await tester.pumpWidget(
+      ProviderScope(
+        overrides: [appDatabaseProvider.overrideWithValue(db)],
+        child: MaterialApp(
+          locale: const Locale('de'),
+          localizationsDelegates: AppLocalizations.localizationsDelegates,
+          supportedLocales: AppLocalizations.supportedLocales,
+          home: CheckInScreen(
+            householdId: 'home',
+            geolocation: _LastKnown(taken),
+            launch: (_) async => true,
+          ),
+        ),
+      ),
+    );
+    await tester.pumpAndSettle();
+
+    await tester.tap(find.text('Standort anhängen'));
+    await tester.pumpAndSettle();
+
+    final when = ReadablePosition(
+      latitude: 0,
+      longitude: 0,
+      takenAt: taken,
+    ).takenAtLabel('de', DateTime.now())!;
+    expect(
+      find.textContaining('Position von $when', skipOffstage: false),
+      findsOneWidget,
+    );
+    expect(
+      find.text(
+        'Keine frische Messung: Das ist die letzte bekannte Position '
+        '(gemessen $when).',
+        skipOffstage: false,
+      ),
+      findsOneWidget,
+    );
+
+    await tester.pumpWidget(const SizedBox());
+    await tester.pump(const Duration(seconds: 1));
   });
 
   test('contacts are kept', () async {
@@ -196,4 +265,22 @@ void main() {
     await tester.pumpWidget(const SizedBox());
     await tester.pump(const Duration(seconds: 1));
   });
+}
+
+/// A device that got no fresh fix and handed over the one it had.
+class _LastKnown extends GeolocationService {
+  _LastKnown(this.taken);
+
+  final DateTime taken;
+
+  @override
+  Future<ReadablePosition> getCurrentFix() async => ReadablePosition(
+    latitude: 52.2689,
+    longitude: 10.5268,
+    accuracyMetres: 20,
+    takenAt: taken,
+  );
+
+  @override
+  void close() {}
 }

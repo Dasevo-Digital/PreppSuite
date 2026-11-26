@@ -3109,6 +3109,10 @@ class AppLocalizationsDe extends AppLocalizations {
       'Das reicht nicht bis zur Hausnummer. Unter freiem Himmel noch einmal messen, und der Leitstelle die Ungenauigkeit mitsagen.';
 
   @override
+  String get myPositionApproximate =>
+      'Das Gerät gibt PreppSuite nur den ungefähren Standort. Für eine genaue Position in den Einstellungen des Geräts bei PreppSuite den genauen Standort erlauben.';
+
+  @override
   String myPositionStale(int minutes) {
     return 'Diese Messung ist $minutes Minuten alt. Das Gerät hat gerade keine frische bekommen – unter freiem Himmel noch einmal messen, bevor du sie durchgibst.';
   }
@@ -3116,6 +3120,16 @@ class AppLocalizationsDe extends AppLocalizations {
   @override
   String nearbyStale(int minutes) {
     return 'Gerechnet mit der letzten bekannten Position, $minutes Minuten alt.';
+  }
+
+  @override
+  String positionStale(String time) {
+    return 'Keine frische Messung: Das ist die letzte bekannte Position (gemessen $time).';
+  }
+
+  @override
+  String positionStaleWay(String time) {
+    return 'Keine frische Messung: Entfernung und Richtung gelten ab der letzten bekannten Position (gemessen $time). Wer seitdem unterwegs war, steht woanders.';
   }
 
   @override
@@ -8470,6 +8484,11 @@ class AppLocalizationsDe extends AppLocalizations {
   }
 
   @override
+  String checkInPositionFrom(String time) {
+    return 'Position von $time';
+  }
+
+  @override
   String get checkInAttachLocation => 'Standort anhängen';
 
   @override
@@ -8662,6 +8681,11 @@ class AppLocalizationsDe extends AppLocalizations {
 
   @override
   String get aedHere => 'hier';
+
+  @override
+  String aedPositionFrom(String time) {
+    return 'an der Position von $time';
+  }
 
   @override
   String get compassN => 'nördlich';

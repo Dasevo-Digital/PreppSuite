@@ -49,10 +49,25 @@ class _PlacePickerScreenState extends State<PlacePickerScreen> {
   Future<void> _locate(AppLocalizations l10n) async {
     setState(() => _locating = true);
     try {
-      final here = await _geolocation.getCurrentLatLng();
+      // Precise, and said when it is old (#390): a point picked from
+      // yesterday's position is a point somewhere else.
+      final fix = await _geolocation.getCurrentFix();
       if (!mounted) return;
+      final here = LatLng(fix.latitude, fix.longitude);
       setState(() => _point = here);
       _map.move(here, 17);
+      final now = DateTime.now();
+      if (fix.isStaleAt(now)) {
+        ScaffoldMessenger.of(context)
+          ..hideCurrentSnackBar()
+          ..showSnackBar(
+            SnackBar(
+              content: Text(
+                l10n.positionStale(fix.takenAtLabel(l10n.localeName, now)!),
+              ),
+            ),
+          );
+      }
     } on Object catch (error) {
       if (!mounted) return;
       ScaffoldMessenger.of(context)

@@ -1,5 +1,7 @@
 import 'dart:math' as math;
 
+import 'package:intl/intl.dart';
+
 /// One position, in the several ways it might have to be said out loud.
 ///
 /// The map could already centre on "my location". What it could not do was
@@ -34,6 +36,7 @@ class ReadablePosition {
     required this.longitude,
     this.accuracyMetres,
     this.takenAt,
+    this.approximateOnly = false,
   });
 
   final double latitude;
@@ -54,6 +57,12 @@ class ReadablePosition {
   /// sentence.
   final DateTime? takenAt;
 
+  /// The system gives this app only an approximate position: "Genauer
+  /// Standort" is off for it (iOS) or only the approximate one was
+  /// allowed (Android). A precise request cannot get past that; the
+  /// setting can.
+  final bool approximateOnly;
+
   /// How stale the fix is, or null where there is nothing to be stale.
   Duration? ageAt(DateTime now) {
     final taken = takenAt;
@@ -72,6 +81,23 @@ class ReadablePosition {
   static const staleAfter = Duration(minutes: 2);
 
   bool isStaleAt(DateTime now) => (ageAt(now) ?? Duration.zero) >= staleAfter;
+
+  /// When the fix was taken, as somebody reading a message later wants it
+  /// (#390): the time on the same day, the date with it otherwise. A
+  /// position from yesterday evening in another town is the case this is
+  /// for. Null for a point that was not measured.
+  String? takenAtLabel(String locale, DateTime now) {
+    final taken = takenAt?.toLocal();
+    if (taken == null) return null;
+    final today = now.toLocal();
+    final sameDay =
+        taken.year == today.year &&
+        taken.month == today.month &&
+        taken.day == today.day;
+    return sameDay
+        ? DateFormat.Hm(locale).format(taken)
+        : DateFormat.MMMd(locale).add_Hm().format(taken);
+  }
 
   /// `52.516275, 13.377704` — six places, about ten centimetres.
   String get decimal =>

@@ -5,6 +5,7 @@ import '../../../core/error_text.dart';
 import '../../../core/geolocation_service.dart';
 import '../../../l10n/generated/app_localizations.dart';
 import '../../maps/application/personal_place.dart';
+import '../../maps/application/readable_position.dart';
 import '../../maps/presentation/map_screen.dart';
 import '../../shelters/application/shelter_bearing.dart';
 import '../../shelters/application/shelter_l10n.dart';
@@ -56,7 +57,14 @@ class _WayDialog extends StatefulWidget {
 class _WayDialogState extends State<_WayDialog> {
   late final _geolocation = widget.geolocation ?? GeolocationService();
   ({double meters, CompassPoint direction})? _way;
+
+  /// The fix [_way] was measured from. Said when it is old (#390): the
+  /// device hands over its last known position when it gets no fresh one,
+  /// and "300 m north-east" from where somebody was yesterday is a wrong
+  /// direction, not a rough one.
+  ReadablePosition? _from;
   Object? _error;
+  var _measuring = false;
 
   @override
   void initState() {
@@ -71,11 +79,21 @@ class _WayDialogState extends State<_WayDialog> {
   }
 
   Future<void> _measure() async {
+    setState(() {
+      _measuring = true;
+      _error = null;
+    });
     try {
-      final here = await _geolocation.getCurrentLatLng();
-      if (mounted) setState(() => _way = wayTo(here, widget.place));
+      final fix = await _geolocation.getCurrentFix();
+      if (!mounted) return;
+      setState(() {
+        _from = fix;
+        _way = wayTo(LatLng(fix.latitude, fix.longitude), widget.place);
+      });
     } on Object catch (error) {
       if (mounted) setState(() => _error = error);
+    } finally {
+      if (mounted) setState(() => _measuring = false);
     }
   }
 
@@ -83,9 +101,14 @@ class _WayDialogState extends State<_WayDialog> {
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context)!;
     final theme = Theme.of(context);
-    final way = _way;
-    final error = _error;
+    final way = _measuring ? null : _way;
+    final error = _measuring ? null : _error;
     final place = widget.place;
+    final now = DateTime.now();
+    final from = _from;
+    final staleAt = way != null && from != null && from.isStaleAt(now)
+        ? from.takenAtLabel(l10n.localeName, now)
+        : null;
 
     return AlertDialog(
       title: Text(place.label),
@@ -93,12 +116,21 @@ class _WayDialogState extends State<_WayDialog> {
         mainAxisSize: MainAxisSize.min,
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          if (way != null)
+          if (way != null) ...[
             Text(
               formatShelterDistance(l10n, way.meters, way.direction),
               style: theme.textTheme.headlineSmall,
-            )
-          else if (error != null)
+            ),
+            if (staleAt != null) ...[
+              const SizedBox(height: 8),
+              Text(
+                l10n.positionStaleWay(staleAt),
+                style: theme.textTheme.bodyMedium?.copyWith(
+                  color: theme.colorScheme.error,
+                ),
+              ),
+            ],
+          ] else if (error != null)
             Text(describeError(l10n, error))
           else
             Row(
@@ -119,6 +151,11 @@ class _WayDialogState extends State<_WayDialog> {
         ],
       ),
       actions: [
+        if (staleAt != null || error != null)
+          TextButton(
+            onPressed: _measure,
+            child: Text(l10n.myPositionMeasure),
+          ),
         TextButton(
           onPressed: () {
             final navigator = Navigator.of(context)..pop();

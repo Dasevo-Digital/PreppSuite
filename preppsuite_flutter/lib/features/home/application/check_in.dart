@@ -84,10 +84,17 @@ String composeCheckIn({
 
 /// Where a position is, in a form every phone can open: the numbers for
 /// somebody to read out, and a map link for somebody to tap.
+///
+/// [takenAt] is a line of its own under the numbers, for a fix that is
+/// not from now (#390): the device hands over its last known position
+/// when it cannot get a fresh one, and a message sent at 14:05 carrying
+/// yesterday's position in another town says where somebody was, not
+/// where they are.
 String describePosition(
   double latitude,
   double longitude, {
   double? accuracyMetres,
+  String? takenAt,
 }) {
   final lat = latitude.toStringAsFixed(5);
   final lon = longitude.toStringAsFixed(5);
@@ -95,6 +102,7 @@ String describePosition(
       ? ''
       : ' (±${accuracyMetres.round()} m)';
   return '$lat, $lon$accuracy\n'
+      '${takenAt == null ? '' : '$takenAt\n'}'
       'https://www.openstreetmap.org/?mlat=$lat&mlon=$lon#map=17/$lat/$lon';
 }
 

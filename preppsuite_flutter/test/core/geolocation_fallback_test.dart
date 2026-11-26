@@ -23,7 +23,15 @@ class _FakeGeolocator extends GeolocatorPlatform
     this.permission = LocationPermission.whileInUse,
     this.current,
     this.last,
+    this.accuracyStatus,
   });
+
+  /// Null is a platform that does not answer the question.
+  final LocationAccuracyStatus? accuracyStatus;
+
+  @override
+  Future<LocationAccuracyStatus> getLocationAccuracy() async =>
+      accuracyStatus ?? (throw UnimplementedError());
 
   final bool serviceEnabled;
   final LocationPermission permission;
@@ -209,6 +217,69 @@ void main() {
     expect(state, isNotNull);
     expect(asked!.queryParameters['lat'], '52.27');
     expect(asked!.queryParameters['lon'], '10.53');
+  });
+
+  group('precise where it is measured from, coarse where a region will do '
+      '(#390)', () {
+    test('a fix is asked for at high accuracy, with more time', () async {
+      final platform = _FakeGeolocator(current: at(52.0, 10.0, now));
+      GeolocatorPlatform.instance = platform;
+
+      await GeolocationService().getCurrentFix();
+
+      expect(platform.askedWith!.accuracy, LocationAccuracy.high);
+      expect(platform.askedWith!.timeLimit, const Duration(seconds: 30));
+    });
+
+    test('a plain coordinate stays coarse and quick', () async {
+      final platform = _FakeGeolocator(current: at(52.0, 10.0, now));
+      GeolocatorPlatform.instance = platform;
+
+      await GeolocationService().getCurrentLatLng();
+
+      expect(platform.askedWith!.accuracy, LocationAccuracy.low);
+      expect(platform.askedWith!.timeLimit, const Duration(seconds: 15));
+    });
+
+    test('and so does the state lookup', () async {
+      final platform = _FakeGeolocator(current: at(52.0, 10.0, now));
+      GeolocatorPlatform.instance = platform;
+
+      await GeolocationService(
+        httpClient: MockClient((_) async => http.Response('{}', 200)),
+      ).determineBundesland();
+
+      expect(platform.askedWith!.accuracy, LocationAccuracy.low);
+    });
+
+    test('a fix says when the system only gives an approximate one', () async {
+      GeolocatorPlatform.instance = _FakeGeolocator(
+        current: at(52.0, 10.0, now),
+        accuracyStatus: LocationAccuracyStatus.reduced,
+      );
+      expect(
+        (await GeolocationService().getCurrentFix()).approximateOnly,
+        isTrue,
+      );
+
+      GeolocatorPlatform.instance = _FakeGeolocator(
+        current: at(52.0, 10.0, now),
+        accuracyStatus: LocationAccuracyStatus.precise,
+      );
+      expect(
+        (await GeolocationService().getCurrentFix()).approximateOnly,
+        isFalse,
+      );
+
+      // A platform that cannot say is not taken for one that refuses.
+      GeolocatorPlatform.instance = _FakeGeolocator(
+        current: at(52.0, 10.0, now),
+      );
+      expect(
+        (await GeolocationService().getCurrentFix()).approximateOnly,
+        isFalse,
+      );
+    });
   });
 
   group('on Android (#158)', () {

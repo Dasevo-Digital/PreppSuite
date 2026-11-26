@@ -106,6 +106,25 @@ void main() {
     expect(find.textContaining('nicht bis zur Hausnummer'), findsOneWidget);
   });
 
+  testWidgets('an approximate-only permission is named, not "go outside" '
+      '(#390)', (tester) async {
+    await show(
+      tester,
+      position: const ReadablePosition(
+        latitude: 52.516275,
+        longitude: 13.377704,
+        accuracyMetres: 2400,
+        approximateOnly: true,
+      ),
+    );
+
+    expect(
+      find.textContaining('nur den ungefähren Standort'),
+      findsOneWidget,
+    );
+    expect(find.textContaining('Unter freiem Himmel'), findsNothing);
+  });
+
   testWidgets('a position picked on the map carries no false accuracy', (
     tester,
   ) async {

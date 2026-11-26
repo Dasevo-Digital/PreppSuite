@@ -5170,6 +5170,12 @@ abstract class AppLocalizations {
   /// **'That will not reach a house number. Measure again under open sky, and tell the control room how rough it is.'**
   String get myPositionAccuracyPoor;
 
+  /// No description provided for @myPositionApproximate.
+  ///
+  /// In en, this message translates to:
+  /// **'The device only gives PreppSuite your approximate location. For a precise position, allow precise location for PreppSuite in the device settings.'**
+  String get myPositionApproximate;
+
   /// No description provided for @myPositionStale.
   ///
   /// In en, this message translates to:
@@ -5181,6 +5187,18 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Worked out from the last known position, {minutes} minutes old.'**
   String nearbyStale(int minutes);
+
+  /// No description provided for @positionStale.
+  ///
+  /// In en, this message translates to:
+  /// **'No fresh fix: this is the last known position (taken {time}).'**
+  String positionStale(String time);
+
+  /// No description provided for @positionStaleWay.
+  ///
+  /// In en, this message translates to:
+  /// **'No fresh fix: distance and direction are measured from the last known position (taken {time}). If you have moved since, you are somewhere else.'**
+  String positionStaleWay(String time);
 
   /// No description provided for @myPositionDms.
   ///
@@ -13939,6 +13957,12 @@ abstract class AppLocalizations {
   /// **'As of {time}'**
   String checkInTime(String time);
 
+  /// No description provided for @checkInPositionFrom.
+  ///
+  /// In en, this message translates to:
+  /// **'Position taken {time}'**
+  String checkInPositionFrom(String time);
+
   /// No description provided for @checkInAttachLocation.
   ///
   /// In en, this message translates to:
@@ -14232,6 +14256,12 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'here'**
   String get aedHere;
+
+  /// No description provided for @aedPositionFrom.
+  ///
+  /// In en, this message translates to:
+  /// **'at the position taken {time}'**
+  String aedPositionFrom(String time);
 
   /// No description provided for @compassN.
   ///

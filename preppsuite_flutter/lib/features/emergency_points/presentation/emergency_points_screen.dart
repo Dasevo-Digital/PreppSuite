@@ -9,6 +9,7 @@ import 'package:url_launcher/url_launcher.dart';
 import '../../../core/error_text.dart';
 import '../../../core/geolocation_service.dart';
 import '../../../l10n/generated/app_localizations.dart';
+import '../../maps/application/readable_position.dart';
 import '../../first_aid/application/defibrillators.dart' show compassOctant;
 import '../../../core/error_log.dart';
 import '../../first_aid/presentation/defibrillator_screen.dart'
@@ -17,8 +18,10 @@ import '../../first_aid/presentation/defibrillator_screen.dart'
         compassLabel,
         nearbyListDate,
         nearbyOutcome,
+        nearbyPlaceLabel,
         nearbySearchProblemOf,
-        nearbySearchProblemText;
+        nearbySearchProblemText,
+        nearbyStaleWarning;
 import '../application/emergency_points.dart';
 import '../application/offline_nearby_points.dart' show OfflineNearbyPointStore;
 import '../../warnings/presentation/address_dialog.dart';
@@ -57,6 +60,10 @@ class _EmergencyPointsScreenState extends State<EmergencyPointsScreen> {
       widget.geolocation ?? GeolocationService();
 
   EmergencyPointSearch? _search;
+
+  /// The fix [_search] was measured from, where it was measured here and
+  /// now; set together with it.
+  ReadablePosition? _fix;
   var _restoring = true;
   var _busy = false;
 
@@ -89,8 +96,8 @@ class _EmergencyPointsScreenState extends State<EmergencyPointsScreen> {
     final l10n = AppLocalizations.of(context)!;
     setState(() => _busy = true);
     try {
-      final here = await _geolocation.getCurrentLatLng();
-      await _find(here.latitude, here.longitude, null);
+      final fix = await _geolocation.getCurrentFix();
+      await _find(fix.latitude, fix.longitude, null, fix: fix);
     } on LocationUnavailableException catch (error) {
       _say(describeError(l10n, error));
     } finally {
@@ -118,7 +125,12 @@ class _EmergencyPointsScreenState extends State<EmergencyPointsScreen> {
     }
   }
 
-  Future<void> _find(double latitude, double longitude, String? name) async {
+  Future<void> _find(
+    double latitude,
+    double longitude,
+    String? name, {
+    ReadablePosition? fix,
+  }) async {
     // As on the defibrillator screen (#366): what the offline map brought
     // along as soon as it is read, the network's answer when it comes,
     // neither waiting for the other.
@@ -142,6 +154,7 @@ class _EmergencyPointsScreenState extends State<EmergencyPointsScreen> {
             found: offline.points,
             fromOfflineMap: true,
           );
+          _fix = fix;
         });
       }),
     );
@@ -174,6 +187,7 @@ class _EmergencyPointsScreenState extends State<EmergencyPointsScreen> {
     if (!mounted) return;
     setState(() {
       _search = result;
+      _fix = fix;
       _problem = null;
     });
   }
@@ -262,9 +276,22 @@ class _EmergencyPointsScreenState extends State<EmergencyPointsScreen> {
     final date = nearbyListDate(l10n, search.checkedAt, search.fromOfflineMap);
     final wells = search.of(EmergencyPointKind.well);
     final helpPoints = search.of(EmergencyPointKind.helpPoint);
+    final stale = nearbyStaleWarning(l10n, _fix);
     return [
+      if (stale != null) ...[
+        Text(
+          stale,
+          style: theme.textTheme.bodyMedium?.copyWith(
+            color: theme.colorScheme.error,
+          ),
+        ),
+        const SizedBox(height: 8),
+      ],
       Text(
-        l10n.emergencyPointsPlace(search.placeName ?? l10n.aedHere, date),
+        l10n.emergencyPointsPlace(
+          nearbyPlaceLabel(l10n, placeName: search.placeName, fix: _fix),
+          date,
+        ),
         style: theme.textTheme.bodySmall,
       ),
       const SizedBox(height: 8),

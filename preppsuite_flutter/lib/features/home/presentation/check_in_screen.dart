@@ -14,6 +14,7 @@ import '../../../core/settings_arrival.dart';
 import '../../../l10n/generated/app_localizations.dart';
 import '../../household/application/household_member_controller.dart';
 import '../../household/application/household_plan_controller.dart';
+import '../../maps/application/readable_position.dart';
 import '../application/check_in.dart';
 import '../../household/application/card_species.dart';
 
@@ -50,7 +51,10 @@ class _CheckInScreenState extends ConsumerState<CheckInScreen>
 
   var _status = CheckInStatus.safe;
   List<CheckInContact> _contacts = const [];
-  String? _location;
+
+  /// The fix the message carries, kept whole so that the message can say
+  /// when it was taken once it is no longer from now (#390).
+  ReadablePosition? _fix;
   var _locating = false;
 
   @override
@@ -81,6 +85,25 @@ class _CheckInScreenState extends ConsumerState<CheckInScreen>
   bool get _canText =>
       !kIsWeb && (Platform.isAndroid || Platform.isIOS || Platform.isMacOS);
 
+  /// When [_fix] was taken, where that is worth saying, or null.
+  String? _staleAt(AppLocalizations l10n, DateTime now) {
+    final fix = _fix;
+    if (fix == null || !fix.isStaleAt(now)) return null;
+    return fix.takenAtLabel(l10n.localeName, now);
+  }
+
+  String? _location(AppLocalizations l10n, DateTime now) {
+    final fix = _fix;
+    if (fix == null) return null;
+    final staleAt = _staleAt(l10n, now);
+    return describePosition(
+      fix.latitude,
+      fix.longitude,
+      accuracyMetres: fix.accuracyMetres,
+      takenAt: staleAt == null ? null : l10n.checkInPositionFrom(staleAt),
+    );
+  }
+
   String _message(AppLocalizations l10n, String? meetingPoint) {
     final status = switch (_status) {
       CheckInStatus.safe => l10n.checkInSafe,
@@ -90,20 +113,19 @@ class _CheckInScreenState extends ConsumerState<CheckInScreen>
             ? l10n.checkInOnMyWay
             : l10n.checkInOnMyWayTo(meetingPoint),
     };
-    final time = DateFormat.MMMd(
-      l10n.localeName,
-    ).add_Hm().format(DateTime.now());
+    final now = DateTime.now();
+    final time = DateFormat.MMMd(l10n.localeName).add_Hm().format(now);
     return composeCheckIn(
       status: status,
       time: l10n.checkInTime(time),
-      location: _location,
+      location: _location(l10n, now),
       note: _note.text,
     );
   }
 
   Future<void> _toggleLocation(bool on) async {
     if (!on) {
-      setState(() => _location = null);
+      setState(() => _fix = null);
       return;
     }
     final l10n = AppLocalizations.of(context)!;
@@ -111,13 +133,7 @@ class _CheckInScreenState extends ConsumerState<CheckInScreen>
     try {
       final fix = await _geolocation.getCurrentFix();
       if (!mounted) return;
-      setState(
-        () => _location = describePosition(
-          fix.latitude,
-          fix.longitude,
-          accuracyMetres: fix.accuracyMetres,
-        ),
-      );
+      setState(() => _fix = fix);
     } on LocationUnavailableException catch (error) {
       _say(describeError(l10n, error));
     } finally {
@@ -183,6 +199,7 @@ class _CheckInScreenState extends ConsumerState<CheckInScreen>
         ref.watch(householdMembersProvider(widget.householdId)).value ??
         const [];
     final text = _message(l10n, plan?.meetingPointNear);
+    final staleAt = _staleAt(l10n, DateTime.now());
     final suggestions = _suggestions(plan?.contactName, plan?.contactPhone, [
       // An animal's card names who takes it in (#151), not somebody who
       // is waiting to hear that the household is safe.
@@ -219,10 +236,17 @@ class _CheckInScreenState extends ConsumerState<CheckInScreen>
           ),
           SwitchListTile(
             contentPadding: EdgeInsets.zero,
-            value: _location != null,
+            value: _fix != null,
             onChanged: _locating ? null : _toggleLocation,
             title: Text(l10n.checkInAttachLocation),
-            subtitle: _locating ? Text(l10n.checkInLocating) : null,
+            subtitle: _locating
+                ? Text(l10n.checkInLocating)
+                : staleAt != null
+                ? Text(
+                    l10n.positionStale(staleAt),
+                    style: TextStyle(color: theme.colorScheme.error),
+                  )
+                : null,
           ),
           TextField(
             controller: _note,

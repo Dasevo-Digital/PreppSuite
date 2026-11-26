@@ -133,7 +133,16 @@ class _MyPositionScreenState extends State<MyPositionScreen> {
                   l10n.myPositionAccuracy(metres.round()),
                   style: theme.textTheme.titleSmall,
                 ),
-                if (metres > 50)
+                // Going outside does not help where the system gives this
+                // app only an approximate position (#390); the setting does.
+                if (position!.approximateOnly)
+                  Text(
+                    l10n.myPositionApproximate,
+                    style: theme.textTheme.bodySmall?.copyWith(
+                      color: theme.colorScheme.error,
+                    ),
+                  )
+                else if (metres > 50)
                   Text(
                     l10n.myPositionAccuracyPoor,
                     style: theme.textTheme.bodySmall?.copyWith(

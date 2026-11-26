@@ -67,7 +67,7 @@ class GeolocationService {
   /// outside Germany). Throws [LocationUnavailableException] if permission
   /// was denied or the position couldn't be read at all.
   Future<GermanState?> determineBundesland() async {
-    final position = await _getPosition();
+    final position = await _getPosition(precise: false);
     return stateAt(position.latitude, position.longitude);
   }
 
@@ -79,23 +79,37 @@ class GeolocationService {
     return germanStateByName(stateName);
   }
 
-  /// Raw device coordinates — e.g. to center the Schutzräume map on the
-  /// user's current position (`ShelterMapScreen`). Same
+  /// Raw device coordinates, coarse and quick — for what is decided over
+  /// kilometres: the Schutzräume map's search around the user
+  /// (`ShelterMapScreen`), the daylight times, the heavy rain map. Same
   /// permission/error handling as [determineBundesland], without the
   /// reverse-geocoding step.
+  ///
+  /// Anything measured from where somebody stands asks [getCurrentFix].
   Future<LatLng> getCurrentLatLng() async {
-    final position = await _getPosition();
+    final position = await _getPosition(precise: false);
     return LatLng(position.latitude, position.longitude);
   }
 
-  /// The same fix, with the one number that decides whether it is worth
-  /// reading out: how far off it may be.
+  /// The fix as precisely as the device will give it, with what decides
+  /// whether it is worth reading out: how far off it may be, when it was
+  /// taken, and whether the system hands this app only an approximate
+  /// position.
+  ///
+  /// For everything measured from where somebody stands (#390): "Meine
+  /// Position", the check-in, the place picker, the way to the meeting
+  /// point, the defibrillators, the emergency points and the offline
+  /// search. Until 3.0.3 every request was coarse -- on iOS and macOS a
+  /// kilometre, on Android the location manager without satellites -- so
+  /// the screen for the control room nearly always said the fix did not
+  /// reach a house number, and measuring again under open sky did not
+  /// change that.
   ///
   /// A position without its accuracy is a claim without a confidence. Ten
   /// metres is a doorway; eight hundred is the wrong end of the village,
   /// and the screen that reads it aloud has to be able to say which.
   Future<ReadablePosition> getCurrentFix() async {
-    final position = await _getPosition();
+    final position = await _getPosition(precise: true);
     return ReadablePosition(
       latitude: position.latitude,
       longitude: position.longitude,
@@ -104,7 +118,23 @@ class GeolocationService {
       // saying. Somebody reading coordinates over a radio has to know
       // whether they are standing in them.
       takenAt: position.timestamp,
+      approximateOnly: await _approximateOnly(),
     );
+  }
+
+  /// Whether the system gives this app only an approximate position:
+  /// "Genauer Standort" switched off for it on iOS, the approximate
+  /// choice in Android's permission dialog. No precise request gets past
+  /// that, so the screen has to name the setting rather than suggest
+  /// going outside.
+  static Future<bool> _approximateOnly() async {
+    try {
+      return await Geolocator.getLocationAccuracy() ==
+          LocationAccuracyStatus.reduced;
+    } on Object {
+      // Not a question every platform answers.
+      return false;
+    }
   }
 
   /// Forward-geocodes a free-text place/postal code query (e.g. "38100" or
@@ -152,7 +182,7 @@ class GeolocationService {
   /// missing Info.plist key or a platform without an implementation comes
   /// back as a plain platform error, and an uncaught one of those is a
   /// button that looks like nothing happened when it was pressed.
-  Future<Position> _getPosition() async {
+  Future<Position> _getPosition({required bool precise}) async {
     try {
       if (!await Geolocator.isLocationServiceEnabled()) {
         throw const LocationUnavailableException(LocationRefusal.servicesOff);
@@ -181,7 +211,7 @@ class GeolocationService {
 
       try {
         return await Geolocator.getCurrentPosition(
-          locationSettings: _settings(),
+          locationSettings: locationSettings(precise: precise),
         );
       } on Object {
         // A fresh fix is a receiver waking up, and indoors or on a
@@ -209,16 +239,27 @@ class GeolocationService {
     }
   }
 
-  /// Coarse and quick: a region and a nearby shelter need no more.
+  /// How long a coarse request waits: a network position is there in a
+  /// few seconds or not at all.
+  static const coarseTimeLimit = Duration(seconds: 15);
+
+  /// How long a precise one waits: a receiver waking up under open sky
+  /// needs that long, and indoors the last known fix follows anyway.
+  static const preciseTimeLimit = Duration(seconds: 30);
+
+  /// Coarse and quick where a region or a nearby shelter needs no more;
+  /// precise, with more time, where a distance of a few hundred metres or
+  /// a house number is the answer (#390).
   ///
   /// On Android through the system's own location manager rather than
   /// Google Play services' fused provider (#158). The fused provider is
   /// Google's, in a Google process; the location manager is the
   /// platform's. Whether the device itself asks Google for a network
   /// position is a system setting of its owner's, not this app's.
-  static LocationSettings _settings() {
-    const accuracy = LocationAccuracy.low;
-    const timeLimit = Duration(seconds: 15);
+  @visibleForTesting
+  static LocationSettings locationSettings({required bool precise}) {
+    final accuracy = precise ? LocationAccuracy.high : LocationAccuracy.low;
+    final timeLimit = precise ? preciseTimeLimit : coarseTimeLimit;
     if (!kIsWeb && defaultTargetPlatform == TargetPlatform.android) {
       return AndroidSettings(
         accuracy: accuracy,
@@ -226,7 +267,7 @@ class GeolocationService {
         forceLocationManager: true,
       );
     }
-    return const LocationSettings(accuracy: accuracy, timeLimit: timeLimit);
+    return LocationSettings(accuracy: accuracy, timeLimit: timeLimit);
   }
 
   Future<String?> _reverseGeocodeState(

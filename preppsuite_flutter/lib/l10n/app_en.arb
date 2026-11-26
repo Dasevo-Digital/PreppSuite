@@ -1891,6 +1891,7 @@
     }
   },
   "myPositionAccuracyPoor": "That will not reach a house number. Measure again under open sky, and tell the control room how rough it is.",
+  "myPositionApproximate": "The device only gives PreppSuite your approximate location. For a precise position, allow precise location for PreppSuite in the device settings.",
   "myPositionStale": "This fix is {minutes} minutes old. The device could not get a fresh one just now — measure again under open sky before passing it on.",
   "@myPositionStale": {
     "placeholders": {
@@ -1904,6 +1905,22 @@
     "placeholders": {
       "minutes": {
         "type": "int"
+      }
+    }
+  },
+  "positionStale": "No fresh fix: this is the last known position (taken {time}).",
+  "@positionStale": {
+    "placeholders": {
+      "time": {
+        "type": "String"
+      }
+    }
+  },
+  "positionStaleWay": "No fresh fix: distance and direction are measured from the last known position (taken {time}). If you have moved since, you are somewhere else.",
+  "@positionStaleWay": {
+    "placeholders": {
+      "time": {
+        "type": "String"
       }
     }
   },
@@ -4854,6 +4871,14 @@
       }
     }
   },
+  "checkInPositionFrom": "Position taken {time}",
+  "@checkInPositionFrom": {
+    "placeholders": {
+      "time": {
+        "type": "String"
+      }
+    }
+  },
   "checkInAttachLocation": "Attach my location",
   "checkInLocating": "Finding my location …",
   "checkInNote": "Additional note (optional)",
@@ -4970,6 +4995,14 @@
   "aedIncomplete": "Volunteers record the locations in OpenStreetMap. The list is not complete, and opening hours can change.",
   "aedSource": "Data: © OpenStreetMap contributors, ODbL",
   "aedHere": "here",
+  "aedPositionFrom": "at the position taken {time}",
+  "@aedPositionFrom": {
+    "placeholders": {
+      "time": {
+        "type": "String"
+      }
+    }
+  },
   "compassN": "north",
   "compassNE": "north-east",
   "compassE": "east",

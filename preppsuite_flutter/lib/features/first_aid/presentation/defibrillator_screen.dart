@@ -10,6 +10,7 @@ import '../../../core/error_log.dart';
 import '../../../core/error_text.dart';
 import '../../../core/geolocation_service.dart';
 import '../../../l10n/generated/app_localizations.dart';
+import '../../maps/application/readable_position.dart';
 import '../../shelters/application/overpass_shelter_client.dart'
     show OverpassException;
 import '../application/defibrillators.dart';
@@ -97,6 +98,33 @@ Future<NearbyOutcome<T>> nearbyOutcome<T>(Future<T> search) => search.then(
       (found: null, error: error, stack: stack),
 );
 
+/// Where a list was measured from, as its heading names it: the address
+/// searched for, or the device's own position.
+///
+/// "hier" only for a fix from now (#390). The device hands over its last
+/// known position when it gets no fresh one, and a list measured from
+/// where somebody was yesterday says when that was.
+String nearbyPlaceLabel(
+  AppLocalizations l10n, {
+  String? placeName,
+  ReadablePosition? fix,
+}) {
+  if (placeName != null) return placeName;
+  final now = DateTime.now();
+  if (fix != null && fix.isStaleAt(now)) {
+    return l10n.aedPositionFrom(fix.takenAtLabel(l10n.localeName, now)!);
+  }
+  return l10n.aedHere;
+}
+
+/// The warning above a list measured from an old fix, or null for a
+/// fresh one and for an address (#390).
+String? nearbyStaleWarning(AppLocalizations l10n, ReadablePosition? fix) {
+  final now = DateTime.now();
+  if (fix == null || !fix.isStaleAt(now)) return null;
+  return l10n.positionStaleWay(fix.takenAtLabel(l10n.localeName, now)!);
+}
+
 /// The date in a list's heading: when it was searched, or when the
 /// offline map's points were fetched.
 String nearbyListDate(AppLocalizations l10n, DateTime at, bool fromOfflineMap) {
@@ -111,6 +139,10 @@ class _DefibrillatorScreenState extends State<DefibrillatorScreen> {
       widget.geolocation ?? GeolocationService();
 
   DefibrillatorSearch? _search;
+
+  /// The fix [_search] was measured from, where it was measured here and
+  /// now; set together with it.
+  ReadablePosition? _fix;
   var _restoring = true;
   var _busy = false;
 
@@ -143,8 +175,8 @@ class _DefibrillatorScreenState extends State<DefibrillatorScreen> {
     final l10n = AppLocalizations.of(context)!;
     setState(() => _busy = true);
     try {
-      final here = await _geolocation.getCurrentLatLng();
-      await _find(here.latitude, here.longitude, null);
+      final fix = await _geolocation.getCurrentFix();
+      await _find(fix.latitude, fix.longitude, null, fix: fix);
     } on LocationUnavailableException catch (error) {
       _say(describeError(l10n, error));
     } finally {
@@ -172,7 +204,12 @@ class _DefibrillatorScreenState extends State<DefibrillatorScreen> {
     }
   }
 
-  Future<void> _find(double latitude, double longitude, String? name) async {
+  Future<void> _find(
+    double latitude,
+    double longitude,
+    String? name, {
+    ReadablePosition? fix,
+  }) async {
     // Asked at once, answered whenever it is. What the offline map brought along is on the device and there in a
     // moment; the network may take half a minute, or not answer (#366).
     // Looked up beside the search rather than before it, and never waited
@@ -197,6 +234,7 @@ class _DefibrillatorScreenState extends State<DefibrillatorScreen> {
             found: offline.defibrillators,
             fromOfflineMap: true,
           );
+          _fix = fix;
         });
       }),
     );
@@ -231,6 +269,7 @@ class _DefibrillatorScreenState extends State<DefibrillatorScreen> {
     if (!mounted) return;
     setState(() {
       _search = result;
+      _fix = fix;
       _problem = null;
     });
   }
@@ -326,11 +365,28 @@ class _DefibrillatorScreenState extends State<DefibrillatorScreen> {
     final theme = Theme.of(context);
     final radius = defibrillatorRadiusMetres ~/ 1000;
     final date = nearbyListDate(l10n, search.checkedAt, search.fromOfflineMap);
-    final place = search.placeName ?? l10n.aedHere;
+    final place = nearbyPlaceLabel(
+      l10n,
+      placeName: search.placeName,
+      fix: _fix,
+    );
+    final stale = nearbyStaleWarning(l10n, _fix);
+    final warning = [
+      if (stale != null) ...[
+        Text(
+          stale,
+          style: theme.textTheme.bodyMedium?.copyWith(
+            color: theme.colorScheme.error,
+          ),
+        ),
+        const SizedBox(height: 8),
+      ],
+    ];
     if (search.found.isEmpty) {
-      return [Text(l10n.aedNone(radius))];
+      return [...warning, Text(l10n.aedNone(radius))];
     }
     return [
+      ...warning,
       Text(
         l10n.aedFound(search.found.length, radius, place, date),
         style: theme.textTheme.titleMedium,

@@ -12,6 +12,7 @@ import 'package:preppsuite_flutter/features/household/presentation/meeting_point
 import 'package:preppsuite_flutter/features/maps/application/map_source_preference.dart';
 import 'package:preppsuite_flutter/features/maps/application/offline_map_providers.dart';
 import 'package:preppsuite_flutter/features/maps/application/personal_place.dart';
+import 'package:preppsuite_flutter/features/maps/application/readable_position.dart';
 import 'package:preppsuite_flutter/features/maps/presentation/place_picker_screen.dart';
 import 'package:preppsuite_flutter/l10n/generated/app_localizations.dart';
 import 'package:preppsuite_flutter/local_db/database.dart';
@@ -60,12 +61,20 @@ class _RefusingStore extends _MemoryStore {
 }
 
 class _FixedPosition extends GeolocationService {
-  _FixedPosition(this.here);
+  _FixedPosition(this.here, {this.takenAt});
 
   final LatLng here;
 
+  /// When the fix was taken; now by default.
+  final DateTime? takenAt;
+
   @override
-  Future<LatLng> getCurrentLatLng() async => here;
+  Future<ReadablePosition> getCurrentFix() async => ReadablePosition(
+    latitude: here.latitude,
+    longitude: here.longitude,
+    accuracyMetres: 10,
+    takenAt: takenAt ?? DateTime.now(),
+  );
 }
 
 Widget _app(Widget home, {List overrides = const []}) => ProviderScope(
@@ -234,5 +243,73 @@ void main() {
     expect(find.text('Vor der Garage'), findsOneWidget);
     expect(find.text('1,1 km nördlich'), findsOneWidget);
     expect(find.text('52.27000, 10.52000'), findsOneWidget);
+  });
+
+  testWidgets('a way from the last known position says how old it is '
+      '(#390)', (tester) async {
+    final taken = DateTime.now().subtract(const Duration(minutes: 50));
+    await tester.pumpWidget(
+      _app(
+        Scaffold(
+          body: MeetingPointWayButton(
+            place: const PersonalPlace(
+              id: 'meetingPoint.near',
+              label: 'Vor der Garage',
+              latitude: 52.27,
+              longitude: 10.52,
+            ),
+            geolocation: _FixedPosition(
+              const LatLng(52.26, 10.52),
+              takenAt: taken,
+            ),
+          ),
+        ),
+      ),
+    );
+
+    await tester.tap(find.byTooltip('Wie weit, welche Richtung'));
+    await tester.pump();
+    await tester.pump(const Duration(milliseconds: 100));
+
+    final when = ReadablePosition(
+      latitude: 0,
+      longitude: 0,
+      takenAt: taken,
+    ).takenAtLabel('de', DateTime.now())!;
+    expect(find.text('1,1 km nördlich'), findsOneWidget);
+    expect(
+      find.text(
+        'Keine frische Messung: Entfernung und Richtung gelten ab der '
+        'letzten bekannten Position (gemessen $when). Wer seitdem unterwegs '
+        'war, steht woanders.',
+      ),
+      findsOneWidget,
+    );
+    expect(find.text('Neu messen'), findsOneWidget);
+  });
+
+  testWidgets('a fresh way says nothing of its age', (tester) async {
+    await tester.pumpWidget(
+      _app(
+        Scaffold(
+          body: MeetingPointWayButton(
+            place: const PersonalPlace(
+              id: 'meetingPoint.near',
+              label: 'Vor der Garage',
+              latitude: 52.27,
+              longitude: 10.52,
+            ),
+            geolocation: _FixedPosition(const LatLng(52.26, 10.52)),
+          ),
+        ),
+      ),
+    );
+
+    await tester.tap(find.byTooltip('Wie weit, welche Richtung'));
+    await tester.pump();
+    await tester.pump(const Duration(milliseconds: 100));
+
+    expect(find.textContaining('Keine frische Messung'), findsNothing);
+    expect(find.text('Neu messen'), findsNothing);
   });
 }
