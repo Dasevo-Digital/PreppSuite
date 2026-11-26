@@ -24,7 +24,7 @@ void main() {
     final settings = manifest
         .findAllElements(
           'windowsSettings',
-          namespace: 'urn:schemas-microsoft-com:asm.v3',
+          namespaceUri: 'urn:schemas-microsoft-com:asm.v3',
         )
         .single;
     final codePage = settings.childElements
