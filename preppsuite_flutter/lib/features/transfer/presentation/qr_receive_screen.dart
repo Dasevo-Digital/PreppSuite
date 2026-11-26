@@ -243,6 +243,7 @@ class _QrReceiveScreenState extends ConsumerState<QrReceiveScreen> {
         deviceId: await const SharedFolderStore().deviceId(),
         householdId: householdId,
         invitation: invitation,
+        replacing: move.discard,
       );
       if (!mounted) return;
       if (move.discard) await _moveInto(move);
@@ -320,6 +321,9 @@ class _QrReceiveScreenState extends ConsumerState<QrReceiveScreen> {
       final rows = await applyHouseholdSnapshot(
         ref.read(appDatabaseProvider),
         snapshot,
+        // This device's version of a row both households hold -- every
+        // built-in checklist row -- gives way to theirs (#341).
+        replacing: move.discard,
       );
       if (!mounted) return;
       await _moveInto(move);

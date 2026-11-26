@@ -468,6 +468,11 @@ Future<LocalHandoverResult> joinLocalHandover({
   /// left out; a test hands in a temporary one so that exercising a real
   /// socket needs no platform directory plugin.
   Directory? into,
+
+  /// The answer "replace": this device's rows are discarded once this is
+  /// over, so the host's version of a row both households hold is taken
+  /// as it is (#341); see [applyHouseholdSnapshot].
+  bool replacing = false,
 }) async {
   if (invitation.householdId != householdId) {
     throw const LocalHandoverException(LocalHandoverFailure.otherHousehold);
@@ -601,7 +606,11 @@ Future<LocalHandoverResult> joinLocalHandover({
         throw const LocalHandoverException(LocalHandoverFailure.unreadable);
       }
 
-      final received = await applyHouseholdSnapshot(db, theirs.snapshot);
+      final received = await applyHouseholdSnapshot(
+        db,
+        theirs.snapshot,
+        replacing: replacing,
+      );
       await applySyncedSettings(theirs.snapshot.settings);
       return (
         received: received,

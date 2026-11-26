@@ -176,41 +176,82 @@ Future<int> countOwnEntries(AppDatabase db, String householdId) async {
 /// snapshot twice changes nothing the second time, and applying an old
 /// one changes nothing at all — which is what makes it safe to hand a
 /// household around by any road, in any order.
-Future<int> applyHouseholdSnapshot(AppDatabase db, DeviceSnapshot snapshot) {
-  return db.mergeIncomingRows(
-    inventory: [
-      for (final json in snapshot.inventoryItems)
-        ?incomingRow(json, decodeInventoryItem(json)),
-    ],
-    templates: [
-      for (final json in snapshot.checklistTemplates)
-        ?incomingRow(json, decodeChecklistTemplate(json)),
-    ],
-    items: [
-      for (final json in snapshot.checklistItems)
-        ?incomingRow(json, decodeChecklistItem(json)),
-    ],
-    budget: [
-      for (final json in snapshot.budgetEntries)
-        ?incomingRow(json, decodeBudgetEntry(json)),
-    ],
-    plans: [
-      for (final json in snapshot.householdPlans)
-        ?incomingRow(json, decodeHouseholdPlan(json)),
-    ],
-    members: [
-      for (final json in snapshot.householdMembers)
-        ?incomingRow(json, decodeHouseholdMember(json)),
-    ],
-    owned: [
-      for (final json in snapshot.possessions)
-        ?incomingRow(json, decodePossession(json)),
-    ],
-    offers: [
-      for (final json in snapshot.neighbourOffers)
-        ?incomingRow(json, decodeNeighbourOffer(json)),
-    ],
+///
+/// [replacing] is for the answer "replace" on a road that merges before
+/// it moves -- the QR chain, the local handover (#341). This device's own
+/// rows are about to be discarded, so where the snapshot brings a row
+/// under a client id this device also holds in another household --
+/// every built-in checklist row has one id in every household -- the
+/// snapshot's version is taken whatever the versions say. Compared, this
+/// device's tick or deletion won, was discarded with the rest, and the
+/// line was gone in both versions.
+Future<int> applyHouseholdSnapshot(
+  AppDatabase db,
+  DeviceSnapshot snapshot, {
+  bool replacing = false,
+}) {
+  final inventory = [
+    for (final json in snapshot.inventoryItems)
+      ?incomingRow(json, decodeInventoryItem(json)),
+  ];
+  final templates = [
+    for (final json in snapshot.checklistTemplates)
+      ?incomingRow(json, decodeChecklistTemplate(json)),
+  ];
+  final items = [
+    for (final json in snapshot.checklistItems)
+      ?incomingRow(json, decodeChecklistItem(json)),
+  ];
+  final budget = [
+    for (final json in snapshot.budgetEntries)
+      ?incomingRow(json, decodeBudgetEntry(json)),
+  ];
+  final plans = [
+    for (final json in snapshot.householdPlans)
+      ?incomingRow(json, decodeHouseholdPlan(json)),
+  ];
+  final members = [
+    for (final json in snapshot.householdMembers)
+      ?incomingRow(json, decodeHouseholdMember(json)),
+  ];
+  final owned = [
+    for (final json in snapshot.possessions)
+      ?incomingRow(json, decodePossession(json)),
+  ];
+  final offers = [
+    for (final json in snapshot.neighbourOffers)
+      ?incomingRow(json, decodeNeighbourOffer(json)),
+  ];
+  Future<int> merge() => db.mergeIncomingRows(
+    inventory: inventory,
+    templates: templates,
+    items: items,
+    budget: budget,
+    plans: plans,
+    members: members,
+    owned: owned,
+    offers: offers,
   );
+  if (!replacing) return merge();
+
+  Set<String> ids<C>(List<IncomingRow<C>> rows) => {
+    for (final row in rows) row.clientId,
+  };
+  // One transaction: a merge that fails puts back what gave way to it.
+  return db.transaction(() async {
+    await db.deleteRowsGivingWay(
+      snapshot.householdId,
+      inventory: ids(inventory),
+      templates: ids(templates),
+      items: ids(items),
+      budget: ids(budget),
+      plans: ids(plans),
+      members: ids(members),
+      owned: ids(owned),
+      offers: ids(offers),
+    );
+    return merge();
+  });
 }
 
 /// Lifts the two fields the merge compares out of the raw JSON, so the

@@ -407,6 +407,44 @@ void main() {
     }
   });
 
+  // "Replace" on this road: the host's rows come in under its id, then the
+  // move discards the guest's own. A row both households hold under one id
+  // -- here a stock row the guest had re-stamped into its own household --
+  // takes the host's version, not the guest's newer one that is about to
+  // be discarded (#341).
+  test('replacing takes the host\'s version of a row both hold', () async {
+    final a = open();
+    final b = open();
+    await putItem(
+      a,
+      id: 'item-1',
+      name: 'Haferflocken',
+      quantity: 2,
+      updatedAt: DateTime.utc(2026, 9, 13, 10),
+    );
+    await putItem(
+      b,
+      id: 'item-1',
+      name: 'Haferflocken',
+      quantity: 9,
+      updatedAt: DateTime.utc(2026, 9, 13, 18),
+      household: 'guest-household',
+    );
+
+    final host = await hostOn(a);
+    await joinLocalHandover(
+      db: b,
+      deviceId: 'device-b',
+      householdId: householdId,
+      invitation: host.invitation,
+      replacing: true,
+    );
+    await b.deleteHouseholdData('guest-household');
+
+    final kept = (await b.watchInventoryItems(householdId).first).single;
+    expect(kept.quantity, 2);
+  });
+
   group('what rides along beside the rows', () {
     test('the household setup comes back from the host', () async {
       // Only the host offers it: a guest being set up is the one device

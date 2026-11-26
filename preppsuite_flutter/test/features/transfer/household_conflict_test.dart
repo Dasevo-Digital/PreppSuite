@@ -1,6 +1,8 @@
 import 'package:drift/drift.dart' show Value;
 import 'package:drift/native.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:preppsuite_flutter/features/checklists/application/checklist_controller.dart';
+import 'package:preppsuite_flutter/features/checklists/application/checklist_seeder.dart';
 import 'package:preppsuite_flutter/features/sharing/application/device_snapshot.dart';
 import 'package:preppsuite_flutter/features/sharing/application/snapshot_exchange.dart';
 import 'package:preppsuite_flutter/local_db/database.dart';
@@ -71,6 +73,79 @@ void main() {
     await applyHouseholdSnapshot(db, await theirSnapshot());
 
     expect(await namesIn(db, theirs), ['Ihre Nudeln']);
+  });
+
+  // Every built-in checklist row has one client id in every household, and
+  // the merge goes by that id. Replacing merges the other household in
+  // first and discards this device's rows after: this device's own copy
+  // won whenever it was newer -- a tick, a deletion -- or won the tie, was
+  // discarded a moment later, and the line was gone (#341).
+  group('a row both households hold', () {
+    Future<AppDatabase> seeded(String householdId) async {
+      final db = AppDatabase.forTesting(NativeDatabase.memory());
+      await ChecklistSeeder(db).seed(householdId);
+      return db;
+    }
+
+    Future<List<ChecklistItem>> lines(AppDatabase db, String id) =>
+        db.watchAllChecklistItems(id).first;
+
+    late AppDatabase db;
+    late ChecklistItem ticked;
+    late ChecklistItem deleted;
+    late DeviceSnapshot others;
+
+    setUp(() async {
+      db = await seeded(mine);
+      final shipped = await lines(db, mine);
+      ticked = shipped[0];
+      deleted = shipped[1];
+      final controller = ChecklistController(db, mine);
+      await controller.toggleItem(ticked);
+      await controller.deleteItem(deleted);
+
+      final other = await seeded(theirs);
+      addTearDown(other.close);
+      others = await readHouseholdSnapshot(
+        other,
+        deviceId: 'other',
+        householdId: theirs,
+      );
+    });
+
+    tearDown(() => db.close());
+
+    test('replacing takes the other household\'s version of it', () async {
+      final shipped = (await lines(db, mine)).length + 1;
+
+      // The QR chain's order: their rows in, then the move discards ours.
+      await applyHouseholdSnapshot(db, others, replacing: true);
+      await db.deleteHouseholdData(mine);
+
+      final now = await lines(db, theirs);
+      expect(now, hasLength(shipped), reason: 'no line lost');
+      expect(
+        now.singleWhere((line) => line.clientId == ticked.clientId).isChecked,
+        isFalse,
+        reason: 'their line, not the tick discarded with this device',
+      );
+      expect(now.map((line) => line.clientId), contains(deleted.clientId));
+    });
+
+    test('merging still keeps the newer of the two', () async {
+      await applyHouseholdSnapshot(db, others);
+      await db.adoptHouseholdId(from: mine, to: theirs);
+
+      final now = await lines(db, theirs);
+      expect(
+        now.singleWhere((line) => line.clientId == ticked.clientId).isChecked,
+        isTrue,
+      );
+      expect(
+        now.map((line) => line.clientId),
+        isNot(contains(deleted.clientId)),
+      );
+    });
   });
 
   test('changing nothing really changes nothing', () async {

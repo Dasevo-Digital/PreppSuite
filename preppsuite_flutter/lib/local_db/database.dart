@@ -1779,6 +1779,55 @@ class AppDatabase extends _$AppDatabase {
     });
   }
 
+  /// Deletes the rows, of any household but [householdId], whose client
+  /// ids [householdId] is about to bring, table by table (#341).
+  ///
+  /// For "replace" on the QR and handover roads, which merge the other
+  /// household's rows in before this device's own are discarded. The
+  /// merge goes by client id across households, and some rows share one:
+  /// every built-in checklist list and line, in every household. This
+  /// device's own copy then won whenever it was newer -- a tick, a
+  /// deletion -- or won the tie, and was deleted a moment later with the
+  /// rest, leaving neither; the seeder does not write a line into a list
+  /// that exists. Out of the way first, the other household's version is
+  /// the one that stays. Rows under a third id, or none, are left from
+  /// an older version and are this device's as well.
+  Future<void> deleteRowsGivingWay(
+    String householdId, {
+    Set<String> inventory = const {},
+    Set<String> templates = const {},
+    Set<String> items = const {},
+    Set<String> budget = const {},
+    Set<String> plans = const {},
+    Set<String> members = const {},
+    Set<String> owned = const {},
+    Set<String> offers = const {},
+  }) {
+    return transaction(() async {
+      for (final (table, clientIds)
+          in <(TableInfo<Table, Object?>, Set<String>)>[
+            (inventoryItems, inventory),
+            (checklistTemplates, templates),
+            (checklistItems, items),
+            (budgetEntries, budget),
+            (householdPlans, plans),
+            (householdMembers, members),
+            (possessions, owned),
+            (neighbourOffers, offers),
+          ]) {
+        for (final clientId in clientIds) {
+          await customUpdate(
+            'DELETE FROM "${table.actualTableName}" '
+            'WHERE household_id IS NOT ? AND client_id = ?',
+            variables: [Variable(householdId), Variable(clientId)],
+            updates: {table},
+            updateKind: UpdateKind.delete,
+          );
+        }
+      }
+    });
+  }
+
   /// Applies rows that came from another device, each one only if it is
   /// newer than what is stored here.
   ///
