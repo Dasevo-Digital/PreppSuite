@@ -78,6 +78,49 @@ void main() {
       expect(_body(source, 'override fun onDestroy('), contains('rangeReads'));
     });
   });
+
+  _grants(source);
+}
+
+/// The lasting grants Android keeps for picked files (#410): 128 up to
+/// Android 10, 512 after, and past that the oldest goes without a word.
+void _grants(String source) {
+  group('lasting grants', () {
+    test('a file picked for once takes none', () {
+      final result = _body(source, 'override fun onActivityResult(');
+      expect(result, contains('val keep = isFolder || pendingKeep'));
+      expect(
+        result.indexOf('if (keep) {'),
+        allOf(
+          isNonNegative,
+          lessThan(result.indexOf('takePersistableUriPermission')),
+        ),
+      );
+      expect(source, contains('call.argument<Boolean>("keep") ?: true'));
+    });
+
+    test('a provider that refuses one does not take the app down', () {
+      final result = _body(source, 'override fun onActivityResult(');
+      final take = result.indexOf('takePersistableUriPermission');
+      expect(result.lastIndexOf('try {', take), isNonNegative);
+      expect(
+        result.indexOf('} catch (_: Exception) {', take),
+        greaterThan(take),
+      );
+    });
+
+    test('a folder is never given back', () {
+      final release = _body(source, 'private fun release(');
+      expect(release, contains('segments[0] == "tree") return false'));
+      expect(release, contains('releasePersistableUriPermission'));
+      final branch = _body(
+        _body(source, 'private fun handle('),
+        '"release" ->',
+      );
+      expect(branch, contains('fileReads.execute {'));
+      expect(branch, contains('runOnUiThread { result.success(released) }'));
+    });
+  });
 }
 
 /// [source] without its `//` and `/* */` comments. MainActivity has no

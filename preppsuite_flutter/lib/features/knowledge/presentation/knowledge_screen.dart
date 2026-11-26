@@ -28,6 +28,7 @@ import 'knowledge_index_panel.dart';
 import 'personal_documents_screen.dart';
 import '../../../core/error_text.dart';
 import '../../downloads/application/byte_size.dart';
+import '../../downloads/application/kept_files.dart';
 
 /// Looking things up without a network: search an offline archive by
 /// title, open what it finds.
@@ -727,7 +728,10 @@ class _KnowledgeScreenState extends ConsumerState<KnowledgeScreen> {
     final problem = await ref
         .read(knowledgeProvider.notifier)
         .useArchive(location: picked.value, label: picked.label);
-    if (problem == null || !mounted) return;
+    if (problem == null) return;
+    // Refused, the file is not remembered, and neither is its grant (#410).
+    await releaseUnkeptFiles([picked.value]);
+    if (!mounted) return;
 
     ScaffoldMessenger.of(context).showSnackBar(
       SnackBar(content: Text(l10n.knowledgeErrorUnreadable)),

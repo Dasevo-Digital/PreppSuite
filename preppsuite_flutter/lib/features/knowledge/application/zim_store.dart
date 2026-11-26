@@ -5,6 +5,7 @@ import 'dart:typed_data';
 import 'package:shared_preferences/shared_preferences.dart';
 
 import '../../../core/portable_paths.dart';
+import '../../downloads/application/kept_files.dart';
 
 const _libraryKey = 'knowledgeArchives';
 const _selectedKey = 'knowledgeSelectedArchive';
@@ -220,11 +221,16 @@ class ZimStore {
     return (archives: archives, selectedId: prefs.getString(_selectedKey));
   }
 
+  /// An archive that leaves the library, or moves to another handle,
+  /// gives its grant back where nothing else remembers it (#410).
   Future<void> save(
     List<StoredArchive> archives, {
     required String? selectedId,
   }) async {
     final prefs = await SharedPreferences.getInstance();
+    // Read as stored rather than through [library], which on a device
+    // that never saved one would carry the old single archive over first.
+    final before = _locationsIn(prefs.getString(_libraryKey));
     await prefs.setString(
       _libraryKey,
       jsonEncode([for (final archive in archives) archive.toJson()]),
@@ -233,6 +239,22 @@ class ZimStore {
       await prefs.remove(_selectedKey);
     } else {
       await prefs.setString(_selectedKey, selectedId);
+    }
+    await releaseUnkeptFiles(
+      before.difference({for (final archive in archives) archive.location}),
+    );
+  }
+
+  static Set<String> _locationsIn(String? raw) {
+    if (raw == null) return const {};
+    try {
+      final decoded = jsonDecode(raw);
+      if (decoded is! List) return const {};
+      return {
+        for (final entry in decoded) ?StoredArchive.fromJson(entry)?.location,
+      };
+    } on FormatException {
+      return const {};
     }
   }
 

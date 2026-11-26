@@ -9,6 +9,7 @@ import '../../../core/error_log.dart';
 import '../../../core/feel.dart';
 import '../../../l10n/generated/app_localizations.dart';
 import '../../downloads/application/byte_size.dart';
+import '../../downloads/application/kept_files.dart';
 import '../../maps/application/map_archive_access.dart' show pickMapArchive;
 import '../../../core/platform_storage.dart';
 import '../application/document_folder_import.dart';
@@ -447,6 +448,8 @@ class _PersonalDocumentsScreenState extends State<PersonalDocumentsScreen>
     if (picked == null) return;
     final extension = picked.label.split('.').last.toLowerCase();
     if (!const {'pdf', 'epub', 'md', 'markdown'}.contains(extension)) {
+      // Not taken in, so its grant goes back as well (#410).
+      await releaseUnkeptFiles([picked.value]);
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(content: Text(l10n.knowledgeDocumentOpenFailed)),
@@ -456,7 +459,10 @@ class _PersonalDocumentsScreenState extends State<PersonalDocumentsScreen>
     }
 
     final index = await _askToIndex(l10n);
-    if (index == null) return;
+    if (index == null) {
+      await releaseUnkeptFiles([picked.value]);
+      return;
+    }
     final updated = await _store.add(
       location: picked.value,
       label: picked.label,

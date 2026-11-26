@@ -16,12 +16,21 @@ import 'pmtiles_archive.dart';
 /// into the app's own storage, which for a country extract means several
 /// gigabytes written twice; and the copy would be thrown away on the next
 /// cache clear, taking the map with it.
-Future<PickedStorage?> pickMapArchive({String? dialogTitle}) async {
+///
+/// [keep] false is for a file read once and forgotten, a backup to
+/// restore: Android then takes no grant that outlasts the app, because it
+/// keeps only so many and drops the oldest when there are more (#410).
+/// The file stays readable until the app ends. The other platforms
+/// ignore it.
+Future<PickedStorage?> pickMapArchive({
+  String? dialogTitle,
+  bool keep = true,
+}) async {
   if (usesNativeStoragePicker) {
     final picked = await nativeStorageChannel.invokeMapMethod<String, String>(
       'pickFile',
-      // Only the macOS panel shows it; Android and iOS ignore it.
-      {'dialogTitle': dialogTitle},
+      // Only the macOS panel shows the title; Android and iOS ignore it.
+      {'dialogTitle': dialogTitle, 'keep': keep},
     );
     final uri = picked?['uri'];
     if (uri == null) return null;

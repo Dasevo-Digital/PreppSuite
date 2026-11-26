@@ -56,6 +56,27 @@ void main() {
       skip: !Platform.isAndroid,
     );
 
+    testWidgets(
+      'Android gives back no grant it never kept, and never a folder (#410)',
+      (tester) async {
+        final package = (await PackageInfo.fromPlatform()).packageName;
+        for (final uri in [
+          'content://$package.flutter.share_provider/cache/never-kept.bin',
+          'content://com.android.externalstorage.documents/tree/primary%3AX',
+          'bookmark://00000000-0000-0000-0000-000000000000',
+        ]) {
+          expect(
+            await nativeStorageChannel.invokeMethod<bool>('release', {
+              'uri': uri,
+            }),
+            isFalse,
+            reason: uri,
+          );
+        }
+      },
+      skip: !Platform.isAndroid,
+    );
+
     testWidgets('an invalid leased reader is rejected and closes harmlessly', (
       tester,
     ) async {

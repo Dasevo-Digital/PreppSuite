@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:intl/intl.dart';
 
 import '../../../l10n/generated/app_localizations.dart';
+import '../../downloads/application/kept_files.dart';
 import '../../emergency_points/application/offline_nearby_points.dart';
 import '../../shelters/application/geo_bounds.dart' show GeoBoundingBox;
 import '../application/map_archive_access.dart';
@@ -135,7 +136,10 @@ class _Body extends ConsumerWidget {
     final problem = await ref
         .read(offlineMapProvider.notifier)
         .useArchive(location: picked.value, label: picked.label);
-    if (problem == null || !context.mounted) return;
+    if (problem == null) return;
+    // Refused, the file is not remembered, and neither is its grant (#410).
+    await releaseUnkeptFiles([picked.value]);
+    if (!context.mounted) return;
 
     // The card shows the same reason, but a file that was just picked and
     // refused deserves an answer at the moment of picking.

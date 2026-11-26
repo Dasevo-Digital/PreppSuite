@@ -80,6 +80,27 @@ Future<void> excludeFromBackup(String path) async {
 bool isNativeStorageHandle(String value) =>
     value.startsWith('content://') || value.startsWith('bookmark://');
 
+/// Gives back the lasting permission Android keeps for a picked file
+/// (#410), and answers whether there was one.
+///
+/// Only for a `content://` handle, read from the value as everywhere
+/// else. The native side never gives back a folder's grant. Whether the
+/// file is still in use is the caller's to decide; see
+/// `releaseUnkeptFiles`.
+Future<bool> releaseStorageGrant(String location) async {
+  if (!location.startsWith('content://')) return false;
+  try {
+    return await nativeStorageChannel.invokeMethod<bool>('release', {
+          'uri': location,
+        }) ??
+        false;
+  } on PlatformException {
+    return false;
+  } on MissingPluginException {
+    return false;
+  }
+}
+
 class PickedStorage {
   const PickedStorage({required this.value, required this.label});
 

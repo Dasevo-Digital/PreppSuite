@@ -26,7 +26,9 @@ import java.util.concurrent.RejectedExecutionException
  *
  * The permission is taken as *persistable* in both cases, which is the
  * part that makes this worth doing: it survives a restart, so the folder
- * and the map are picked once rather than every launch.
+ * and the map are picked once rather than every launch. A file picked for
+ * once, a backup to restore, is not kept, and a file the app no longer
+ * remembers is given back (`release`, #410): Android keeps only so many.
  *
  * A FragmentActivity because the biometric prompt of the app lock is a
  * fragment (#143); everything above works the same on it.
@@ -41,6 +43,9 @@ class MainActivity : FlutterFragmentActivity() {
 
     /** Set while a picker is open; there is only ever one. */
     private var pendingPick: MethodChannel.Result? = null
+
+    /** Whether the file being picked is to be reachable after a restart. */
+    private var pendingKeep = true
 
     /**
      * Open descriptors for files being read in ranges, by reader token.
@@ -122,7 +127,19 @@ class MainActivity : FlutterFragmentActivity() {
     private fun handle(call: MethodCall, result: MethodChannel.Result) {
         when (call.method) {
             "pick" -> pick(Intent.ACTION_OPEN_DOCUMENT_TREE, PICK_FOLDER_REQUEST, result)
-            "pickFile" -> pick(Intent.ACTION_OPEN_DOCUMENT, PICK_FILE_REQUEST, result)
+            "pickFile" -> pick(
+                Intent.ACTION_OPEN_DOCUMENT,
+                PICK_FILE_REQUEST,
+                result,
+                keep = call.argument<Boolean>("keep") ?: true,
+            )
+            "release" -> {
+                val uri = call.argument<String>("uri")!!
+                fileReads.execute {
+                    val released = runCatching { release(uri) }.getOrDefault(false)
+                    runOnUiThread { result.success(released) }
+                }
+            }
             "openFile" -> openFile(call.argument("uri")!!, call.argument("fileToken"), result)
             "readRange" -> readRange(
                 call.argument<String>("fileToken") ?: call.argument("uri")!!,
@@ -211,9 +228,15 @@ class MainActivity : FlutterFragmentActivity() {
         }
     }
 
-    private fun pick(action: String, requestCode: Int, result: MethodChannel.Result) {
+    private fun pick(
+        action: String,
+        requestCode: Int,
+        result: MethodChannel.Result,
+        keep: Boolean = true,
+    ) {
         pendingPick?.success(null)
         pendingPick = result
+        pendingKeep = keep
 
         val intent = Intent(action).addFlags(
             Intent.FLAG_GRANT_READ_URI_PERMISSION or
@@ -236,6 +259,8 @@ class MainActivity : FlutterFragmentActivity() {
 
         val result = pendingPick ?: return
         pendingPick = null
+        val keep = isFolder || pendingKeep
+        pendingKeep = true
 
         val picked = data?.data
         if (resultCode != RESULT_OK || picked == null) {
@@ -246,15 +271,27 @@ class MainActivity : FlutterFragmentActivity() {
         // Without this the grant lasts only as long as this process, and
         // whatever was picked would have to be picked again on every
         // launch. A file is only ever read, so read is all it asks for.
-        contentResolver.takePersistableUriPermission(
-            picked,
-            if (isFolder) {
-                Intent.FLAG_GRANT_READ_URI_PERMISSION or
-                    Intent.FLAG_GRANT_WRITE_URI_PERMISSION
-            } else {
-                Intent.FLAG_GRANT_READ_URI_PERMISSION
-            },
-        )
+        //
+        // Not for a file picked for once (#410). Android keeps 128 lasting
+        // grants up to version 10 and 512 after, and past that it drops the
+        // oldest without a word: often the shared folder's, picked first.
+        // A provider may also refuse to make a grant last; the pick then
+        // works for this run instead of taking the app down.
+        if (keep) {
+            try {
+                contentResolver.takePersistableUriPermission(
+                    picked,
+                    if (isFolder) {
+                        Intent.FLAG_GRANT_READ_URI_PERMISSION or
+                            Intent.FLAG_GRANT_WRITE_URI_PERMISSION
+                    } else {
+                        Intent.FLAG_GRANT_READ_URI_PERMISSION
+                    },
+                )
+            } catch (_: Exception) {
+                // Reachable for this run, as an unkept pick is.
+            }
+        }
 
         val document = if (isFolder) {
             DocumentFile.fromTreeUri(this, picked)
@@ -268,6 +305,29 @@ class MainActivity : FlutterFragmentActivity() {
                 "label" to (document?.name ?: picked.lastPathSegment.orEmpty()),
             ),
         )
+    }
+
+    /**
+     * Gives back the lasting grant on one picked file, once nothing the app
+     * remembers names it any more (#410); which that is, Dart knows. True
+     * when there was one. Never a folder's: the shared folder's grant is
+     * what the sync stands on, and only the person takes it away.
+     */
+    private fun release(uri: String): Boolean {
+        val target = Uri.parse(uri)
+        val segments = target.pathSegments
+        if (segments.size >= 2 && segments[0] == "tree") return false
+        var released = false
+        for (permission in contentResolver.persistedUriPermissions) {
+            if (permission.uri != target) continue
+            var modes = 0
+            if (permission.isReadPermission) modes = modes or Intent.FLAG_GRANT_READ_URI_PERMISSION
+            if (permission.isWritePermission) modes = modes or Intent.FLAG_GRANT_WRITE_URI_PERMISSION
+            if (modes == 0) continue
+            contentResolver.releasePersistableUriPermission(target, modes)
+            released = true
+        }
+        return released
     }
 
     // --- Ranged reads, for the offline map archive ----------------------

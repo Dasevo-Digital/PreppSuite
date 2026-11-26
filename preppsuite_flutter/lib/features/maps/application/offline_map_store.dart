@@ -1,6 +1,7 @@
 import 'package:shared_preferences/shared_preferences.dart';
 
 import '../../../core/portable_paths.dart';
+import '../../downloads/application/kept_files.dart';
 
 const _archivePathKey = 'offlineMapArchivePath';
 const _archiveLabelKey = 'offlineMapArchiveLabel';
@@ -30,15 +31,23 @@ class OfflineMapStore {
     );
   }
 
+  /// A map that replaces another gives the other's grant back, where
+  /// nothing else remembers it (#410).
   Future<void> save({required String location, required String label}) async {
+    final before = (await archive())?.location;
     final prefs = await SharedPreferences.getInstance();
     await prefs.setString(_archivePathKey, storeLocation(location));
     await prefs.setString(_archiveLabelKey, label);
+    if (before != null && before != location) {
+      await releaseUnkeptFiles([before]);
+    }
   }
 
   Future<void> clear() async {
+    final before = (await archive())?.location;
     final prefs = await SharedPreferences.getInstance();
     await prefs.remove(_archivePathKey);
     await prefs.remove(_archiveLabelKey);
+    if (before != null) await releaseUnkeptFiles([before]);
   }
 }

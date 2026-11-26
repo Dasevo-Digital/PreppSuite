@@ -6,6 +6,7 @@ import '../../../core/private_preferences.dart';
 import 'package:uuid/uuid.dart';
 
 import '../../../core/portable_paths.dart';
+import '../../downloads/application/kept_files.dart';
 import 'document_calendar.dart';
 
 const _documentsKey = 'knowledgePersonalDocuments';
@@ -257,18 +258,44 @@ class PersonalDocumentStore {
 
   /// Forgets the whole list, for a household that is deleted (#247): the
   /// deadlines and where the originals are kept go with it. The files
-  /// themselves are somebody's own and stay where they are.
-  Future<void> clear() =>
-      _mutate(() => const PrivatePreferences().remove(_documentsKey));
+  /// themselves are somebody's own and stay where they are; the grants
+  /// Android kept for them are given back (#410).
+  Future<void> clear() async {
+    final dropped = await _mutate(() async {
+      List<PersonalDocument> before;
+      try {
+        before = await _read();
+      } on Object {
+        // Forgetting must not depend on reading.
+        before = const [];
+      }
+      await const PrivatePreferences().remove(_documentsKey);
+      return [for (final item in before) item.location];
+    });
+    await releaseUnkeptFiles(dropped);
+  }
 
-  Future<List<PersonalDocument>> remove(String id) => _mutate(() async {
-    final updated = [
-      for (final item in await _read())
-        if (item.id != id) item,
-    ];
-    await _save(updated);
+  /// A document taken out of the list gives its file's grant back, where
+  /// nothing else remembers the file (#410).
+  Future<List<PersonalDocument>> remove(String id) async {
+    final (:updated, :dropped) = await _mutate(() async {
+      final before = await _read();
+      final updated = [
+        for (final item in before)
+          if (item.id != id) item,
+      ];
+      await _save(updated);
+      return (
+        updated: updated,
+        dropped: [
+          for (final item in before)
+            if (item.id == id) item.location,
+        ],
+      );
+    });
+    await releaseUnkeptFiles(dropped);
     return updated;
-  });
+  }
 
   /// [fingerprint] is the file as it was read for this index, and is
   /// written whenever it is given; a status without one (`indexing`)
@@ -314,14 +341,23 @@ class PersonalDocumentStore {
 
   /// Points document [id] at [location], keeping everything else about
   /// it -- its index, its reading position. For a file that is still
-  /// there but could no longer be reached by the old handle.
-  Future<void> relocate(String id, String location) => _mutate(() async {
-    final updated = [
-      for (final item in await _read())
-        if (item.id == id) item.copyWith(location: location) else item,
-    ];
-    await _save(updated);
-  });
+  /// there but could no longer be reached by the old handle, whose grant
+  /// goes back where nothing else remembers it (#410).
+  Future<void> relocate(String id, String location) async {
+    final dropped = await _mutate(() async {
+      final before = await _read();
+      final updated = [
+        for (final item in before)
+          if (item.id == id) item.copyWith(location: location) else item,
+      ];
+      await _save(updated);
+      return [
+        for (final item in before)
+          if (item.id == id && item.location != location) item.location,
+      ];
+    });
+    await releaseUnkeptFiles(dropped);
+  }
 
   Future<void> updateReaderOffset(String id, double offset) =>
       _mutate(() async {

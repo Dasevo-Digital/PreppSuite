@@ -50,8 +50,11 @@ typedef PickedBackup = ({BackupFile file, ByteRangeSource source});
 /// Any file type: a format 3 backup has an extension no platform knows,
 /// and filtering for `.json` would hide every new backup while showing
 /// every old one.
+///
+/// The backup is read once and forgotten, so Android keeps no grant for it
+/// beyond this run (#410).
 Future<PickedBackup?> pickBackup({required String dialogTitle}) async {
-  final picked = await pickMapArchive(dialogTitle: dialogTitle);
+  final picked = await pickMapArchive(dialogTitle: dialogTitle, keep: false);
   if (picked == null) return null;
   final source = await openMapArchive(picked.value);
   try {
