@@ -286,6 +286,12 @@ void main() {
       findsOneWidget,
     );
     expect(find.text('Neu messen'), findsOneWidget);
+
+    // Measuring again asks the receiver once more.
+    await tester.tap(find.text('Neu messen'));
+    await tester.pump();
+    await tester.pump(const Duration(milliseconds: 100));
+    expect(find.text('1,1 km nördlich'), findsOneWidget);
   });
 
   testWidgets('a fresh way says nothing of its age', (tester) async {

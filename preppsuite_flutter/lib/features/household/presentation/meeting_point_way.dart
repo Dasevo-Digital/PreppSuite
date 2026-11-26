@@ -64,7 +64,9 @@ class _WayDialogState extends State<_WayDialog> {
   /// direction, not a rough one.
   ReadablePosition? _from;
   Object? _error;
-  var _measuring = false;
+
+  /// From the start: the dialog measures as it opens.
+  var _measuring = true;
 
   @override
   void initState() {
@@ -78,11 +80,16 @@ class _WayDialogState extends State<_WayDialog> {
     super.dispose();
   }
 
-  Future<void> _measure() async {
+  /// Measures again, from the button a stale fix or a failure offers.
+  void _again() {
     setState(() {
       _measuring = true;
       _error = null;
     });
+    _measure();
+  }
+
+  Future<void> _measure() async {
     try {
       final fix = await _geolocation.getCurrentFix();
       if (!mounted) return;
@@ -153,7 +160,7 @@ class _WayDialogState extends State<_WayDialog> {
       actions: [
         if (staleAt != null || error != null)
           TextButton(
-            onPressed: _measure,
+            onPressed: _again,
             child: Text(l10n.myPositionMeasure),
           ),
         TextButton(
