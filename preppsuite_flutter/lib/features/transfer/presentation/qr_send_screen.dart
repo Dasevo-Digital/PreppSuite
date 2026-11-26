@@ -15,6 +15,7 @@ import '../application/handover_payload.dart';
 import '../application/local_handover.dart';
 import '../application/local_discovery.dart';
 import '../application/qr_chain.dart';
+import 'handover_result_text.dart';
 import 'qr_code_view.dart';
 import '../../../core/error_text.dart';
 
@@ -125,11 +126,7 @@ class _QrSendScreenState extends ConsumerState<QrSendScreen> {
       _watching = host.handovers.listen((result) {
         if (!mounted) return;
         final l10n = AppLocalizations.of(context)!;
-        setState(() {
-          _handoverResult = result.received == 0
-              ? l10n.transferHandoverNothing
-              : l10n.transferHandoverDone(result.received);
-        });
+        setState(() => _handoverResult = handoverResultText(l10n, result));
       });
       final broadcaster = await LocalTransferBroadcaster.start();
       if (!mounted) {

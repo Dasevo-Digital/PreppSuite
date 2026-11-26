@@ -5699,7 +5699,7 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get transferHandoverNothing =>
-      'Synced. Both devices were already at the same point.';
+      'Synced. Nothing new arrived on this device.';
 
   @override
   String get transferUnreachable =>

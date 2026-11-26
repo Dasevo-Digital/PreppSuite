@@ -2129,7 +2129,7 @@
       }
     }
   },
-  "transferHandoverNothing": "Abgeglichen. Beide Geräte waren schon auf demselben Stand.",
+  "transferHandoverNothing": "Abgeglichen. Auf diesem Gerät kam nichts Neues an.",
   "transferUnreachable": "Das andere Gerät ist nicht erreichbar. Hängen beide im selben Netz?",
   "portableTitle": "Datenordner",
   "portableInstalled": "Auf diesem Rechner",

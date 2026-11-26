@@ -5741,7 +5741,7 @@ class AppLocalizationsEs extends AppLocalizations {
 
   @override
   String get transferHandoverNothing =>
-      'Sincronizado. Los dos dispositivos ya estaban en el mismo punto.';
+      'Sincronizado. A este dispositivo no ha llegado nada nuevo.';
 
   @override
   String get transferUnreachable =>

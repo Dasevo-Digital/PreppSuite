@@ -18,6 +18,7 @@ import '../../sharing/application/settings_sync_store.dart';
 import '../../sharing/application/shared_folder_store.dart';
 import '../application/handover_payload.dart';
 import '../application/local_handover.dart';
+import 'handover_result_text.dart';
 import 'household_conflict_dialog.dart';
 import '../application/qr_chain.dart';
 import '../../../core/error_text.dart';
@@ -252,12 +253,7 @@ class _QrReceiveScreenState extends ConsumerState<QrReceiveScreen> {
       if (!mounted) return;
       setState(() {
         _rows = result.received;
-        final rows = result.received == 0
-            ? l10n.transferHandoverNothing
-            : l10n.transferHandoverDone(result.received);
-        _result = result.photos == 0
-            ? rows
-            : '$rows ${l10n.transferHandoverPhotos(result.photos)}';
+        _result = handoverResultText(l10n, result);
       });
     } on LocalHandoverException catch (error) {
       if (!mounted) return;

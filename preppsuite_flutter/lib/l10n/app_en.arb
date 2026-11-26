@@ -3292,7 +3292,7 @@
       }
     }
   },
-  "transferHandoverNothing": "Synced. Both devices were already at the same point.",
+  "transferHandoverNothing": "Synced. Nothing new arrived on this device.",
   "transferUnreachable": "The other device cannot be reached. Are both on the same network?",
   "portableTitle": "Data folder",
   "portableInstalled": "On this machine",

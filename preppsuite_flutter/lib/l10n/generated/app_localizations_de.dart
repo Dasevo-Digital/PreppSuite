@@ -5730,7 +5730,7 @@ class AppLocalizationsDe extends AppLocalizations {
 
   @override
   String get transferHandoverNothing =>
-      'Abgeglichen. Beide Geräte waren schon auf demselben Stand.';
+      'Abgeglichen. Auf diesem Gerät kam nichts Neues an.';
 
   @override
   String get transferUnreachable =>

@@ -1565,7 +1565,7 @@
   "transferSendChainHint": "Sin red: apunta la cámara del otro dispositivo a esta pantalla. Las imágenes van en bucle: la que se pierda vuelve a pasar sola.",
   "transferHandoverDone": "Sincronizado. {rows} filas incorporadas.",
   "transferHandoverPhotos": "{count, plural, =1{Ha venido una foto.} other{Han venido {count} fotos.}}",
-  "transferHandoverNothing": "Sincronizado. Los dos dispositivos ya estaban en el mismo punto.",
+  "transferHandoverNothing": "Sincronizado. A este dispositivo no ha llegado nada nuevo.",
   "transferUnreachable": "No se puede acceder al otro dispositivo. ¿Están los dos en la misma red?",
   "portableTitle": "Carpeta de datos",
   "portableInstalled": "En este equipo",

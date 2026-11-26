@@ -9493,7 +9493,7 @@ abstract class AppLocalizations {
   /// No description provided for @transferHandoverNothing.
   ///
   /// In en, this message translates to:
-  /// **'Synced. Both devices were already at the same point.'**
+  /// **'Synced. Nothing new arrived on this device.'**
   String get transferHandoverNothing;
 
   /// No description provided for @transferUnreachable.
