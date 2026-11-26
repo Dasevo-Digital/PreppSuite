@@ -34,8 +34,14 @@ serverseitig möglich (siehe „Bekannte Einschränkungen" unten). Beispiel:
 
 - `severity` nutzt bereits die CAP-Skala (Minor/Moderate/Severe/Extreme) —
   identisch zu MeteoAlarm, daher nur `.toLowerCase()` nötig.
-- Kein `expires`-Feld in `mapData.json` — `Warning.expires` bleibt für
-  BBK-Warnungen immer `null`.
+- `mapData.json` hatte lange kein Ablaufdatum. Im November 2026 führte
+  `dwd/mapData.json` ein Feld `expiresDate`; die App liest es nicht.
+  `Warning.expires` bleibt für BBK-Warnungen `null`, bis sie in einem
+  vollständigen Abruf fehlen (siehe unten).
+- DWD-Kennungen tragen im Deutschlandkarten-Feed das Präfix `dwdmap.`, im
+  Kreis-Dashboard `dwd.`. Jede neue Fassung einer DWD-Warnung hat eine neue
+  Kennung (`…DWD.PVW.<sent-ms>.<uuid>.MUL`); die Detailseite nennt die
+  ersetzte Fassung in CAP-`references` (#395).
 - `id` kodiert das Bundesland, in zwei Formen: `mow.DE-HE-...` (mowas,
   dwd) und `lhp.LHP.NW.nw86768` (lhp, police). Beide werden als
   `regionKey` extrahiert, die zweite nur, wenn die zwei Buchstaben ein
@@ -124,7 +130,13 @@ nicht erreichbar" ist dafür entscheidend — deshalb liefert
 fehlgeschlagenen Abruf unterbleibt das Beenden. Sonst würde eine einzelne
 schlechte Antwort sämtliche aktiven Warnungen stillschweigend zurückziehen.
 MeteoAlarm-Meldungen übernehmen hingegen `cap:expires` aus dem Feed und
-laufen anhand dieses Zeitpunkts ab.
+laufen anhand dieses Zeitpunkts ab. Seit #395 endet außerdem eine
+MeteoAlarm-Meldung, die ein bis zum Ende gelesener Länder-Feed nicht mehr
+führt: Eine ersetzte Fassung verschwindet aus dem Feed, ihr altes
+`expires` hätte sie sonst neben der neuen weiterlaufen lassen. Eine
+MeteoAlarm-Meldung nennt oft viele Gebiete (im November 2026 bis zu 73);
+sie wird je Gebiet gespeichert (`<identifier>#<EMMA_ID>`) und einmal
+gemeldet.
 
 ## Die Detailseite einer Warnung
 
