@@ -1595,6 +1595,80 @@ class AppDatabase extends _$AppDatabase {
     });
   }
 
+  /// Deletes the built-in checklist rows of [householdId] that nobody has
+  /// touched -- still at [seededAt], the seeder's own stamp -- for a
+  /// household that is being forgotten (#397).
+  ///
+  /// [templates] and [items] are the built-in client ids. A line that was
+  /// changed stays, and so does its list, with every other line of it:
+  /// the seeder writes a list's lines only when the list is missing, and
+  /// it writes them over whatever has their id. Only lists none of whose
+  /// lines are left go. What stays is the next household's to take over.
+  Future<void> deleteUntouchedChecklistRows(
+    String householdId, {
+    required Set<String> templates,
+    required Set<String> items,
+    required DateTime seededAt,
+  }) {
+    final stamp = Variable(seededAt.millisecondsSinceEpoch ~/ 1000);
+    return transaction(() async {
+      final keptLists = {
+        for (final row in await customSelect(
+          'SELECT DISTINCT template_client_id FROM checklist_items '
+          'WHERE household_id IS ? AND updated_at != ?',
+          variables: [Variable(householdId), stamp],
+          readsFrom: {checklistItems},
+        ).get())
+          row.read<String>('template_client_id'),
+      };
+      final lists = templates.difference(keptLists);
+      for (final chunk in _chunks(items)) {
+        await customUpdate(
+          'DELETE FROM checklist_items '
+          'WHERE household_id IS ? AND updated_at = ? '
+          'AND client_id IN (${_marks(chunk.length)})'
+          '${keptLists.isEmpty ? '' : ' AND template_client_id NOT IN (${_marks(keptLists.length)})'}',
+          variables: [
+            Variable(householdId),
+            stamp,
+            for (final id in chunk) Variable(id),
+            for (final id in keptLists) Variable(id),
+          ],
+          updates: {checklistItems},
+          updateKind: UpdateKind.delete,
+        );
+      }
+      for (final chunk in _chunks(lists)) {
+        await customUpdate(
+          'DELETE FROM checklist_templates '
+          'WHERE household_id IS ? AND updated_at = ? '
+          'AND client_id IN (${_marks(chunk.length)}) '
+          'AND NOT EXISTS (SELECT 1 FROM checklist_items AS line '
+          'WHERE line.template_client_id = checklist_templates.client_id)',
+          variables: [
+            Variable(householdId),
+            stamp,
+            for (final id in chunk) Variable(id),
+          ],
+          updates: {checklistTemplates},
+          updateKind: UpdateKind.delete,
+        );
+      }
+    });
+  }
+
+  /// [ids] in pieces small enough for one statement's variables.
+  static Iterable<List<String>> _chunks(Set<String> ids) sync* {
+    final all = ids.toList();
+    for (var start = 0; start < all.length; start += 400) {
+      final end = start + 400 < all.length ? start + 400 : all.length;
+      yield all.sublist(start, end);
+    }
+  }
+
+  /// [count] placeholders for an `IN (…)`.
+  static String _marks(int count) => List.filled(count, '?').join(', ');
+
   /// Acknowledges exactly the row versions present in the published file.
   /// A wall-clock cutoff is insufficient: edits can share a second, and
   /// logical timestamps may lead the clock after several rapid edits.

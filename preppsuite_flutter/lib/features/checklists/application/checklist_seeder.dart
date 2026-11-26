@@ -45,6 +45,35 @@ class ChecklistSeeder {
     '00000000-0000-4000-8000-000000001310',
   ];
 
+  /// The client ids of every built-in list, and of every built-in line,
+  /// retired ones included. They are the same in every household.
+  static final builtInTemplateIds = {
+    for (final template in builtInTemplates) template.clientId,
+  };
+  static final builtInItemIds = {
+    for (final template in builtInTemplates)
+      for (final item in template.items) item.clientId,
+    ..._retiredBuiltInItems,
+  };
+
+  /// Takes back what [seed] wrote for a household that is being forgotten
+  /// (#397), as far as nobody has touched it.
+  ///
+  /// First setup makes a profile before it joins anything, and the gate
+  /// writes the lists for it at once; a join that then fails forgets the
+  /// profile. Its lists stayed under its id, and the next profile's run
+  /// skipped every one of them because they existed: they were shown, as
+  /// built-in lists are in every household, but never counted, never
+  /// published and not deleted with the household. A row somebody changed
+  /// is never deleted here.
+  Future<void> forgetUntouched(String householdId) =>
+      _db.deleteUntouchedChecklistRows(
+        householdId,
+        templates: builtInTemplateIds,
+        items: builtInItemIds,
+        seededAt: seededAt,
+      );
+
   Future<void> seed(String householdId) async {
     await _db.claimOrphanChecklistRows(householdId);
 

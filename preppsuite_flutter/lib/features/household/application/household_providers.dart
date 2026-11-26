@@ -1,9 +1,11 @@
 import 'dart:async';
+import 'dart:developer' as developer;
 
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:uuid/uuid.dart';
 
 import '../../../core/app_database_providers.dart';
+import '../../checklists/application/checklist_seeder.dart';
 import '../../../model/household_profile.dart';
 import '../../inventory/application/inventory_photo_service.dart';
 import '../../../model/household_profile_store.dart';
@@ -129,10 +131,31 @@ class HouseholdProfileController extends AsyncNotifier<HouseholdProfile?> {
   /// gate goes by the profile alone, so leaving it behind would let the
   /// app through into a household that is joined to nothing — with a
   /// fresh id that can never merge with the one it was meant to join.
-  Future<void> forget() async {
+  ///
+  /// The built-in lists the gate wrote for that profile go with it, as far
+  /// as nobody touched them (#397): left under the forgotten id, the next
+  /// profile's lists were skipped as existing and never became its own.
+  /// In its turn, so a run still writing them finishes first. A failure
+  /// there costs the tidying, never the forgetting.
+  Future<void> forget() => ref.read(householdTurnsProvider).take(() async {
+    final forgotten = state.value?.id;
+    if (forgotten != null) {
+      try {
+        await ChecklistSeeder(
+          ref.read(appDatabaseProvider),
+        ).forgetUntouched(forgotten);
+      } on Object catch (error, stack) {
+        developer.log(
+          'built-in lists of a forgotten profile could not be removed',
+          name: 'preppsuite.household',
+          error: error,
+          stackTrace: stack,
+        );
+      }
+    }
     await _store.clear();
     state = const AsyncData(null);
-  }
+  });
 
   Future<void> _persist(HouseholdProfile profile) async {
     await _store.save(profile);
