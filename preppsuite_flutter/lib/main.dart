@@ -7,6 +7,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'app.dart';
 import 'core/closes_databases_on_exit.dart';
 import 'core/former_identity.dart';
+import 'core/keychain_accessibility_move.dart';
 import 'core/local_database_encryption.dart';
 import 'core/photo_vault.dart';
 import 'core/portable_data.dart';
@@ -81,6 +82,15 @@ void main(List<String> args) async {
   } on Object {
     // Kept in memory until the next start.
   }
+
+  // iOS: the key store's entries become readable while the phone is
+  // locked, which is when the warning poll runs (#388). Here, before
+  // anything reads them, and never in the background isolate. It cannot
+  // throw and it cannot stop startup.
+  await moveKeychainToFirstUnlock(
+    onError: (error, stack) =>
+        ErrorLog.instance.record(error, stack, context: 'keychain move'),
+  );
 
   // Establish the data-key state before any provider can open Drift. New
   // households start encrypted; existing ones remain recoverably readable
