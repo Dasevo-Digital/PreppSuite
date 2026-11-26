@@ -311,6 +311,19 @@ void main() {
     expect(state.title, 'Klexikon');
   });
 
+  test('a library that cannot be read is not taken for none (#408)', () async {
+    // It reads as an empty library, and with that every index on the disk
+    // would have looked like one whose archive had gone.
+    SharedPreferences.setMockInitialValues({'knowledgeArchives': '{kaputt'});
+    expect(await const ZimStore().libraryIsReadable(), isFalse);
+
+    SharedPreferences.setMockInitialValues({});
+    expect(await const ZimStore().libraryIsReadable(), isTrue);
+
+    await const ZimStore().save(const [], selectedId: null);
+    expect(await const ZimStore().libraryIsReadable(), isTrue);
+  });
+
   group('what the library already knows about an archive (#302)', () {
     Future<StoredArchive> added() async {
       final first = ProviderContainer();
