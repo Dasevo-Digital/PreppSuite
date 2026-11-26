@@ -125,6 +125,22 @@ void main() {
     );
   });
 
+  test('the battery check starts on the local day it was done (#403)', () {
+    // "Erledigt" at half past midnight is stored in UTC, which is the day
+    // before in Germany; the event started a day early.
+    for (final done in [
+      DateTime(2026, 10, 10, 0, 30),
+      DateTime(2026, 10, 10, 23, 30),
+    ]) {
+      final ics = build(
+        const [],
+        charge: ChargeCheck(lastChecked: done.toUtc(), everyDays: 90),
+      )!;
+
+      expect(lines(ics), contains('DTSTART;VALUE=DATE:20270108'));
+    }
+  });
+
   test('commas and semicolons in a name are escaped', () {
     final ics = build([
       item('a', name: 'Reis, Nudeln; Mehl', expires: DateTime(2026, 12, 24)),

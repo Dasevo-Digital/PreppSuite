@@ -97,13 +97,17 @@ class ChargeCheck {
   /// day before -- and [daysUntilDue], which counts from midnight, then
   /// called the check due a day early. Found by the calendar export's
   /// test (#102).
+  ///
+  /// In local time, always. The household's check is stored in UTC, and
+  /// the date used to be built from its UTC fields: "done" at half past
+  /// midnight in Germany is the day before in UTC, and the overview, the
+  /// briefing and the calendar file called the check due a day early
+  /// (#403). The local day is the one somebody went through the drawer.
   DateTime? get dueAt {
     if (isOff) return null;
-    final from = lastChecked;
+    final from = lastChecked?.toLocal();
     if (from == null) return null;
-    // In the zone the check was recorded in: a UTC stamp stays UTC.
-    final make = from.isUtc ? DateTime.utc : DateTime.new;
-    return make(
+    return DateTime(
       from.year,
       from.month,
       from.day + everyDays,

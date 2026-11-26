@@ -114,7 +114,10 @@ void main() {
     ChargeCheck at(DateTime? checked, int every) =>
         ChargeCheck(lastChecked: checked, everyDays: every);
 
-    final monday = DateTime.utc(2026, 9, 7, 8);
+    // Local times, as the screens pass them: the due day is a local day
+    // (#403), and a mixture of zones would make these depend on where
+    // the tests run.
+    final monday = DateTime(2026, 9, 7, 8);
 
     test('switched off, nothing is ever due', () {
       final check = at(monday, 0);
@@ -134,15 +137,15 @@ void main() {
     test('the interval is counted from the last check', () {
       final check = at(monday, 14);
 
-      expect(check.dueAt, DateTime.utc(2026, 9, 21, 8));
+      expect(check.dueAt, DateTime(2026, 9, 21, 8));
       expect(check.daysUntilDue(now: monday), 14);
     });
 
     test('the day before is not yet due', () {
       final check = at(monday, 14);
 
-      expect(check.daysUntilDue(now: DateTime.utc(2026, 9, 20, 23)), 1);
-      expect(check.isDue(now: DateTime.utc(2026, 9, 20, 23)), isFalse);
+      expect(check.daysUntilDue(now: DateTime(2026, 9, 20, 23)), 1);
+      expect(check.isDue(now: DateTime(2026, 9, 20, 23)), isFalse);
     });
 
     test('the day itself is due, whatever the time of day', () {
@@ -150,16 +153,16 @@ void main() {
 
       // Compared by calendar day, not by the hour: a check confirmed at
       // eight in the morning is not "due at eight" two weeks later.
-      expect(check.isDue(now: DateTime.utc(2026, 9, 21, 0, 5)), isTrue);
-      expect(check.isDue(now: DateTime.utc(2026, 9, 21, 23, 55)), isTrue);
-      expect(check.daysUntilDue(now: DateTime.utc(2026, 9, 21, 23)), 0);
+      expect(check.isDue(now: DateTime(2026, 9, 21, 0, 5)), isTrue);
+      expect(check.isDue(now: DateTime(2026, 9, 21, 23, 55)), isTrue);
+      expect(check.daysUntilDue(now: DateTime(2026, 9, 21, 23)), 0);
     });
 
     test('afterwards it counts how far behind', () {
       final check = at(monday, 14);
 
-      expect(check.daysUntilDue(now: DateTime.utc(2026, 9, 24)), -3);
-      expect(check.isDue(now: DateTime.utc(2026, 9, 24)), isTrue);
+      expect(check.daysUntilDue(now: DateTime(2026, 9, 24)), -3);
+      expect(check.isDue(now: DateTime(2026, 9, 24)), isTrue);
     });
   });
 
@@ -201,7 +204,7 @@ void main() {
       final check = ref.read(chargeCheckProvider);
       expect(check.everyDays, 14);
       expect(check.lastChecked, DateTime.utc(2026, 9, 7));
-      expect(check.dueAt, DateTime.utc(2026, 9, 21));
+      expect(check.dueAt, DateTime.utc(2026, 9, 21).toLocal());
     });
   });
 
@@ -217,5 +220,25 @@ void main() {
     expect(check.dueAt, DateTime(2026, 12, 30));
     expect(check.isDue(now: DateTime(2026, 12, 29, 12)), isFalse);
     expect(check.isDue(now: DateTime(2026, 12, 30, 8)), isTrue);
+  });
+
+  test('a check done just after midnight is due on its local day (#403)', () {
+    // Stored in UTC, where half past midnight in Germany is still the day
+    // before. Built from the UTC fields, the check came due a day early
+    // on the overview, in the briefing and in the calendar file. The two
+    // moments are either side of midnight, so that one of them is a
+    // different day in UTC wherever the test runs, unless that is UTC.
+    for (final done in [
+      DateTime(2026, 10, 10, 0, 30),
+      DateTime(2026, 10, 10, 23, 30),
+    ]) {
+      final check = ChargeCheck(lastChecked: done.toUtc(), everyDays: 90);
+
+      final due = check.dueAt!;
+      expect(DateTime(due.year, due.month, due.day), DateTime(2027, 1, 8));
+      expect(check.daysUntilDue(now: DateTime(2027, 1, 7, 12)), 1);
+      expect(check.isDue(now: DateTime(2027, 1, 7, 23, 59)), isFalse);
+      expect(check.isDue(now: DateTime(2027, 1, 8, 0, 1)), isTrue);
+    }
   });
 }
