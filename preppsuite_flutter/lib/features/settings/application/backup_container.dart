@@ -275,9 +275,12 @@ class BackupReader {
   /// Hands the entry [nextEntry] just named to [write], a chunk at a
   /// time, and checks it against its trailer at the end.
   ///
-  /// Returns false when the entry does not match -- a wrong length, a
-  /// wrong hash, a trailer for a different entry. The caller has then
-  /// written something it must throw away; nothing here can unwrite it.
+  /// Returns false when the entry does not match -- a damaged chunk, a
+  /// wrong length, a wrong hash, a trailer for a different entry or one
+  /// that does not decode. The caller has then written something it must
+  /// throw away; nothing here can unwrite it. Either way the reader stands
+  /// after the whole entry, trailer included, so that the next one is read
+  /// from where it starts (#405).
   Future<bool> copyEntry(
     int index, {
     required bool encrypted,
@@ -307,7 +310,16 @@ class BackupReader {
         final clear = encrypted
             ? await _openChunk(stored, key.bytes, index, chunk)
             : stored;
-        if (clear == null) return false;
+        if (clear == null) {
+          // One flipped bit in a photo or a document (#405). Stopping
+          // here left the reader in the middle of the entry, and the next
+          // entry was looked for in its chunks: every file after it was
+          // lost, and the restore ended in "backup failed". The rest of
+          // this entry is stepped over from where it began.
+          _offset = start;
+          await skipEntry();
+          return false;
+        }
         hash.add(clear);
         size += clear.length;
         chunk++;
@@ -324,7 +336,13 @@ class BackupReader {
       final trailer = await _readExactly(_source, _offset, trailerLength);
       _offset += trailerLength;
 
-      final clear = await decryptFromFolder(utf8.decode(trailer), key);
+      final String sealed;
+      try {
+        sealed = utf8.decode(trailer);
+      } on FormatException {
+        return false;
+      }
+      final clear = await decryptFromFolder(sealed, key);
       if (clear == null) return false;
       final Object? facts;
       try {

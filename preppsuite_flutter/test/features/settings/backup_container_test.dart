@@ -263,6 +263,100 @@ void main() {
     expect(folder.listSync(recursive: true).whereType<File>(), isEmpty);
   });
 
+  group('a damaged private file costs only itself (#405)', () {
+    Future<
+      ({
+        BackupFilesRestored result,
+        List<HandoverPhoto> photos,
+        List<String> documents,
+        List<String> archives,
+      })
+    >
+    restoreAfter(void Function(Uint8List bytes) damage) async {
+      final file = await write();
+      final bytes = await file.readAsBytes();
+      damage(bytes);
+      await file.writeAsBytes(bytes);
+
+      final opened = (await open(file))!;
+      final into = targetsInto(Directory('${temp.path}/ziel'));
+      final result = await restoreBackupFiles(
+        reader: opened.file.reader!,
+        key: opened.key,
+        manifest: opened.files,
+        selected: {0, 1, 2},
+        targets: into.targets,
+      );
+      return (
+        result: result,
+        photos: into.photos,
+        documents: into.documents,
+        archives: into.archives,
+      );
+    }
+
+    test('a flipped bit in a document leaves the files after it', () async {
+      final restored = await restoreAfter((bytes) {
+        final document = _entries(bytes).singleWhere((e) => e.index == 1);
+        bytes[document.chunks.first + 20] ^= 0x01;
+      });
+
+      expect(restored.result.failed, ['police.pdf']);
+      expect(restored.result.restored, 2);
+      expect(restored.documents, isEmpty);
+      expect(restored.photos.single.bytes, photoBytes);
+      expect(await File(restored.archives.single).readAsBytes(), archiveBytes);
+    });
+
+    test('so does one in a photo', () async {
+      final restored = await restoreAfter((bytes) {
+        final photo = _entries(bytes).singleWhere((e) => e.index == 0);
+        bytes[photo.chunks.first + 20] ^= 0x01;
+      });
+
+      expect(restored.result.failed, ['b3f0.jpg']);
+      expect(restored.photos, isEmpty);
+      expect(
+        await File(restored.documents.single).readAsBytes(),
+        documentBytes,
+      );
+      expect(await File(restored.archives.single).readAsBytes(), archiveBytes);
+    });
+
+    test('and a trailer that is not even text', () async {
+      final restored = await restoreAfter((bytes) {
+        final document = _entries(bytes).singleWhere((e) => e.index == 1);
+        bytes[document.trailer + 5] = 0xff;
+      });
+
+      expect(restored.result.failed, ['police.pdf']);
+      expect(await File(restored.archives.single).readAsBytes(), archiveBytes);
+    });
+
+    test('pictures read before a file that ends early are kept', () async {
+      final file = await write();
+      final bytes = await file.readAsBytes();
+      final archive = _entries(bytes).singleWhere((e) => e.index == 2);
+      // Cut off in the middle of the archive, as by a full disk.
+      await file.writeAsBytes(bytes.sublist(0, archive.chunks[1] + 100));
+
+      final opened = (await open(file))!;
+      final into = targetsInto(Directory('${temp.path}/ziel'));
+      await expectLater(
+        restoreBackupFiles(
+          reader: opened.file.reader!,
+          key: opened.key,
+          manifest: opened.files,
+          selected: {0, 1, 2},
+          targets: into.targets,
+        ),
+        throwsA(isA<BackupFormatException>()),
+      );
+
+      expect(into.photos.single.bytes, photoBytes);
+    });
+  });
+
   test('what was not asked for is skipped, not written', () async {
     final opened = (await open(await write()))!;
     final into = targetsInto(Directory('${temp.path}/ziel'));
@@ -607,6 +701,33 @@ void main() {
     );
     await out.close();
   });
+}
+
+/// Where each entry of a container keeps its chunks and its trailer: the
+/// offsets of their bytes, read the way the format is written down in
+/// `backup_container.dart`.
+List<({int index, List<int> chunks, int trailer})> _entries(Uint8List bytes) {
+  final view = ByteData.sublistView(bytes);
+  var offset = 'PSBACKUP'.length + 2;
+  offset += 4 + view.getUint32(offset, Endian.little);
+  final entries = <({int index, List<int> chunks, int trailer})>[];
+  while (bytes[offset] == 0x46) {
+    final index = view.getUint32(offset + 1, Endian.little);
+    offset += 5;
+    final chunks = <int>[];
+    while (true) {
+      final length = view.getUint32(offset, Endian.little);
+      offset += 4;
+      if (length == 0) break;
+      chunks.add(offset);
+      offset += length;
+    }
+    final trailerLength = view.getUint32(offset, Endian.little);
+    offset += 4;
+    entries.add((index: index, chunks: chunks, trailer: offset));
+    offset += trailerLength;
+  }
+  return entries;
 }
 
 int _indexOf(List<int> haystack, List<int> needle) {

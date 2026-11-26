@@ -316,6 +316,59 @@ Future<BackupFilesRestored> restoreBackupFiles({
     photoBytes = 0;
   }
 
+  try {
+    await _restoreEntries(
+      reader: reader,
+      key: key,
+      byIndex: byIndex,
+      selected: selected,
+      seen: seen,
+      failed: failed,
+      targets: targets,
+      cancellation: cancellation,
+      onBytes: onBytes,
+      addPhoto: (photo) async {
+        photos.add(photo);
+        photoBytes += photo.bytes.length;
+        if (photoBytes >= _photoBatchBytes) await flushPhotos();
+      },
+      onRestored: () => restored++,
+    );
+  } on Object {
+    // A file that ends early, or a cancelled restore: the pictures read and
+    // checked before it still go in (#405), as the documents before them
+    // already did.
+    try {
+      await flushPhotos();
+    } on Object {
+      // The error that stopped the restore is the one to report.
+    }
+    rethrow;
+  }
+  await flushPhotos();
+
+  // Listed and asked for, but no bytes in the file: the backup could not
+  // read it when it was written.
+  for (final index in selected) {
+    final entry = byIndex[index];
+    if (entry != null && !seen.contains(index)) failed.add(entry.label);
+  }
+  return BackupFilesRestored(restored: restored, failed: failed);
+}
+
+Future<void> _restoreEntries({
+  required BackupReader reader,
+  required FolderKey key,
+  required Map<int, BackupFileEntry> byIndex,
+  required Set<int> selected,
+  required Set<int> seen,
+  required List<String> failed,
+  required BackupFileTargets targets,
+  required Future<void> Function(HandoverPhoto photo) addPhoto,
+  required void Function() onRestored,
+  BackupCancellation? cancellation,
+  void Function(BackupFileEntry entry, int bytes)? onBytes,
+}) async {
   while (true) {
     final index = await reader.nextEntry();
     if (index == null) break;
@@ -349,18 +402,15 @@ Future<BackupFilesRestored> restoreBackupFiles({
         failed.add(entry.label);
         continue;
       }
-      final bytes = buffer.takeBytes();
-      photos.add(
+      await addPhoto(
         HandoverPhoto(
           owner: owner,
           clientId: clientId,
           name: name,
-          bytes: bytes,
+          bytes: buffer.takeBytes(),
           slot: slot,
         ),
       );
-      photoBytes += bytes.length;
-      if (photoBytes >= _photoBatchBytes) await flushPhotos();
       continue;
     }
 
@@ -389,20 +439,11 @@ Future<BackupFilesRestored> restoreBackupFiles({
         case BackupFileKind.photo:
           break;
       }
-      restored++;
+      onRestored();
     } on Object {
       failed.add(entry.label);
     }
   }
-  await flushPhotos();
-
-  // Listed and asked for, but no bytes in the file: the backup could not
-  // read it when it was written.
-  for (final index in selected) {
-    final entry = byIndex[index];
-    if (entry != null && !seen.contains(index)) failed.add(entry.label);
-  }
-  return BackupFilesRestored(restored: restored, failed: failed);
 }
 
 /// Writes one entry into the target folder and returns its path, or null
