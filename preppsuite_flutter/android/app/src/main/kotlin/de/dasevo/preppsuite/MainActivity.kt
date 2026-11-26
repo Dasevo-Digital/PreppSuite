@@ -13,6 +13,7 @@ import io.flutter.embedding.engine.FlutterEngine
 import io.flutter.plugin.common.MethodCall
 import io.flutter.plugin.common.MethodChannel
 import java.util.concurrent.Executors
+import java.util.concurrent.RejectedExecutionException
 
 /**
  * Everything the app needs from storage the user picked.
@@ -51,11 +52,19 @@ class MainActivity : FlutterFragmentActivity() {
     private val openFiles = mutableMapOf<String, ParcelFileDescriptor>()
 
     /**
-     * Reads happen here rather than on the main thread: a map being panned
-     * asks for tiles continuously, and file I/O in the middle of that is
-     * what turns smooth scrolling into jank.
+     * Folder work happens here rather than on the main thread (#376, #410):
+     * every answer from a document provider is a binder call, and one in
+     * the cloud may first have to fetch what it is asked for. One thread,
+     * so a read and a write of one file keep the order Dart asked in.
      */
     private val fileReads = Executors.newSingleThreadExecutor()
+
+    /**
+     * Ranged reads of open archives, on a thread of their own (#410): a map
+     * being panned asks for tiles continuously, and behind a run through
+     * the household's pictures each tile waited for the folder.
+     */
+    private val rangeReads = Executors.newSingleThreadExecutor()
 
     /** Reads scanned pages (#66); see TextRecognition. */
     private var textRecognition: TextRecognition? = null
@@ -309,7 +318,7 @@ class MainActivity : FlutterFragmentActivity() {
             return
         }
 
-        fileReads.execute {
+        rangeReads.execute {
             val outcome = runCatching {
                 // A stream around this descriptor would close it after the
                 // first read. Positional reads keep its lifetime with the
@@ -335,14 +344,25 @@ class MainActivity : FlutterFragmentActivity() {
         }
     }
 
+    /**
+     * Forgets the descriptor at once and closes it after the reads already
+     * queued for it: closed under a running read, its number could go to
+     * the next file opened, and the read would carry on in that one.
+     */
     private fun closeFile(uri: String) {
-        openFiles.remove(uri)?.let { runCatching { it.close() } }
+        val descriptor = openFiles.remove(uri) ?: return
+        try {
+            rangeReads.execute { runCatching { descriptor.close() } }
+        } catch (_: RejectedExecutionException) {
+            runCatching { descriptor.close() }
+        }
     }
 
     override fun onDestroy() {
         openFiles.values.forEach { runCatching { it.close() } }
         openFiles.clear()
         fileReads.shutdown()
+        rangeReads.shutdown()
         super.onDestroy()
     }
 
@@ -363,8 +383,11 @@ class MainActivity : FlutterFragmentActivity() {
         if (!granted) return false
 
         val root = DocumentFile.fromTreeUri(this, tree) ?: return false
-        return root.canWrite() &&
-            resolveDirectory(root, listOf("preppsuite", "devices"), create = true) != null
+        // A folder the provider cannot list is not one to write to; that
+        // is what DocumentFile answered here before (#410).
+        return root.canWrite() && runCatching {
+            resolveDirectory(root.uri, listOf("preppsuite", "devices"), create = true)
+        }.getOrNull() != null
     }
 
     /**
@@ -377,31 +400,69 @@ class MainActivity : FlutterFragmentActivity() {
      */
     private fun list(uri: String, path: String): List<String> {
         val directory = directoryAt(uri, path, create = false) ?: return emptyList()
-        val children = DocumentsContract.buildChildDocumentsUriUsingTree(
-            directory.uri,
-            DocumentsContract.getDocumentId(directory.uri),
+        return children(directory).filterValues { it.isFile }.keys.toList()
+    }
+
+    /** One entry of a directory in the tree. */
+    private class Child(val uri: Uri, type: String?) {
+        // What DocumentFile says: a folder has the folder type, a file
+        // some other type, and an entry without one is neither.
+        val isDirectory = type == DocumentsContract.Document.MIME_TYPE_DIR
+        val isFile = !type.isNullOrEmpty() && !isDirectory
+    }
+
+    /**
+     * The entries of [directory] by name, in one query.
+     *
+     * `DocumentFile.findFile` lists the directory and then asks each entry
+     * for its name, one binder call apiece. Looking up every picture that
+     * way cost a call per picture already in the folder, a run through N
+     * pictures some N squared calls (#410). Here a lookup is one query per
+     * directory on the way, with name, id and type at once. Of two entries
+     * with one name the first counts, as with `findFile`.
+     *
+     * A provider that does not answer at all is an error rather than an
+     * empty folder: taken for empty, a read would say a file is missing
+     * (#312) and a write would put a second one beside it.
+     */
+    private fun children(directory: Uri): Map<String, Child> {
+        val query = DocumentsContract.buildChildDocumentsUriUsingTree(
+            directory,
+            DocumentsContract.getDocumentId(directory),
         )
-        val names = mutableListOf<String>()
-        contentResolver.query(
-            children,
+        val found = LinkedHashMap<String, Child>()
+        val cursor = contentResolver.query(
+            query,
             arrayOf(
                 DocumentsContract.Document.COLUMN_DISPLAY_NAME,
+                DocumentsContract.Document.COLUMN_DOCUMENT_ID,
                 DocumentsContract.Document.COLUMN_MIME_TYPE,
             ),
             null,
             null,
             null,
-        )?.use { cursor ->
-            while (cursor.moveToNext()) {
-                val name = cursor.getString(0) ?: continue
-                val type = cursor.getString(1)
-                // What DocumentFile.isFile says: a type, and not a folder's.
-                if (type.isNullOrEmpty() || type == DocumentsContract.Document.MIME_TYPE_DIR) continue
-                names.add(name)
+        ) ?: throw java.io.IOException("The folder could not be listed.")
+        cursor.use {
+            while (it.moveToNext()) {
+                val name = it.getString(0) ?: continue
+                val id = it.getString(1) ?: continue
+                if (name in found) continue
+                found[name] = Child(
+                    DocumentsContract.buildDocumentUriUsingTree(directory, id),
+                    it.getString(2),
+                )
             }
         }
-        return names
+        return found
     }
+
+    /**
+     * A new document in [directory], or null where the provider makes
+     * none, as `DocumentFile.createFile` and `createDirectory` answer.
+     */
+    private fun createDocument(directory: Uri, type: String, name: String): Uri? = runCatching {
+        DocumentsContract.createDocument(contentResolver, directory, type, name)
+    }.getOrNull()
 
     private class ReadTooLarge : Exception()
 
@@ -409,7 +470,7 @@ class MainActivity : FlutterFragmentActivity() {
         val segments = path.split('/')
         val directory = directoryAt(uri, segments.dropLast(1).joinToString("/"), create = false)
             ?: return null
-        val file = directory.findFile(segments.last()) ?: return null
+        val file = children(directory)[segments.last()] ?: return null
         if (!file.isFile) return null
 
         val input = contentResolver.openInputStream(file.uri)
@@ -443,11 +504,11 @@ class MainActivity : FlutterFragmentActivity() {
         val directory = directoryAt(uri, segments.dropLast(1).joinToString("/"), create = true)
             ?: throw java.io.IOException("No writable directory")
         val name = segments.last()
-        val file = directory.findFile(name)
-            ?: directory.createFile("application/json", name)
+        val file = children(directory)[name]?.uri
+            ?: createDocument(directory, "application/json", name)
             ?: throw java.io.IOException("No writable file")
 
-        val stream = contentResolver.openOutputStream(file.uri, "wt")
+        val stream = contentResolver.openOutputStream(file, "wt")
             ?: throw java.io.IOException("No output stream")
         stream.use {
             it.write(contents.toByteArray(Charsets.UTF_8))
@@ -466,11 +527,13 @@ class MainActivity : FlutterFragmentActivity() {
         if (name.isEmpty() || name == "." || name == ".." || segments.contains("..")) return false
         val directory = directoryAt(uri, segments.dropLast(1).joinToString("/"), create = false)
             ?: return false
-        val file = directory.findFile(name) ?: return false
-        return file.isFile && file.delete()
+        val file = children(directory)[name] ?: return false
+        return file.isFile && runCatching {
+            DocumentsContract.deleteDocument(contentResolver, file.uri)
+        }.getOrDefault(false)
     }
 
-    private fun directoryAt(uri: String, path: String, create: Boolean): DocumentFile? {
+    private fun directoryAt(uri: String, path: String, create: Boolean): Uri? {
         // A handle that is not (or no longer) a document tree, such as one
         // restored from another platform, is simply not there.
         val root = try {
@@ -479,21 +542,23 @@ class MainActivity : FlutterFragmentActivity() {
             null
         } ?: return null
         val segments = path.split('/').filter { it.isNotEmpty() }
-        return resolveDirectory(root, segments, create)
+        return resolveDirectory(root.uri, segments, create)
     }
 
     private fun resolveDirectory(
-        root: DocumentFile,
+        root: Uri,
         segments: List<String>,
         create: Boolean,
-    ): DocumentFile? {
+    ): Uri? {
         var current = root
         for (segment in segments) {
-            val existing = current.findFile(segment)
+            val existing = children(current)[segment]
             current = when {
-                existing != null && existing.isDirectory -> existing
+                existing != null && existing.isDirectory -> existing.uri
                 existing != null -> return null
-                create -> current.createDirectory(segment) ?: return null
+                create ->
+                    createDocument(current, DocumentsContract.Document.MIME_TYPE_DIR, segment)
+                        ?: return null
                 else -> return null
             }
         }

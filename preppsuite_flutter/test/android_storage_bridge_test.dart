@@ -37,7 +37,54 @@ void main() {
       expect(branch, contains('onFailure'));
     });
   });
+
+  group('a run through the pictures', () {
+    test('looks each one up with one query, not one per picture', () {
+      // `findFile` asks every entry of the folder for its name, one binder
+      // call each: for every picture read, written or removed, a call per
+      // picture already there.
+      final code = _withoutComments(source);
+      expect(code, isNot(contains('.findFile(')));
+      expect(code, isNot(contains('.listFiles(')));
+      final children = _body(source, 'private fun children(');
+      expect(
+        RegExp(r'contentResolver\.query\(').allMatches(children),
+        hasLength(1),
+      );
+      expect(children, contains('COLUMN_DISPLAY_NAME'));
+      expect(children, contains('COLUMN_DOCUMENT_ID'));
+      for (final function in [
+        'private fun read(',
+        'private fun write(',
+        'private fun delete(',
+        'private fun list(',
+        'private fun resolveDirectory(',
+      ]) {
+        expect(
+          _body(source, function),
+          contains('children('),
+          reason: function,
+        );
+      }
+    });
+
+    test('does not hold up the tiles of the map', () {
+      expect(source, contains('private val rangeReads ='));
+      final read = _body(source, 'private fun readRange(');
+      expect(read, contains('rangeReads.execute {'));
+      expect(read, isNot(contains('fileReads')));
+      // Closed after the reads queued for it, on the same thread.
+      expect(_body(source, 'private fun closeFile('), contains('rangeReads'));
+      expect(_body(source, 'override fun onDestroy('), contains('rangeReads'));
+    });
+  });
 }
+
+/// [source] without its `//` and `/* */` comments. MainActivity has no
+/// string with two slashes in it, which this would cut.
+String _withoutComments(String source) => source
+    .replaceAll(RegExp(r'/\*[\s\S]*?\*/'), '')
+    .replaceAll(RegExp(r'//[^\n]*'), '');
 
 /// The block that starts at the first `{` after [signature].
 String _body(String source, String signature) {
