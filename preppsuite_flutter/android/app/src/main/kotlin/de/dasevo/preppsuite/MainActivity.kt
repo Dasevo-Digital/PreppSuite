@@ -114,7 +114,7 @@ class MainActivity : FlutterFragmentActivity() {
         when (call.method) {
             "pick" -> pick(Intent.ACTION_OPEN_DOCUMENT_TREE, PICK_FOLDER_REQUEST, result)
             "pickFile" -> pick(Intent.ACTION_OPEN_DOCUMENT, PICK_FILE_REQUEST, result)
-            "openFile" -> result.success(openFile(call.argument("uri")!!, call.argument("fileToken")))
+            "openFile" -> openFile(call.argument("uri")!!, call.argument("fileToken"), result)
             "readRange" -> readRange(
                 call.argument<String>("fileToken") ?: call.argument("uri")!!,
                 (call.argument<Number>("offset")!!).toLong(),
@@ -125,7 +125,20 @@ class MainActivity : FlutterFragmentActivity() {
                 closeFile(call.argument<String>("fileToken") ?: call.argument("uri")!!)
                 result.success(null)
             }
-            "ensureWritable" -> result.success(ensureWritable(call.argument("uri")!!))
+            // Off the main thread as well (#410): every two minutes, and
+            // each answer is a binder call to a provider that may be slow.
+            "ensureWritable" -> {
+                val uri = call.argument<String>("uri")!!
+                fileReads.execute {
+                    val outcome = runCatching { ensureWritable(uri) }
+                    runOnUiThread {
+                        outcome.fold(
+                            onSuccess = { result.success(it) },
+                            onFailure = { result.error("error", it.message, null) },
+                        )
+                    }
+                }
+            }
             // Off the main thread, as reads are (#376): a folder with the
             // household's pictures in it holds hundreds of files, and the
             // provider answers each question with a binder call.
@@ -250,15 +263,38 @@ class MainActivity : FlutterFragmentActivity() {
 
     // --- Ranged reads, for the offline map archive ----------------------
 
-    private fun openFile(uri: String, token: String? = null): Boolean {
+    /**
+     * Opens [uri] for ranged reads under [token], and answers whether it
+     * could be opened.
+     *
+     * Not on the main thread (#410): a cloud provider may fetch the whole
+     * file before it hands out a descriptor, and for a backup in Nextcloud
+     * or Drive that is long enough for "app not responding". The
+     * descriptor is filed on the main thread, where [openFiles] lives, and
+     * before the answer, so the first read finds it.
+     */
+    private fun openFile(uri: String, token: String?, result: MethodChannel.Result) {
         val key = token ?: uri
         closeFile(key)
-        return runCatching {
-            val descriptor = contentResolver.openFileDescriptor(Uri.parse(uri), "r")
-                ?: return false
-            openFiles[key] = descriptor
-            true
-        }.getOrDefault(false)
+        fileReads.execute {
+            val descriptor = runCatching {
+                contentResolver.openFileDescriptor(Uri.parse(uri), "r")
+            }.getOrNull()
+            runOnUiThread {
+                when {
+                    descriptor == null -> result.success(false)
+                    isDestroyed -> {
+                        runCatching { descriptor.close() }
+                        result.success(false)
+                    }
+                    else -> {
+                        closeFile(key)
+                        openFiles[key] = descriptor
+                        result.success(true)
+                    }
+                }
+            }
+        }
     }
 
     private fun readRange(
