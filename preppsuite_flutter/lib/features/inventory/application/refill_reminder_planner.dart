@@ -39,6 +39,12 @@ class RefillReminder {
 /// worked out afresh on every change. A reminder whose moment has passed
 /// is not scheduled again -- the medication screen shows a pack that is
 /// due, and a notification on every sync would be noise.
+///
+/// A pack that lasts no longer than the lead time is due the moment it
+/// is counted (#401): its refill day lies on or before the count, and that
+/// moment had always passed, so the household was never reminded. It is
+/// reminded once, on the morning after the count. That day is counted from
+/// the count and not from [now], so planning again later moves nothing.
 List<RefillReminder> planRefillReminders({
   required List<InventoryItem> items,
   required DateTime now,
@@ -52,7 +58,7 @@ List<RefillReminder> planRefillReminders({
       ],
       now: now,
     ))
-      if (range.refillOn case final day?)
+      if (_refillDay(range) case final day?)
         if (DateTime(day.year, day.month, day.day, reminderHour)
             case final fireAt when fireAt.isAfter(now))
           RefillReminder(
@@ -68,4 +74,18 @@ List<RefillReminder> planRefillReminders({
     return byTime != 0 ? byTime : a.itemName.compareTo(b.itemName);
   });
   return reminders;
+}
+
+/// The day a pack in daily use is reminded of, or null for a reserve:
+/// its refill day, and never before the day after it was counted.
+DateTime? _refillDay(MedicationRange range) {
+  final day = range.refillOn;
+  if (day == null) return null;
+  final counted = range.countedOn;
+  final firstAfterCount = DateTime(
+    counted.year,
+    counted.month,
+    counted.day + 1,
+  );
+  return day.isBefore(firstAfterCount) ? firstAfterCount : day;
 }

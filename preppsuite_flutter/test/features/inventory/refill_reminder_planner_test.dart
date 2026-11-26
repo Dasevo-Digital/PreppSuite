@@ -58,6 +58,71 @@ void main() {
     );
   });
 
+  group('a pack that lasts no longer than the lead time (#401)', () {
+    test('is reminded the morning after the count', () {
+      // Ten days at two a day, fourteen days' lead: the refill day lies
+      // before the count, and nothing used to be planned at all.
+      final reminder = planRefillReminders(
+        items: [pills(quantity: 20)],
+        now: DateTime(2026, 10, 1, 12, 30),
+      ).single;
+
+      expect(reminder.fireAt, DateTime(2026, 10, 2, 9));
+      expect(reminder.runsOutOn, DateTime(2026, 10, 11));
+    });
+
+    test('is reminded the morning after the count when it lasts exactly '
+        'the lead time', () {
+      final reminder = planRefillReminders(
+        items: [pills(quantity: 28)],
+        now: DateTime(2026, 10, 1, 12, 30),
+      ).single;
+
+      expect(reminder.fireAt, DateTime(2026, 10, 2, 9));
+      expect(reminder.runsOutOn, DateTime(2026, 10, 15));
+    });
+
+    test('stays on that morning however often it is planned, and comes '
+        'once', () {
+      final moments = {
+        for (final now in [
+          DateTime(2026, 10, 1, 12, 30),
+          DateTime(2026, 10, 1, 23, 59),
+          DateTime(2026, 10, 2, 0, 1),
+          DateTime(2026, 10, 2, 8, 59),
+        ])
+          for (final quantity in [20.0, 28.0])
+            planRefillReminders(
+              items: [pills(quantity: quantity)],
+              now: now,
+            ).single.fireAt,
+      };
+      expect(moments, {DateTime(2026, 10, 2, 9)});
+
+      for (final now in [
+        DateTime(2026, 10, 2, 9, 1),
+        DateTime(2026, 10, 3, 8),
+        DateTime(2026, 10, 20, 8),
+      ]) {
+        expect(
+          planRefillReminders(items: [pills(quantity: 20)], now: now),
+          isEmpty,
+          reason: '$now',
+        );
+      }
+    });
+
+    test('is not reminded with nothing counted', () {
+      expect(
+        planRefillReminders(
+          items: [pills(quantity: 0)],
+          now: DateTime(2026, 10, 1, 12, 30),
+        ),
+        isEmpty,
+      );
+    });
+  });
+
   test('is only for a pack the household asked about', () {
     expect(
       planRefillReminders(
