@@ -98,10 +98,16 @@ void main() {
     });
 
     testWidgets('one number per item makes it count (#109)', (tester) async {
+      final ravioli = item(clientId: 'ravioli', unit: 'Dose');
+      // Stored as well as listed: the conversion works on the row as
+      // stored (#403).
+      await tester.runAsync(
+        () => db.upsertInventoryItem(ravioli.toCompanion(false)),
+      );
       await pump(
         tester,
         const InventoryListScreen(householdId: householdId),
-        stock: [item(clientId: 'ravioli', unit: 'Dose')],
+        stock: [ravioli],
       );
       await tester.tap(find.text(l10n.measureConvertTitle));
       await tester.pumpAndSettle();
