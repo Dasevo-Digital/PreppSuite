@@ -774,9 +774,11 @@ verloren, ist für Android 7 bis 12 keine Aktualisierung mehr möglich. Erst ein
 `minSdk` von 33 macht ihn entbehrlich.
 
 Die App trägt die Kennung `de.dasevo.preppsuite` (die Testfassung
-`de.dasevo.preppsuite.test`). Bis 2.x hieß sie `de.status403.preppsuite`; auf
-den Desktops holt der erste Start unter der neuen Kennung den Haushalt von dort
-(`lib/core/former_identity.dart`). Auf Android und iOS ist eine neue Kennung
+`de.dasevo.preppsuite.test`). Bis 2.x hieß sie `de.status403.preppsuite`; unter
+Linux und Windows holt der erste Start unter der neuen Kennung den Haushalt von
+dort (`lib/core/former_identity.dart`). Unter macOS ging das bis 3.0.3; wer dort
+noch eine 2.x-Fassung hat, installiert zuerst 3.0.3 und startet sie einmal. Auf
+Android und iOS ist eine neue Kennung
 eine neue App: Der Haushalt kommt dort über eine Sicherung hinüber. Wer eine
 eigene Fassung über einen Store verteilen will, braucht eine eigene Kennung
 unter einer Domain, die er selbst kontrolliert.

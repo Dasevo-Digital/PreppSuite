@@ -12,9 +12,14 @@ import 'package:path_provider/path_provider.dart';
 ///
 /// The identifier is not cosmetic. It is where the data lives:
 ///
-/// - macOS: the sandbox container `~/Library/Containers/<id>/…`
 /// - Linux: `~/.local/share/<APPLICATION_ID>`
 /// - Windows: `%APPDATA%\<CompanyName>\<ProductName>`, from `Runner.rc`
+///
+/// macOS was carried over too, from the former sandbox container, up to
+/// 3.0.3. That needed a temporary exception reaching into another app's
+/// container, which no store accepts; with every installation moved it
+/// went in 3.0.4 (#423). Coming to macOS from 2.x now means installing a
+/// version up to 3.0.3 first and starting it once.
 ///
 /// Without this, the first start under the new identifier would open an
 /// empty household while the real one sat beside it under a name nobody
@@ -54,12 +59,6 @@ String? formerSupportDirectory(String supportPath, {required String platform}) {
   String? former(int i) {
     final part = parts[i];
     switch (platform) {
-      case 'macos':
-        const ids = {
-          'de.dasevo.preppsuite': 'de.status403.preppsuite',
-          'de.dasevo.preppsuite.test': 'de.status403.preppsuite.test',
-        };
-        return ids[part];
       case 'linux':
         return part == 'de.dasevo.preppsuite'
             ? 'de.status403.preppsuite'

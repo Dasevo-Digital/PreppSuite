@@ -14,28 +14,20 @@ void main() {
     String? former(String path, String platform) =>
         formerSupportDirectory(path, platform: platform);
 
-    test('macOS: the container and the folder in it', () {
-      expect(
-        former(
-          '/Users/x/Library/Containers/de.dasevo.preppsuite/Data/Library/'
-              'Application Support/de.dasevo.preppsuite',
-          'macos',
-        ),
-        '/Users/x/Library/Containers/de.status403.preppsuite/Data/Library/'
-        'Application Support/de.status403.preppsuite',
-      );
-    });
-
-    test('macOS: the test copy takes over the former test copy', () {
-      expect(
-        former(
-          '/Users/x/Library/Containers/de.dasevo.preppsuite.test/Data/'
-              'Library/Application Support/de.dasevo.preppsuite.test',
-          'macos',
-        ),
-        '/Users/x/Library/Containers/de.status403.preppsuite.test/Data/'
-        'Library/Application Support/de.status403.preppsuite.test',
-      );
+    test('macOS: nothing is looked for any more (#423)', () {
+      // The sandbox reached the former container only through a temporary
+      // exception, which went in 3.0.4.
+      for (final id in ['de.dasevo.preppsuite', 'de.dasevo.preppsuite.test']) {
+        expect(
+          former(
+            '/Users/x/Library/Containers/$id/Data/Library/'
+                'Application Support/$id',
+            'macos',
+          ),
+          isNull,
+          reason: id,
+        );
+      }
     });
 
     test('Linux', () {
@@ -124,32 +116,16 @@ void main() {
   group('the table matches the platform files', () {
     // An identifier changed in one place and not in the table would find
     // nothing on the first start. These read it where it is really set.
-    test('macOS: the bundle id has a former one, and the entitlements let '
-        'the sandbox reach both former containers', () {
-      final xcconfig = File(
-        'macos/Runner/Configs/AppInfo.xcconfig',
-      ).readAsStringSync();
-      final id = RegExp(
-        r'^PRODUCT_BUNDLE_IDENTIFIER = (\S+)',
-        multiLine: true,
-      ).firstMatch(xcconfig)!.group(1)!;
-      for (final variant in [id, '$id.test']) {
-        final former = formerSupportDirectory(
-          '/Users/x/Library/Containers/$variant/Data/Library/'
-          'Application Support/$variant',
-          platform: 'macos',
-        );
-        expect(former, isNotNull, reason: variant);
-        final container = RegExp(
-          r'Containers/([^/]+)/',
-        ).firstMatch(former!)!.group(1);
-        for (final file in ['Release', 'DebugProfile']) {
-          expect(
-            File('macos/Runner/$file.entitlements').readAsStringSync(),
-            contains('<string>/Library/Containers/$container/</string>'),
-            reason: '$file.entitlements, $variant',
-          );
-        }
+    test('macOS: neither entitlements file reaches into another app\'s '
+        'container (#423)', () {
+      // A store rejects temporary exceptions, and the one for the former
+      // identifier's containers had done its work.
+      for (final file in ['Release', 'DebugProfile']) {
+        final text = File(
+          'macos/Runner/$file.entitlements',
+        ).readAsStringSync();
+        expect(text, isNot(contains('temporary-exception')), reason: file);
+        expect(text, isNot(contains('/Library/Containers/')), reason: file);
       }
     });
 

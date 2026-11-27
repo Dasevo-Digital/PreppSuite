@@ -1545,12 +1545,14 @@ tree; the test suite deliberately targets that layer rather than the UI.
   `de.dasevo.preppsuite`** (and `.test`), for a store listing. On the
   desktops the first start under the new one carries the household over
   (`lib/core/former_identity.dart`): renamed where possible, copied
-  through a sibling folder where not, never deleted. On macOS that needs a
-  read-write temporary exception for the two former containers in both
-  entitlements files — the same kind #80 removed, and it has to go the
-  same way before any store build. The preferences live in the old
-  container's `NSUserDefaults` plist and are read by
-  `MainFlutterWindow.swift` before the engine starts. Security-scoped
+  through a sibling folder where not, never deleted. On macOS that needed
+  a read-write temporary exception for the two former containers in both
+  entitlements files, and `MainFlutterWindow.swift` read the preferences
+  from the old container's `NSUserDefaults` plist before the engine
+  started. Both went in 3.0.4 (#423), the same way #80 went: every
+  installation had moved, and a store rejects the exception. **Coming to
+  macOS from 2.x now means installing a version up to 3.0.3 first** and
+  starting it once. Linux and Windows still carry the household over. Security-scoped
   bookmarks belong to the identifier that made them, so a chosen data
   folder, the shared folder and the download folder have to be picked once
   more; the overview already says so for the data folder (`missingChoice`).
