@@ -270,6 +270,27 @@ void main() {
         isFalse,
       );
     });
+
+    for (final leftover in [
+      'preppsuite.sqlite.aes256cbc-recovery',
+      'preppsuite.sqlite.rekeying',
+    ]) {
+      test(
+        'nor with a move to chacha20 left half done: $leftover (#419)',
+        () async {
+          _writeHousehold(p.join(installation.path, leftover), 'Beispiel');
+
+          expect(
+            await takeOver(settings: InMemorySharedPreferencesStore.empty()),
+            PortableTakeover.failed,
+          );
+          expect(
+            File(p.join(folder.path, 'preppsuite.sqlite')).existsSync(),
+            isFalse,
+          );
+        },
+      );
+    }
   });
 
   group('all or nothing', () {

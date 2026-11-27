@@ -95,6 +95,8 @@ void main(List<String> args) async {
   // Establish the data-key state before any provider can open Drift. New
   // households start encrypted; existing ones remain recoverably readable
   // until Settings has created a backup and starts the explicit upgrade.
+  // Here too, before anything has a database open, what 3.0.3 encrypted
+  // with aes256cbc is moved to chacha20, once (#419).
   //
   // It never throws out of here. A device that cannot hand over the key
   // right now leaves the app in recovery, where `LocalDataGate` explains

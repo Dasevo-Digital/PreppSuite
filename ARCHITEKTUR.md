@@ -3017,8 +3017,9 @@ Versand — das andere Gerät hat einen anderen Schlüssel — und versiegelt es
 beim Empfang neu.
 
 `lib/core/local_database_encryption.dart` hält einen 256-Bit-Schlüssel im
-plattformgebundenen sicheren Speicher und öffnet damit die Drift-Dateien.
-Vier Dinge daran sind teuer erkauft und dürfen nicht zurückgedreht werden.
+plattformgebundenen sicheren Speicher und öffnet damit die Drift-Dateien,
+seit #419 mit ChaCha20-Poly1305 (`chacha20`). Sechs Dinge daran sind teuer
+erkauft und dürfen nicht zurückgedreht werden.
 
 **`PRAGMA key` auf einer Klartextdatei macht sie unlesbar.** Nicht "ignoriert"
 und nicht "verschlüsselt sie" — SQLite3MultipleCiphers versucht danach zu
@@ -3036,22 +3037,56 @@ und eine Datei, die es noch nicht gibt, entsteht verschlüsselt. Ein Modus,
 der für die ganze Installation gilt, hatte genau den gegenteiligen Effekt —
 nach einem Abbruch war die Hälfte des Haushalts nicht mehr zu öffnen.
 
+**Auch die Chiffre steht im Dateikopf, und sie wird nie ausprobiert**
+(#419). Bis 3.0.3 war es `aes256cbc`, unter einem Kommentar, der das die
+Vorgabe der Bibliothek nannte; die Vorgabe ist `chacha20`. AES-CBC trägt
+kein Prüfzeichen je Seite: Ein gekipptes Bit wurde als Daten gelesen, und
+`PRAGMA integrity_check` meldete ok. Neue Dateien entstehen mit `chacha20`,
+`aes256cbc`-Dateien öffnen weiter. Welche Chiffre eine Datei hat, sagt
+Byte 20 des Kopfes, das SQLite3MultipleCiphers unter jeder Chiffre im
+Klartext lässt: der Platz, den jede Seite am Ende frei hält, 32 Byte für
+Nonce und Tag bei `chacha20`, keiner bei `aes256cbc` (`_cipherOfFileSync`;
+zu kurz oder unbekannt heißt `chacha20`). Ausprobieren ist keine
+Abkürzung: Eine Verbindung mit Schreibrecht und falscher Chiffre spielt ein
+heißes Journal durch diese Chiffre zurück. `aes256cbc` auf einer
+`chacha20`-Datei schrieb Unsinn über die Seiten und löschte das Journal,
+und lesend scheitert der Versuch schon am Journal und sagt nichts.
+
 **Die Wiederherstellung sucht über die Namen, nicht über `.sqlite`.** Im
 Moment zwischen den beiden `rename`-Aufrufen heißt die Datenbank weder wie
 sie selbst noch irgendwie auf `.sqlite`. Eine Aufräumschleife über
 `*.sqlite` besucht sie deshalb nie — der Haushalt blieb als
 `.plaintext-recovery` liegen, und die App legte daneben einen leeren an.
-`_databaseBaseFiles` faltet die beiden Migrationsendungen auf den
-eigentlichen Namen zurück; `local_database_encryption_test.dart` stellt
-jeden Abbruchpunkt nach. Das gilt auch ohne die Marke `migrating` (#393):
-Eine Kopie ohne ihre Datenbank wird beim Start zurückbenannt, und wo das
-nicht geht, ist der Zustand `recoveryRequired`.
+`_databaseBaseFiles` faltet die Migrationsendungen (`.plaintext-recovery`
+und `.encrypting`, seit #419 auch `.rekeying` und `.aes256cbc-recovery`)
+auf den eigentlichen Namen zurück; `local_database_encryption_test.dart`
+und `local_database_cipher_upgrade_test.dart` stellen jeden Abbruchpunkt
+nach. Das gilt auch ohne die Marke `migrating` (#393): Eine Kopie ohne
+ihre Datenbank wird beim Start zurückbenannt, und wo das nicht geht, ist
+der Zustand `recoveryRequired`.
 
 **Die Migration läuft in einem eigenen Isolate und ist wiederaufnehmbar.**
 `VACUUM INTO` kopiert die ganze Datei, und die Wissensindizes können
 Gigabyte groß sein. Ein zweiter Lauf überspringt, was bereits
 verschlüsselt ist, und benutzt **denselben** Schlüssel — ein neuer würde
 verwaisen lassen, was der erste Lauf geschafft hat.
+
+**Der Start tauscht nur Dateien, die niemand offen hat** (#419). Der
+Wechsel von `aes256cbc` auf `chacha20` läuft beim Start, bevor dieser
+Prozess eine Datenbank geöffnet hat (`_opened`), und nur mit der Sperre
+`.preppsuite-in-use` für sich allein (`_UseLock`): eine leere
+SQLite-Datei neben den Datenbanken, über eine Transaktion gehalten. Der
+Hintergrundlauf hält sie geteilt, bis `finishBackgroundRun` sie freigibt,
+ein Desktop-Fenster für seine ganze Laufzeit
+(`holdAgainstOtherInstances`). SQLite hält solche Sperren zwischen den
+Isolates eines Prozesses wie zwischen Prozessen, und das System gibt sie
+mit dem Prozess frei; eine Sperre auf den Datenbanken selbst ginge nicht,
+denn eine offene, untätige Verbindung hält keine. Findet der Start die
+Sperre belegt, bleibt die Datei bis zum nächsten Start, wie sie ist; der
+Hintergrundlauf wartet `upgradeWait` und gibt mit `LocalDataBusy` auf, ein
+zweites Fenster kommt dann in `recoveryRequired`. Eine Verbindung, die über
+den Tausch offen bliebe, schriebe ins Original weiter, und ihr Journal, das
+SQLite über den Namen findet, läge neben der neuen Datei.
 
 Ohne Schlüssel ist der Zustand `recoveryRequired`, und der hat seit 2.0.1
 einen Bildschirm: `lib/core/local_data_gate.dart` steht vor der App-Sperre,
@@ -4793,6 +4828,30 @@ jetzt auch ohne die Marke `migrating` repariert; geht das nicht, ist der
 Zustand `recoveryRequired`. Solange eine `.plaintext-recovery` da ist,
 beginnt keine Umstellung, und `_encryptFileSync` bricht ab, bevor es etwas
 anfasst.
+
+**Die Datenbanken des Haushalts sind `chacha20`, und ein Wechsel, der
+scheitert, sperrt niemanden aus** (#419). Bis 3.0.3 verschlüsselte die App
+mit `aes256cbc`, ohne Prüfzeichen je Seite (siehe „Verschlüsselung im
+Ruhezustand“). Der erste Start danach verschlüsselt jede Datenbank in
+`_databaseBaseFiles` außer den Wissensindizes neu (`_upgradeCipher`):
+`VACUUM INTO` nach `<Datei>.rekeying` mit Schlüssel und alter Chiffre, dort
+`PRAGMA cipher = 'chacha20'` und `PRAGMA rekey` mit demselben Schlüssel.
+Die Kopie muss `chacha20` im Kopf tragen, `quick_check` bestehen und
+`user_version`, Schema und jede Zeile des Originals halten, und ins
+Original darf seit der Kopie nichts geschrieben worden sein. Dann wird das
+Original zu `<Datei>.aes256cbc-recovery`, die Kopie bekommt den Namen, und
+das Original geht erst, wenn die neue Datei unter ihrem Namen aufgeht.
+Scheitert ein Schritt davor, bleibt das Original in Gebrauch, der Fehler
+steht im Fehlerprotokoll, und der nächste Start versucht es wieder. Ein
+Abbruch lässt höchstens eine Kopie neben ihrer Datenbank (wird gelöscht),
+das Original allein unter dem Wiederherstellungsnamen (bekommt den Namen
+zurück, `_settleCipherUpgrade`) oder neue Datei und Original (das Original
+geht, sobald die neue Datei `quick_check` besteht, sonst bleiben beide).
+Nur ein Zurückbenennen, das scheitert, führt nach `recoveryRequired`, und
+„Erneut versuchen“ holt es nach. Die Wissensindizes behalten `aes256cbc`,
+bis sie neu gebaut werden. Tagessicherungen von vorher bleiben `aes256cbc`
+und lassen sich zurückspielen; der nächste Start stellt die Datei dann
+wieder um. Ältere Versionen öffnen eine umgestellte Datei nicht mehr.
 
 **Ein mitgeführter Ordner richtet sich nach seinen Dateien, nicht nach dem
 Schlüsselspeicher des Rechners** (#392). Installation und mitgeführte

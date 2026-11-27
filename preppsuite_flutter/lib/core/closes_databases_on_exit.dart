@@ -5,6 +5,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../features/knowledge/application/knowledge_providers.dart';
 import 'app_database_providers.dart';
+import 'local_database_encryption.dart';
 import 'open_databases.dart';
 
 /// Closes the local databases while the app is still alive.
@@ -86,6 +87,10 @@ class _ClosesDatabasesOnExitState extends ConsumerState<ClosesDatabasesOnExit> {
     // And whatever no provider holds: a search over personal documents
     // left on screen, an indexer half way through (#113).
     await OpenDatabases.closeAll();
+    // Last, and for the same reason: a connection the quit leaves to its
+    // finalizer is one more. It is the lock that keeps another window from
+    // moving the files to chacha20 while this one has them open (#419).
+    LocalDatabaseEncryption.instance.releaseForExit();
   }
 
   @override

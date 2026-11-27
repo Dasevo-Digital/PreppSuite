@@ -63,12 +63,36 @@ void warningCallbackDispatcher() {
 /// fetched from anywhere — everything it needs comes from preferences and
 /// the local database. It returns false only on failure, so the platform
 /// can decide whether to retry.
+///
+/// From opening the key until its database is closed the run holds the
+/// databases against the app's start, which would otherwise move a file
+/// from aes256cbc to chacha20 under its connection (#419).
 Future<bool> runWarningBackgroundPoll({
   AppDatabase? database,
   WarningRegionStore regionStore = const WarningRegionStore(),
   NotificationService? notifications,
   WarningPollService? pollService,
   Future<bool> Function()? initializeLocalData,
+}) async {
+  try {
+    return await _pollInBackground(
+      database: database,
+      regionStore: regionStore,
+      notifications: notifications,
+      pollService: pollService,
+      initializeLocalData: initializeLocalData,
+    );
+  } finally {
+    LocalDatabaseEncryption.instance.finishBackgroundRun();
+  }
+}
+
+Future<bool> _pollInBackground({
+  required AppDatabase? database,
+  required WarningRegionStore regionStore,
+  required NotificationService? notifications,
+  required WarningPollService? pollService,
+  required Future<bool> Function()? initializeLocalData,
 }) async {
   // The isolate starts bare; plugins are unusable until this runs.
   WidgetsFlutterBinding.ensureInitialized();

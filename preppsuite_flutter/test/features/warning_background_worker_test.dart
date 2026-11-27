@@ -13,6 +13,7 @@ import 'package:preppsuite_flutter/features/warnings/application/warning_poll_st
 import 'package:preppsuite_flutter/features/warnings/application/warning_region_store.dart';
 import 'package:preppsuite_flutter/local_db/database.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import 'package:sqlite3/sqlite3.dart' show sqlite3;
 
 class _MemoryKeys implements LocalDatabaseKeyStorage {
   final values = <String, String>{};
@@ -297,6 +298,61 @@ void main() {
       );
       expect(ok, isTrue);
       expect(poller.polls, 1);
+    },
+    skip: !LocalDatabaseEncryption.cipherAvailable,
+  );
+
+  test(
+    'a run lets go of the databases when it ends (#419)',
+    () async {
+      // It holds them against the app's start, which moves a file from
+      // aes256cbc to chacha20 only while nothing else has it open. Kept
+      // past the run, every later start would leave the file as it is.
+      final directory = await Directory.systemTemp.createTemp('run-hold-');
+      final keys = _MemoryKeys();
+      final previous = LocalDatabaseEncryption.instance;
+      addTearDown(() async {
+        LocalDatabaseEncryption.instance = previous;
+        PrivatePreferences.forgetDerivedKey();
+        await directory.delete(recursive: true);
+      });
+      SharedPreferences.setMockInitialValues({'notificationsEnabled': true});
+      final foreground = LocalDatabaseEncryption(storage: keys);
+      await foreground.initialize(directory: directory);
+      LocalDatabaseEncryption.instance = foreground;
+      await const WarningRegionStore().save(
+        const WarningRegionFilter(countryCode: 'DE', ownRegionKey: '05334'),
+      );
+      final household = '${directory.path}/preppsuite.sqlite';
+      sqlite3.open(household)
+        ..execute("PRAGMA cipher = 'aes256cbc'")
+        ..execute(
+          "PRAGMA key = '${keys.values['preppsuite.localDatabaseEncryption.key.v1']}'",
+        )
+        ..execute('CREATE TABLE household (name TEXT)')
+        ..close();
+
+      final background = LocalDatabaseEncryption(storage: keys);
+      LocalDatabaseEncryption.instance = background;
+      final ok = await runWarningBackgroundPoll(
+        database: db,
+        pollService: _StubPollService(db),
+        notifications: _RecordingNotifications(),
+        initializeLocalData: () async {
+          await background.initialize(
+            directory: directory,
+            repairInterruptedMigration: false,
+          );
+          return true;
+        },
+      );
+      expect(ok, isTrue);
+
+      await LocalDatabaseEncryption(storage: keys).initialize(
+        directory: directory,
+      );
+      final header = File(household).readAsBytesSync();
+      expect(header[20], 32, reason: 'moved to chacha20');
     },
     skip: !LocalDatabaseEncryption.cipherAvailable,
   );

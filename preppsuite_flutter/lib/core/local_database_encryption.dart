@@ -7,9 +7,11 @@ import 'package:drift/drift.dart';
 import 'package:drift/native.dart';
 import 'package:flutter/foundation.dart' show visibleForTesting;
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
-import 'package:sqlite3/sqlite3.dart' show OpenMode, sqlite3;
+import 'package:sqlite3/sqlite3.dart'
+    show Database, OpenMode, SqliteException, sqlite3;
 
 import 'app_database_directory.dart';
+import 'error_log.dart';
 import 'secure_storage.dart';
 import 'portable_data.dart';
 
@@ -39,8 +41,33 @@ const _cipher = 'chacha20';
 /// What 3.0.3 and earlier encrypted with, still read.
 ///
 /// AES-256 in CBC mode keeps no tag: a changed page decrypts to other
-/// contents, and even `PRAGMA integrity_check` said ok.
+/// contents, and even `PRAGMA integrity_check` said ok. The household's
+/// own databases are moved off it at the next start
+/// ([LocalDatabaseEncryption._upgradeCipher]); a knowledge index keeps it
+/// until it is rebuilt.
 const _legacyCipher = 'aes256cbc';
+
+/// The two files the move to chacha20 can leave beside a database: the
+/// copy being re-encrypted, and the aes256cbc original, kept until the
+/// copy has opened under its name.
+const _rekeyingSuffix = '.rekeying';
+const _legacyRecoverySuffix = '.aes256cbc-recovery';
+
+/// Every name a migration gives a database while it is in flight.
+const _inFlightSuffixes = [
+  _recoverySuffix,
+  _encryptingSuffix,
+  _rekeyingSuffix,
+  _legacyRecoverySuffix,
+];
+
+/// The lock beside the databases (see [_UseLock]). Not called
+/// `preppsuite…`: nothing that lists the databases may take it for one.
+const _useLockName = '.preppsuite-in-use';
+
+/// A knowledge index: derived from a public archive, and gigabytes.
+bool _isKnowledgeIndex(File file) =>
+    file.uri.pathSegments.last.startsWith('preppsuite_knowledge');
 
 enum LocalDatabaseEncryptionMode { plaintext, encrypted, recoveryRequired }
 
@@ -109,8 +136,12 @@ class SecureLocalDatabaseKeyStorage implements LocalDatabaseKeyStorage {
 /// avoids the destructive failure mode where an interrupted app update leaves
 /// existing data behind a new key without a recoverable copy.
 class LocalDatabaseEncryption {
-  LocalDatabaseEncryption({LocalDatabaseKeyStorage? storage})
-    : _storage = storage ?? const SecureLocalDatabaseKeyStorage();
+  LocalDatabaseEncryption({
+    LocalDatabaseKeyStorage? storage,
+    this.holdAgainstOtherInstances = false,
+    this.upgradeWait = const Duration(seconds: 30),
+    @visibleForTesting this.cipherUpgradeStop,
+  }) : _storage = storage ?? const SecureLocalDatabaseKeyStorage();
 
   /// The app's one instance.
   ///
@@ -118,16 +149,46 @@ class LocalDatabaseEncryption {
   /// that keep private values reach this through `PrivatePreferences`
   /// rather than being handed an instance, and a device keychain is not
   /// something a test has. Nothing in the app assigns to it.
-  static LocalDatabaseEncryption instance = LocalDatabaseEncryption();
+  static LocalDatabaseEncryption instance = LocalDatabaseEncryption(
+    holdAgainstOtherInstances:
+        Platform.isMacOS || Platform.isLinux || Platform.isWindows,
+  );
 
   static const _modeKey = 'preppsuite.localDatabaseEncryption.mode.v1';
   static const _keyKey = 'preppsuite.localDatabaseEncryption.key.v1';
+
+  /// Whether this instance keeps the databases from being re-encrypted by
+  /// another instance of the app for as long as it runs (#419).
+  ///
+  /// On a desktop a second window is a second process with the same
+  /// files. Its start must neither move a file another one has open, nor
+  /// open one while another start is moving it. A telephone has one
+  /// process; the background poll there holds the files for its run
+  /// instead (see [initialize]).
+  final bool holdAgainstOtherInstances;
+
+  /// How long a background run, or a second window, waits for a start
+  /// that is re-encrypting a database: the run then gives up with
+  /// [LocalDataBusy], the window comes up in recovery, where "try again"
+  /// asks once more.
+  final Duration upgradeWait;
+
+  /// For tests: called after each step of the move to chacha20 with the
+  /// database and the step. Answering true stops there as if the process
+  /// had ended, and throwing fails the step. Runs the move on this isolate.
+  final bool Function(String path, String step)? cipherUpgradeStop;
 
   final LocalDatabaseKeyStorage _storage;
   Directory? _directory;
   LocalDatabaseEncryptionMode? _mode;
   String? _key;
   bool _migrating = false;
+
+  /// Set once [open] has handed out a connection. From then on a file can
+  /// be held open by this process, and none may be moved at a start.
+  bool _opened = false;
+  _UseLock? _runHold;
+  _UseLock? _instanceHold;
 
   /// True while database files are being swapped underneath.
   bool get isMigrating => _migrating;
@@ -228,10 +289,22 @@ class LocalDatabaseEncryption {
   /// name, passed its check and replaced the household with it. Only the
   /// app's own start may repair, because only there can nothing else be
   /// running.
+  ///
+  /// The app's start also moves the household's own databases from
+  /// aes256cbc to chacha20, once (#419; see [_upgradeCipher]). It does so
+  /// only while it holds the lock beside the databases alone, and before
+  /// this process has opened any of them. The background run holds that
+  /// lock shared until [finishBackgroundRun]: a start that finds it held
+  /// leaves the files as they are for this time, and a background run
+  /// that finds a start moving them gets [LocalDataBusy] after
+  /// [upgradeWait]. A connection left open across the move would write
+  /// into the original after the swap, and its journal, which SQLite
+  /// finds by name, would lie beside the new file.
   Future<void> initialize({
     Directory? directory,
     bool repairInterruptedMigration = true,
   }) async {
+    if (!repairInterruptedMigration) await _holdForRun(directory);
     if (_mode != null) return;
 
     final resolvedDirectory = directory ?? await appDatabaseDirectory();
@@ -240,6 +313,46 @@ class LocalDatabaseEncryption {
       await _initializeCarried(resolvedDirectory);
       return;
     }
+
+    _UseLock? alone;
+    if (repairInterruptedMigration &&
+        !_opened &&
+        (holdAgainstOtherInstances ||
+            await _cipherUpgradeDue(resolvedDirectory))) {
+      _releaseInstanceHold();
+      alone = _UseLock.exclusive(resolvedDirectory);
+    }
+    try {
+      // Another window may be moving the files right now: this one waits
+      // until it is done rather than open one in the middle.
+      if (alone == null && !await _holdForInstance(resolvedDirectory)) {
+        _mode = LocalDatabaseEncryptionMode.recoveryRequired;
+        return;
+      }
+      if (alone != null) await _settleCipherUpgrade(resolvedDirectory);
+      await _initializeInstallation(
+        resolvedDirectory,
+        repairInterruptedMigration: repairInterruptedMigration,
+      );
+      final key = _key;
+      if (alone != null &&
+          key != null &&
+          _mode == LocalDatabaseEncryptionMode.encrypted) {
+        await _upgradeCipher(resolvedDirectory, key);
+      }
+    } finally {
+      alone?.release();
+    }
+    if (alone != null && !await _holdForInstance(resolvedDirectory)) {
+      _mode = LocalDatabaseEncryptionMode.recoveryRequired;
+    }
+  }
+
+  /// Everything [initialize] decides for an installation, as before #419.
+  Future<void> _initializeInstallation(
+    Directory resolvedDirectory, {
+    required bool repairInterruptedMigration,
+  }) async {
     final savedMode = await _storage.read(_modeKey);
     final interrupted = savedMode == 'migrating';
 
@@ -432,12 +545,140 @@ class LocalDatabaseEncryption {
   static Future<bool> _hasStrandedCopies(Directory directory) async {
     for (final base in await _databaseBaseFiles(directory)) {
       if (await base.exists()) continue;
-      if (await File('${base.path}$_recoverySuffix').exists() ||
-          await File('${base.path}$_encryptingSuffix').exists()) {
+      for (final suffix in _inFlightSuffixes) {
+        if (await File('${base.path}$suffix').exists()) return true;
+      }
+    }
+    return false;
+  }
+
+  /// Holds the databases shared for a run outside the app's start, the
+  /// background poll (#419). Throws [LocalDataBusy] while a start is
+  /// moving them to chacha20 after [upgradeWait].
+  ///
+  /// A lock that cannot be had for another reason -- a folder that is not
+  /// there yet, a file that is not a database -- is not a start at work,
+  /// and a warning that is not polled for is the worse outcome: the run
+  /// goes on without it.
+  Future<void> _holdForRun(Directory? directory) async {
+    if (_runHold != null || portableLocation.isPortable) return;
+    final folder = directory ?? _directory ?? await appDatabaseDirectory();
+    final (:lock, :busy) = await _UseLock.shared(folder, wait: upgradeWait);
+    if (busy) throw const LocalDataBusy();
+    _runHold = lock;
+  }
+
+  /// Ends what [initialize] began for a background run: from here on a
+  /// start may move the files again. Called once its databases are closed.
+  void finishBackgroundRun() {
+    _runHold?.release();
+    _runHold = null;
+  }
+
+  /// Takes the hold of [holdAgainstOtherInstances], waiting for another
+  /// instance that is moving the files. False when that took too long: a
+  /// file opened now could be swapped under the connection.
+  Future<bool> _holdForInstance(Directory directory) async {
+    if (!holdAgainstOtherInstances || _instanceHold != null) return true;
+    final (:lock, :busy) = await _UseLock.shared(directory, wait: upgradeWait);
+    _instanceHold = lock;
+    return !busy;
+  }
+
+  void _releaseInstanceHold() {
+    _instanceHold?.release();
+    _instanceHold = null;
+  }
+
+  /// Lets go of this instance's hold on the databases, for the quit.
+  void releaseForExit() => _releaseInstanceHold();
+
+  /// Whether the start has something to do for #419: a database of the
+  /// household's own still written with aes256cbc, or what an interrupted
+  /// move left beside one. Asked before the lock is taken, so that an
+  /// installation with nothing to move does not take it at all.
+  static Future<bool> _cipherUpgradeDue(Directory directory) async {
+    for (final base in await _databaseBaseFiles(directory)) {
+      if (await File('${base.path}$_rekeyingSuffix').exists() ||
+          await File('${base.path}$_legacyRecoverySuffix').exists()) {
+        return true;
+      }
+      if (!_isKnowledgeIndex(base) &&
+          _isEncryptedFileSync(base) &&
+          _cipherOfFileSync(base.path) == _legacyCipher) {
         return true;
       }
     }
     return false;
+  }
+
+  /// Puts back what a move to chacha20 left half done, before anything
+  /// else looks at the files (#419). Needs no key.
+  ///
+  /// A copy beside its database is only a copy: the original is the one
+  /// in use. Without its database, the original under its recovery name
+  /// is the household, and gets its name back; a rename that fails throws,
+  /// and the start goes to recovery. A re-encrypted copy with neither
+  /// beside it stays, and so does the start in recovery.
+  static Future<void> _settleCipherUpgrade(Directory directory) async {
+    for (final base in await _databaseBaseFiles(directory)) {
+      final copy = File('${base.path}$_rekeyingSuffix');
+      final original = File('${base.path}$_legacyRecoverySuffix');
+      if (await base.exists()) {
+        _discardSync(copy);
+        continue;
+      }
+      if (await original.exists()) {
+        await original.rename(base.path);
+        _discardSync(copy);
+      }
+    }
+  }
+
+  /// Moves the household's own databases from aes256cbc to chacha20 (#419).
+  ///
+  /// Each on a copy, checked and then swapped in, the original kept under
+  /// [_legacyRecoverySuffix] until the copy has opened under its name (see
+  /// [_upgradeCipherSync]). A file that fails stays as it was and in use,
+  /// the failure goes to the error log, and the next start tries again: a
+  /// file that cannot be re-encrypted is no reason to keep anybody out of
+  /// their household. Only what could not be put back sends the start to
+  /// recovery.
+  ///
+  /// Not the knowledge indexes: they hold public text and can be
+  /// gigabytes, and they keep aes256cbc until they are rebuilt. On its own
+  /// isolate, like the encryption upgrade.
+  Future<void> _upgradeCipher(Directory directory, String key) async {
+    final stop = cipherUpgradeStop;
+    _migrating = true;
+    try {
+      for (final base in await _databaseBaseFiles(directory)) {
+        if (_isKnowledgeIndex(base)) continue;
+        final path = base.path;
+        if (!File('$path$_legacyRecoverySuffix').existsSync() &&
+            !(_isEncryptedFileSync(base) &&
+                _cipherOfFileSync(path) == _legacyCipher)) {
+          continue;
+        }
+        try {
+          final finished = stop == null
+              ? await Isolate.run(() => _upgradeCipherSync(path, key))
+              : _upgradeCipherSync(
+                  path,
+                  key,
+                  stopAfter: (step) => stop(path, step),
+                );
+          if (!finished) return;
+        } on Object catch (error, stack) {
+          ErrorLog.instance.record(error, stack, context: 'chacha20 upgrade');
+        }
+      }
+    } finally {
+      _migrating = false;
+    }
+    if (await _hasStrandedCopies(directory)) {
+      _mode = LocalDatabaseEncryptionMode.recoveryRequired;
+    }
   }
 
   /// Whether the key store says an upgrade is under way, asked where
@@ -481,8 +722,7 @@ class LocalDatabaseEncryption {
     for (final base in await _databaseBaseFiles(directory)) {
       for (final file in [
         base,
-        File('${base.path}$_recoverySuffix'),
-        File('${base.path}$_encryptingSuffix'),
+        for (final suffix in _inFlightSuffixes) File('${base.path}$suffix'),
         File('${base.path}-wal'),
         File('${base.path}-shm'),
       ]) {
@@ -590,6 +830,7 @@ class LocalDatabaseEncryption {
     final file = File(
       '${directory.path}${Platform.pathSeparator}$name$_databaseExtension',
     );
+    _opened = true;
     final key = _key;
     if (_mode == LocalDatabaseEncryptionMode.encrypted && key != null) {
       final path = file.path;
@@ -737,6 +978,12 @@ class LocalDatabaseEncryption {
   /// Whether [file] is a database that does not start like a plain one.
   static Future<bool> isEncryptedDatabase(File file) => _isEncryptedFile(file);
 
+  /// Whether [name] is a database under a name a migration gives it while
+  /// it is in flight: the household may be under either name.
+  static bool isMigrationCopy(String name) => _inFlightSuffixes.any(
+    (suffix) => name.endsWith('$_databaseExtension$suffix'),
+  );
+
   /// The key of the installation on this computer, for a carried copy
   /// taking its household over (#392). Read, never written.
   ///
@@ -775,10 +1022,13 @@ class LocalDatabaseEncryption {
       final path = entity.path;
       if (name.endsWith(_databaseExtension)) {
         paths.add(path);
-      } else if (name.endsWith('$_databaseExtension$_recoverySuffix')) {
-        paths.add(path.substring(0, path.length - _recoverySuffix.length));
-      } else if (name.endsWith('$_databaseExtension$_encryptingSuffix')) {
-        paths.add(path.substring(0, path.length - _encryptingSuffix.length));
+        continue;
+      }
+      for (final suffix in _inFlightSuffixes) {
+        if (name.endsWith('$_databaseExtension$suffix')) {
+          paths.add(path.substring(0, path.length - suffix.length));
+          break;
+        }
       }
     }
     final files = [for (final path in paths) File(path)];
@@ -1017,6 +1267,349 @@ void _encryptFileSync(String path, String key, {void Function()? afterCopy}) {
   for (final suffix in ['-wal', '-shm']) {
     final journal = File('$path$suffix');
     if (journal.existsSync()) journal.deleteSync();
+  }
+}
+
+/// Moves the database at [path] from aes256cbc to chacha20 (#419), and
+/// answers false where [stopAfter] stopped it.
+///
+/// The order is what makes every stop harmless, and the start puts back
+/// whatever it finds ([LocalDatabaseEncryption._settleCipherUpgrade]):
+///
+/// 1. `VACUUM INTO` the copy, through a read-write connection with the
+///    original's key, so that a hot journal is rolled back first. The copy
+///    keeps the cipher and the key.
+/// 2. `PRAGMA cipher = 'chacha20'` and `PRAGMA rekey` with the same key
+///    re-encrypt the copy where it is.
+/// 3. The copy must say chacha20 in its header, pass `quick_check` (every
+///    page's tag), and hold the original's `user_version`, schema and rows.
+/// 4. Nothing may have written into the original since step 1: no journal
+///    beside it, the same size and time.
+/// 5. The original is renamed aside, the copy takes its name.
+/// 6. Once the copy opens under that name, the original is deleted. If it
+///    does not, nothing has used it yet, and the original is put back.
+///
+/// Any failure up to step 5 leaves the original where it was and removes
+/// the copy. Never with a recovery copy there already: that is kept,
+/// whatever else is wrong, until the file under its name opens cleanly.
+bool _upgradeCipherSync(
+  String path,
+  String key, {
+  bool Function(String step)? stopAfter,
+}) {
+  bool stopped(String step) => stopAfter?.call(step) ?? false;
+  final database = File(path);
+  final copy = File('$path$_rekeyingSuffix');
+  final original = File('$path$_legacyRecoverySuffix');
+
+  if (original.existsSync()) {
+    // Swapped, and stopped before the original went. Beside anything that
+    // is not the re-encrypted file opening cleanly it is not a state this
+    // leaves, and which of the two is the household nobody here can say.
+    if (database.existsSync() &&
+        _isEncryptedFileSync(database) &&
+        _cipherOfFileSync(path) == _cipher &&
+        _opensCleanlySync(path, key)) {
+      _discardSync(copy);
+      original.deleteSync();
+    }
+    return true;
+  }
+  if (!_isEncryptedFileSync(database) ||
+      _cipherOfFileSync(path) != _legacyCipher) {
+    return true;
+  }
+
+  _discardSync(copy);
+  try {
+    final source = sqlite3.open(path);
+    try {
+      _configureCipher(source, key, cipher: _legacyCipher);
+      _waitForOtherConnections(source);
+      source.execute('VACUUM INTO ${_sqlLiteral(copy.path)}');
+    } finally {
+      source.close();
+    }
+    final copied = database.statSync();
+    if (stopped('copied')) return false;
+
+    final rekeying = sqlite3.open(copy.path);
+    try {
+      _configureCipher(rekeying, key, cipher: _legacyCipher);
+      rekeying.execute('PRAGMA cipher = ${_sqlLiteral(_cipher)}');
+      rekeying.execute('PRAGMA rekey = ${_sqlLiteral(key)}');
+    } finally {
+      rekeying.close();
+    }
+    if (stopped('rekeyed')) return false;
+
+    if (_cipherOfFileSync(copy.path) != _cipher) {
+      throw StateError('The copy of $path was not re-encrypted.');
+    }
+    _expectSameDatabase(path, copy.path, key);
+    if (stopped('verified')) return false;
+
+    // The use lock keeps this version of the app out. A journal or a
+    // change here is something else writing, and the copy would not hold
+    // what it wrote.
+    final now = database.statSync();
+    if (now.modified != copied.modified ||
+        now.size != copied.size ||
+        [
+          for (final suffix in const ['-journal', '-wal']) File('$path$suffix'),
+          for (final suffix in const ['-journal', '-wal'])
+            File('${copy.path}$suffix'),
+        ].any((journal) => journal.existsSync())) {
+      throw StateError('$path was written to while it was re-encrypted.');
+    }
+    database.renameSync(original.path);
+  } on Object {
+    _discardSync(copy);
+    rethrow;
+  }
+  if (stopped('set aside')) return false;
+
+  try {
+    copy.renameSync(path);
+  } on Object {
+    // Whatever stays named as the original is put back by the next start;
+    // until then the start goes to recovery.
+    original.renameSync(path);
+    _discardSync(copy);
+    rethrow;
+  }
+  if (stopped('swapped')) return false;
+
+  if (_cipherOfFileSync(path) != _cipher || !_opensWithKey(path, key)) {
+    // Nothing has opened it yet, and the original is untouched.
+    database.renameSync(copy.path);
+    original.renameSync(path);
+    _discardSync(copy);
+    throw StateError('The re-encrypted $path did not open.');
+  }
+  if (stopped('opened')) return false;
+
+  original.deleteSync();
+  return true;
+}
+
+/// Removes a copy and whatever journals SQLite left beside it. Quietly: a
+/// copy that will not go now goes at the next start.
+void _discardSync(File file) {
+  for (final path in [
+    file.path,
+    '${file.path}-journal',
+    '${file.path}-wal',
+    '${file.path}-shm',
+  ]) {
+    try {
+      final leftover = File(path);
+      if (leftover.existsSync()) leftover.deleteSync();
+    } on FileSystemException {
+      // Next start.
+    }
+  }
+}
+
+/// Whether the database at [path] opens with [key] and passes
+/// `quick_check`, which under chacha20 reads every page's tag.
+bool _opensCleanlySync(String path, String key) {
+  try {
+    final database = sqlite3.open(path, mode: OpenMode.readOnly);
+    try {
+      _configureCipherForFile(database, path, key);
+      _waitForOtherConnections(database);
+      final result = database.select('PRAGMA quick_check');
+      return result.length == 1 && result.first.values.first == 'ok';
+    } finally {
+      database.close();
+    }
+  } on Object {
+    return false;
+  }
+}
+
+/// Throws unless the database at [copyPath] holds what the one at [path]
+/// holds: a sound file, the same `user_version` (Drift's schema version,
+/// which a copy without it would migrate from nothing), the same schema,
+/// and the same rows in every table, compared value by value.
+///
+/// Rows are read in the order the table keeps them, which `VACUUM INTO`
+/// keeps as well. A rowid that is not a column may be renumbered by it and
+/// is not compared.
+void _expectSameDatabase(String path, String copyPath, String key) {
+  final original = sqlite3.open(path, mode: OpenMode.readOnly);
+  try {
+    final copy = sqlite3.open(copyPath, mode: OpenMode.readOnly);
+    try {
+      _configureCipherForFile(original, path, key);
+      _configureCipherForFile(copy, copyPath, key);
+      _waitForOtherConnections(original);
+      final check = copy.select('PRAGMA quick_check');
+      if (check.length != 1 || check.first.values.first != 'ok') {
+        throw StateError('The copy of $path is damaged.');
+      }
+      if (_userVersion(original) != _userVersion(copy) ||
+          !_sameValues(_schema(original), _schema(copy)) ||
+          !_sameRowCounts(_rowCounts(original), _rowCounts(copy))) {
+        throw StateError('The copy of $path does not match it.');
+      }
+      for (final table in _storedTables(original)) {
+        final select =
+            'SELECT * FROM "${table.replaceAll('"', '""')}" '
+            'NOT INDEXED';
+        final from = original.prepare(select);
+        final to = copy.prepare(select);
+        try {
+          final expected = from.selectCursor();
+          final actual = to.selectCursor();
+          while (expected.moveNext()) {
+            if (!actual.moveNext() ||
+                !_sameValues(expected.current.values, actual.current.values)) {
+              throw StateError('The copy of $path differs in $table.');
+            }
+          }
+          if (actual.moveNext()) {
+            throw StateError('The copy of $path differs in $table.');
+          }
+        } finally {
+          to.close();
+          from.close();
+        }
+      }
+    } finally {
+      copy.close();
+    }
+  } finally {
+    original.close();
+  }
+}
+
+int _userVersion(Database database) =>
+    database.select('PRAGMA user_version').first.values.first as int;
+
+List<Object?> _schema(Database database) => [
+  for (final row in database.select(
+    'SELECT type, name, tbl_name, sql FROM sqlite_master ORDER BY type, name',
+  ))
+    row.values,
+];
+
+/// Every table that keeps its own rows: virtual tables are read through
+/// their shadow tables, which are listed themselves.
+List<String> _storedTables(Database database) => [
+  for (final row in database.select(
+    "SELECT name FROM sqlite_master WHERE type = 'table' "
+    "AND sql NOT LIKE 'CREATE VIRTUAL%' ORDER BY name",
+  ))
+    row['name'] as String,
+];
+
+bool _sameValues(Object? a, Object? b) {
+  if (a is List && b is List) {
+    if (a.length != b.length) return false;
+    for (var i = 0; i < a.length; i++) {
+      if (!_sameValues(a[i], b[i])) return false;
+    }
+    return true;
+  }
+  return a == b;
+}
+
+/// Who has the databases in use, kept by SQLite itself (#419).
+///
+/// An empty database of its own beside them, held through a transaction:
+/// shared by whatever uses the databases outside the app's start -- the
+/// background poll for its run, a desktop window for as long as it is
+/// open -- and alone by a start that moves a file to chacha20. SQLite
+/// keeps these locks between the isolates of one process as well as
+/// between processes, and the system ends them with the process: a run
+/// that was killed leaves nothing to clear up. A lock on a file of the
+/// databases themselves would not do: a connection that is open but idle
+/// holds none.
+final class _UseLock {
+  _UseLock._(this._database);
+
+  final Database _database;
+
+  static File _fileIn(Directory directory) =>
+      File('${directory.path}${Platform.pathSeparator}$_useLockName');
+
+  /// Held by nobody else, or null. Never waits: a start does not keep a
+  /// window from appearing over a file that can be moved next time.
+  static _UseLock? exclusive(Directory directory) {
+    final attempt = _take(directory, alone: true);
+    if (attempt.lock != null || attempt.busy) return attempt.lock;
+    // A file that is not a database at all cannot be held by anybody, and
+    // would keep every start from moving anything. It is replaced once.
+    final file = _fileIn(directory);
+    try {
+      if (!file.existsSync() ||
+          file.lengthSync() == 0 ||
+          _isPlaintextFileSync(file)) {
+        return null;
+      }
+      file.deleteSync();
+    } on FileSystemException {
+      return null;
+    }
+    return _take(directory, alone: true).lock;
+  }
+
+  /// Held alongside others, waiting up to [wait] while it is held alone.
+  /// [busy] when it still was.
+  static Future<({_UseLock? lock, bool busy})> shared(
+    Directory directory, {
+    required Duration wait,
+  }) async {
+    final until = DateTime.now().add(wait);
+    while (true) {
+      final attempt = _take(directory, alone: false);
+      if (!attempt.busy || !DateTime.now().isBefore(until)) return attempt;
+      await Future<void>.delayed(const Duration(milliseconds: 50));
+    }
+  }
+
+  static ({_UseLock? lock, bool busy}) _take(
+    Directory directory, {
+    required bool alone,
+  }) {
+    Database? database;
+    try {
+      database = sqlite3.open(_fileIn(directory).path);
+      database.execute('PRAGMA busy_timeout = 0');
+      if (alone) {
+        database.execute('BEGIN EXCLUSIVE');
+      } else {
+        database.execute('BEGIN');
+        database.select('SELECT count(*) FROM sqlite_master');
+      }
+      return (lock: _UseLock._(database), busy: false);
+    } on Object catch (error) {
+      try {
+        database?.close();
+      } on Object {
+        // Nothing held.
+      }
+      const sqliteBusy = 5;
+      return (
+        lock: null,
+        busy: error is SqliteException && error.resultCode == sqliteBusy,
+      );
+    }
+  }
+
+  void release() {
+    try {
+      _database.execute('ROLLBACK');
+    } on Object {
+      // Closing ends it as well.
+    }
+    try {
+      _database.close();
+    } on Object {
+      // The process ends it at the latest.
+    }
   }
 }
 

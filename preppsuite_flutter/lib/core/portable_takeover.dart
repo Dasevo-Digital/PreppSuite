@@ -158,9 +158,9 @@ Future<PortableTakeover> _putTogether({
       if (!name.startsWith(localDatabaseFilePrefix)) continue;
       // An upgrade that stopped half way: the household may be under
       // either name, and copying one of them could be copying the wrong
-      // one. The installation repairs it at its next start.
-      if (name.endsWith('.sqlite.plaintext-recovery') ||
-          name.endsWith('.sqlite.encrypting')) {
+      // one. The installation repairs it at its next start. The same for
+      // the move to chacha20 (#419).
+      if (LocalDatabaseEncryption.isMigrationCopy(name)) {
         return PortableTakeover.failed;
       }
       if (name.endsWith('.sqlite')) databases.add(entity);
