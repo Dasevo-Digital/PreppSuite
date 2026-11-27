@@ -49,11 +49,23 @@ ArticleViewer get articleViewer =>
 
 /// Split out from [articleViewer] so the mapping can be tested; the
 /// platform itself cannot be.
+///
+/// **Linux draws the article itself** (#421). The window there is
+/// WebKitGTK through `desktop_webview_window`, whose `decide-policy`
+/// handler only reports a navigation and lets it go on: the app's refusal
+/// arrives after WebKit has started loading, so a link, a script or a
+/// `<meta http-equiv=refresh>` in a crafted archive could take the page,
+/// and what it says, onto the internet before `window.stop()` lands — the
+/// CSP does not govern navigation. Until the plugin decides in its native
+/// handler, Linux reads with the built-in reader, which loads nothing from
+/// anywhere. Windows keeps its window: WebView2 holds the navigation until
+/// the app has answered.
 ArticleViewer articleViewerFor(TargetPlatform platform) => switch (platform) {
   TargetPlatform.android ||
   TargetPlatform.iOS ||
   TargetPlatform.macOS => ArticleViewer.panel,
-  TargetPlatform.linux || TargetPlatform.windows => ArticleViewer.window,
+  TargetPlatform.windows => ArticleViewer.window,
+  TargetPlatform.linux => ArticleViewer.builtIn,
   // Nothing to embed and no window to open: the app draws it itself.
   TargetPlatform.fuchsia => ArticleViewer.builtIn,
 };
@@ -129,8 +141,9 @@ Future<bool> openArticleWindow({
     // On Windows the answer is honoured: WebView2 holds the navigation
     // until this returns. On Linux the plugin only reports it and lets
     // WebKitGTK carry on whatever comes back, so there it is stopped by
-    // hand. That is a race the request can win; a hard block on Linux
-    // needs the plugin's `decide-policy` handler patched.
+    // hand. That is a race the request can win, which is why Linux opens
+    // no window at all any more ([articleViewerFor], #421); the stop
+    // stays for anything that still gets here.
     window.setOnUrlRequestCallback((url) {
       if (isArchiveUrl(Uri.tryParse(url), uri)) return true;
       if (defaultTargetPlatform == TargetPlatform.linux) {

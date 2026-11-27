@@ -106,10 +106,12 @@ Bilder und Stilangaben ohne weiteres Zutun funktionieren: sie landen alle
 wieder bei derselben Datei.
 
 Auf Android, iOS, iPadOS und macOS steckt diese Komponente in der App.
-Auf **Linux und Windows** gibt es dafür keine Einbettung, deshalb öffnet
-der Artikel dort ein **eigenes Fenster** – gezeichnet von WebKitGTK
-beziehungsweise WebView2, also von der Maschinerie, die auf dem Rechner
-ohnehin liegt. Der Alternativweg wäre, einen ganzen Chromium mitzuliefern:
+Unter **Windows** gibt es dafür keine Einbettung, deshalb öffnet der
+Artikel dort ein **eigenes Fenster** – gezeichnet von WebView2, also von
+der Maschinerie, die auf dem Rechner ohnehin liegt. Unter **Linux**
+zeichnet die App den Artikel selbst (siehe „Lesen ohne
+Browser-Komponente“): Das WebKitGTK-Fenster kann eine Navigation nicht
+rechtzeitig ablehnen, ein präpariertes Archiv käme damit ins Netz (#421). Der Alternativweg wäre, einen ganzen Chromium mitzuliefern:
 ein paar hundert Megabyte gegen eine Desktop-Fassung, die insgesamt siebzig
 wiegt.
 
@@ -277,11 +279,10 @@ Die Messung dazu steht in `texterkennung-messung.md`.
 
 ## Grenzen
 
-**Unter Linux und Windows muss die Browser-Komponente da sein.** Unter
-Windows 11 ist WebView2 dabei, unter Windows 10 nicht immer; unter Linux
-braucht es WebKitGTK, auf Debian und Ubuntu das Paket
-`libwebkit2gtk-4.1-0`. Fehlt sie, sagt die App das beim Öffnen – suchen
-geht weiter, lesen nicht.
+**Unter Windows zeigt erst die Browser-Komponente den ganzen Artikel.**
+Unter Windows 11 ist WebView2 dabei, unter Windows 10 nicht immer. Fehlt
+sie, zeichnet die App den Artikel selbst, mit weniger von seinem Layout.
+Unter Linux ist das seit #421 immer so.
 
 **zstd und xz.** Kiwix komprimiert seit 2020 mit zstd, davor mit xz. Beides
 liest die App. Die älteren Verfahren zlib und bzip2, die das Format noch
@@ -316,9 +317,14 @@ Skripte, kein Formelsatz, keine nach rechts gesetzten Infoboxen. Text,
 Schriftgröße und das Farbschema der App auch im Artikel, was in der
 Browser-Komponente nie der Fall war.
 
-### Wählbar unter Linux und Windows
+### Wählbar unter Windows
 
-Beide Wege sind unter Einstellungen → **Artikel anzeigen** auswählbar.
+Unter Windows sind beide Wege unter Einstellungen → **Artikel anzeigen**
+auswählbar. Unter Linux gibt es die Auswahl nicht mehr: Das
+WebKitGTK-Fenster meldete eine Navigation nur und lud sie trotzdem, ein
+Link oder Skript eines präparierten Archivs konnte also ins Netz, bevor
+die App sie stoppte (#421). Bis das Plugin die Navigation in seinem
+nativen Handler ablehnt, liest Linux mit der einfachen Ansicht.
 Voreingestellt bleibt das eigene Fenster, weil es mehr vom Artikel zeigt:
 Skripte, Formelsatz, das Layout der Seite. Die einfache Ansicht bleibt
 damit das, wofür sie gebaut wurde — ein Rückfall — und wird nur dann zur

@@ -2087,7 +2087,11 @@ tree; the test suite deliberately targets that layer rather than the UI.
   way there cannot be kept inside them.
 - **An article is readable without a browser engine.** Where the system
   has one it is used — a panel on macOS, iOS and Android, a window on
-  Linux and Windows. Where it has not, `article_document.dart` parses the
+  Windows. Linux always draws it itself since #421: WebKitGTK's window
+  through `desktop_webview_window` only reports a navigation and loads
+  it anyway, so a crafted archive could reach the internet before the
+  app's `window.stop()`; a window there needs the plugin to decide in its
+  native `decide-policy` handler first. Where it has not, `article_document.dart` parses the
   page into blocks and spans and `article_reader_screen.dart` draws them
   as ordinary widgets. That case is not exotic: WebKitGTK is not
   installed on a KDE desktop by default and the WebView2 runtime is not
