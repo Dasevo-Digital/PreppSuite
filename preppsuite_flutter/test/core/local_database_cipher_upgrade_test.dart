@@ -4,7 +4,8 @@ import 'dart:math';
 import 'dart:typed_data';
 
 import 'package:drift/drift.dart'
-    show OpeningDetails, QueryExecutor, QueryExecutorUser;
+    show OpeningDetails, QueryExecutor, QueryExecutorUser, Value;
+import 'package:drift/native.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:path/path.dart' as p;
 import 'package:sqlite3/sqlite3.dart';
@@ -13,6 +14,8 @@ import 'package:preppsuite_flutter/core/database_snapshots.dart';
 import 'package:preppsuite_flutter/core/error_log.dart';
 import 'package:preppsuite_flutter/core/local_database_encryption.dart';
 import 'package:preppsuite_flutter/core/portable_data.dart';
+import 'package:preppsuite_flutter/features/knowledge/application/personal_document_index.dart';
+import 'package:preppsuite_flutter/local_db/database.dart';
 
 /// The move of the household's own databases from aes256cbc to chacha20
 /// at the app's start (#419).
@@ -223,6 +226,72 @@ void main() {
       : 'The SQLite library in this build has no cipher.';
 
   group('the start moves the household to chacha20', () {
+    test('the app\'s own household and document index, as 3.0.3 wrote '
+        'them', () async {
+      QueryExecutor legacy(String name) => NativeDatabase(
+        File(pathTo(name)),
+        setup: (database) => database
+          ..execute("PRAGMA cipher = 'aes256cbc'")
+          ..execute('PRAGMA key = ${_sql(key)}'),
+      );
+      final household = AppDatabase.forTesting(legacy(_household));
+      await household.upsertWarning(
+        WarningsCompanion.insert(
+          source: 'bbk',
+          externalId: 'severe-1',
+          countryCode: 'DE',
+          regionKey: const Value('05334'),
+          severity: 'severe',
+          eventType: 'Hochwasser',
+          headline: 'Hochwasserwarnung',
+          effective: DateTime.utc(2026),
+          sent: DateTime.utc(2026),
+          updatedAt: DateTime.utc(2026),
+        ),
+      );
+      await household.close();
+      final index = PersonalDocumentIndex.forTesting(legacy(_documents));
+      await index.replace(id: 'pass', label: 'Reisepass', text: 'Gültig 2031');
+      await index.close();
+      String schema(String name) {
+        final database = _openWith(pathTo(name), key);
+        try {
+          return jsonEncode([
+            database.select('PRAGMA user_version').single.values,
+            for (final row in database.select(
+              'SELECT type, name, sql FROM sqlite_master ORDER BY name',
+            ))
+              row.values,
+          ]);
+        } finally {
+          database.close();
+        }
+      }
+
+      final before = {
+        for (final name in [_household, _documents]) name: schema(name),
+      };
+
+      final encryption = start();
+      await encryption.initialize(directory: directory);
+
+      for (final name in [_household, _documents]) {
+        expect(_cipherOf(pathTo(name)), _chacha20, reason: name);
+        expect(schema(name), before[name], reason: name);
+      }
+      // Drift finds its schema version and migrates nothing.
+      final moved = AppDatabase.forTesting(encryption.open('preppsuite'));
+      final warnings = await moved.watchAllWarnings().first;
+      await moved.close();
+      expect(warnings.single.headline, 'Hochwasserwarnung');
+      final found = PersonalDocumentIndex.forTesting(
+        encryption.open('preppsuite_personal_documents'),
+      );
+      final matches = await found.search('gultig');
+      await found.close();
+      expect(matches.single.id, 'pass');
+    }, skip: noCipher);
+
     test('the household and its document index, every row kept', () async {
       _writeDatabase(pathTo(_household), key);
       _writeDatabase(pathTo(_documents), key, name: 'Unterlagen');
