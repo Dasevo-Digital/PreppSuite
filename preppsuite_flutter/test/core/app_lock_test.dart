@@ -1,5 +1,8 @@
+import 'dart:convert';
 import 'dart:io';
+import 'dart:typed_data';
 
+import 'package:cryptography/cryptography.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:preppsuite_flutter/core/app_lock.dart';
 import 'package:preppsuite_flutter/core/portable_data.dart';
@@ -85,6 +88,100 @@ void main() {
     storage.values.remove('appLock.check.v1');
 
     expect(await store(storage).verify('ein-langer-test-schluessel'), isFalse);
+  });
+
+  group('a verifier keeps the parameters it was made with (#422)', () {
+    const passphrase = 'ein-langer-test-schluessel';
+
+    /// A verifier as every version up to 3.0.3 wrote it: salt beside it,
+    /// no word about the derivation.
+    Future<void> writeUnnamed(_MemoryStorage storage) async {
+      final salt = Uint8List.fromList(List.generate(16, (i) => i));
+      final key = await Argon2id(
+        memory: 1024,
+        iterations: 1,
+        parallelism: 1,
+        hashLength: 32,
+      ).deriveKeyFromPassword(password: passphrase, nonce: salt);
+      final box = await AesGcm.with256bits().encrypt(
+        utf8.encode('preppsuite-app-lock-v1'),
+        secretKey: key,
+      );
+      storage.values
+        ..['appLock.enabled.v1'] = 'true'
+        ..['appLock.salt.v1'] = base64Encode(salt)
+        ..['appLock.check.v1'] = jsonEncode({
+          'nonce': base64Encode(box.nonce),
+          'data': base64Encode(box.cipherText),
+          'mac': base64Encode(box.mac.bytes),
+        });
+    }
+
+    Map<String, Object?> stored(_MemoryStorage storage) =>
+        jsonDecode(storage.values['appLock.check.v1']!) as Map<String, Object?>;
+
+    test('raised defaults still open a lock made before them', () async {
+      // The right passphrase failed once the defaults changed: the
+      // verifier did not say which values had made it.
+      final storage = _MemoryStorage();
+      await store(storage).enable(passphrase);
+      expect(stored(storage), containsPair('m', 1024));
+
+      final stronger = AppLockStore(
+        storage: storage,
+        memory: 2048,
+        iterations: 2,
+      );
+      expect(await stronger.verify('falscher-schluessel'), isFalse);
+      expect(stored(storage), containsPair('m', 1024));
+
+      expect(await stronger.verify(passphrase), isTrue);
+      // Written again with today's values once it was opened.
+      expect(stored(storage), containsPair('m', 2048));
+      expect(stored(storage), containsPair('t', 2));
+      expect(await stronger.verify(passphrase), isTrue);
+    });
+
+    test('a lock from 3.0.3 opens with the values of its day', () async {
+      final storage = _MemoryStorage();
+      await writeUnnamed(storage);
+      final lock = AppLockStore(
+        storage: storage,
+        memory: 2048,
+        iterations: 2,
+        unnamedParameters: (memory: 1024, iterations: 1, parallelism: 1),
+      );
+
+      expect(await lock.verify('falscher-schluessel'), isFalse);
+      expect(stored(storage).containsKey('kdf'), isFalse);
+
+      expect(await lock.verify(passphrase), isTrue);
+      expect(stored(storage), containsPair('kdf', 'argon2id'));
+      expect(stored(storage), containsPair('m', 2048));
+      // The salt beside it still belongs to it, for an older version.
+      expect(stored(storage)['salt'], storage.values['appLock.salt.v1']);
+      expect(await lock.verify(passphrase), isTrue);
+    });
+
+    test('a verifier that asks for absurd work is refused', () async {
+      final storage = _MemoryStorage();
+      await store(storage).enable(passphrase);
+      storage.values['appLock.check.v1'] = jsonEncode({
+        ...stored(storage),
+        'm': 1 << 30,
+      });
+
+      expect(await store(storage).verify(passphrase), isFalse);
+    });
+
+    test('the parameters of 3.0.3 are the installed defaults', () {
+      final lock = AppLockStore(storage: _MemoryStorage());
+      expect(legacyLockParameters, (
+        memory: lock.memory,
+        iterations: lock.iterations,
+        parallelism: lock.parallelism,
+      ));
+    });
   });
 
   group('when the key store will not answer', () {

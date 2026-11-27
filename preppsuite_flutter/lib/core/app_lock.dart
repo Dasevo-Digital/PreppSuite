@@ -3,6 +3,7 @@ import 'dart:math';
 import 'dart:typed_data';
 
 import 'package:cryptography/cryptography.dart';
+import 'package:flutter/foundation.dart' show visibleForTesting;
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
@@ -17,6 +18,11 @@ import 'secure_storage.dart';
 class AppLockStatusUnavailable implements Exception {
   const AppLockStatusUnavailable();
 }
+
+/// The Argon2id parameters every app lock was set up with until 3.0.3,
+/// when a verifier did not yet say which it used (#422). Never change
+/// these: they are what opens those verifiers.
+const legacyLockParameters = (memory: 65536, iterations: 3, parallelism: 1);
 
 abstract interface class AppLockStorage {
   Future<String?> read(String key);
@@ -76,6 +82,7 @@ class AppLockStore {
     this.memory = _defaultMemory,
     this.iterations = _defaultIterations,
     this.parallelism = _defaultParallelism,
+    @visibleForTesting this.unnamedParameters = legacyLockParameters,
   }) : _storage = storage ?? SecureAppLockStorage();
 
   final AppLockStorage _storage;
@@ -102,9 +109,18 @@ class AppLockStore {
 
   /// Production values use 64 MiB and three Argon2id iterations. Tests can
   /// lower the work factor without weakening the installed app.
+  ///
+  /// What a new verifier is made with. A verifier keeps the values it was
+  /// made with (#422), so raising these later does not lock anybody out:
+  /// an older one still opens with its own, and is written again with
+  /// these once it has been opened.
   final int memory;
   final int iterations;
   final int parallelism;
+
+  /// What a verifier that names no parameters was made with: every lock
+  /// set up to 3.0.3. Only tests change it.
+  final ({int memory, int iterations, int parallelism}) unnamedParameters;
 
   /// Whether this copy can have a lock at all: not in a carried data
   /// folder (see the class comment).
@@ -174,20 +190,8 @@ class AppLockStore {
     final salt = Uint8List.fromList(
       List.generate(_saltLength, (_) => Random.secure().nextInt(256)),
     );
-    final key = await _keyFor(passphrase, salt);
-    final box = await AesGcm.with256bits().encrypt(
-      utf8.encode(_marker),
-      secretKey: key,
-    );
     await _storage.write(_saltKey, base64Encode(salt));
-    await _storage.write(
-      _checkKey,
-      jsonEncode({
-        'nonce': base64Encode(box.nonce),
-        'data': base64Encode(box.cipherText),
-        'mac': base64Encode(box.mac.bytes),
-      }),
-    );
+    await _storage.write(_checkKey, await _verifierFor(passphrase, salt));
     await _storage.write(_enabledKey, 'true');
     // Last, and only once the key store has taken all three. A marker set
     // before a write that then fails would claim a lock that does not
@@ -198,24 +202,112 @@ class AppLockStore {
 
   Future<bool> verify(String passphrase) async {
     if (!available) return false;
-    final salt = _decode(await _storage.read(_saltKey));
     final check = await _storage.read(_checkKey);
-    if (salt == null || check == null) return false;
+    if (check == null) return false;
+    final Map<String, Object?> raw;
+    final Uint8List salt;
+    final ({int memory, int iterations, int parallelism}) used;
     try {
-      final raw = jsonDecode(check);
-      if (raw is! Map<String, Object?>) return false;
+      final decoded = jsonDecode(check);
+      if (decoded is! Map<String, Object?>) return false;
+      raw = decoded;
       final nonce = _decode(raw['nonce'] as String?);
       final data = _decode(raw['data'] as String?);
       final mac = _decode(raw['mac'] as String?);
-      if (nonce == null || data == null || mac == null) return false;
+      // A verifier from 3.0.4 on carries its salt and its parameters; an
+      // older one has its salt beside it and was made with the values of
+      // its day, which are not necessarily today's.
+      final named = raw['kdf'] != null;
+      final ownSalt = named
+          ? _decode(raw['salt'] as String?)
+          : _decode(await _storage.read(_saltKey));
+      final parameters = named ? _parametersIn(raw) : unnamedParameters;
+      if (nonce == null ||
+          data == null ||
+          mac == null ||
+          ownSalt == null ||
+          parameters == null) {
+        return false;
+      }
+      salt = ownSalt;
+      used = parameters;
       final clear = await AesGcm.with256bits().decrypt(
         SecretBox(data, nonce: nonce, mac: Mac(mac)),
-        secretKey: await _keyFor(passphrase, salt),
+        secretKey: await _keyFor(
+          passphrase,
+          salt,
+          memory: used.memory,
+          iterations: used.iterations,
+          parallelism: used.parallelism,
+        ),
       );
-      return utf8.decode(clear) == _marker;
+      if (utf8.decode(clear) != _marker) return false;
     } on Object {
       return false;
     }
+    if (raw['kdf'] == null ||
+        used.memory != memory ||
+        used.iterations != iterations ||
+        used.parallelism != parallelism) {
+      await _rewriteVerifier(passphrase, salt);
+    }
+    return true;
+  }
+
+  /// Writes the verifier again with today's parameters, in one write and
+  /// with the salt it had: the salt stored beside it stays the one that
+  /// belongs to it, so there is no moment at which the two disagree.
+  ///
+  /// Best effort. The passphrase was right; a key store that will not
+  /// take the new verifier leaves the old one, which still opens.
+  Future<void> _rewriteVerifier(String passphrase, Uint8List salt) async {
+    try {
+      await _storage.write(_checkKey, await _verifierFor(passphrase, salt));
+    } on Object {
+      // Kept as it was.
+    }
+  }
+
+  /// The verifier for [passphrase]: the marker sealed with the key derived
+  /// from it, beside the salt and every parameter that derivation took.
+  Future<String> _verifierFor(String passphrase, Uint8List salt) async {
+    final box = await AesGcm.with256bits().encrypt(
+      utf8.encode(_marker),
+      secretKey: await _keyFor(
+        passphrase,
+        salt,
+        memory: memory,
+        iterations: iterations,
+        parallelism: parallelism,
+      ),
+    );
+    return jsonEncode({
+      'kdf': 'argon2id',
+      'm': memory,
+      't': iterations,
+      'p': parallelism,
+      'salt': base64Encode(salt),
+      'nonce': base64Encode(box.nonce),
+      'data': base64Encode(box.cipherText),
+      'mac': base64Encode(box.mac.bytes),
+    });
+  }
+
+  /// The parameters a verifier names, or null when it names an unknown
+  /// derivation or values out of any sane range.
+  static ({int memory, int iterations, int parallelism})? _parametersIn(
+    Map<String, Object?> raw,
+  ) {
+    if (raw['kdf'] != 'argon2id') return null;
+    final m = raw['m'];
+    final t = raw['t'];
+    final p = raw['p'];
+    if (m is! int || t is! int || p is! int) return null;
+    // Bounded, so that a verifier cannot ask for gigabytes or for hours.
+    if (m < 8 || m > 1 << 20 || t < 1 || t > 64 || p < 1 || p > 16) {
+      return null;
+    }
+    return (memory: m, iterations: t, parallelism: p);
   }
 
   /// Whether the household chose to open the lock with face or
@@ -280,7 +372,13 @@ class AppLockStore {
     await _rememberConfigured(false);
   }
 
-  Future<SecretKey> _keyFor(String passphrase, Uint8List salt) {
+  static Future<SecretKey> _keyFor(
+    String passphrase,
+    Uint8List salt, {
+    required int memory,
+    required int iterations,
+    required int parallelism,
+  }) {
     return Argon2id(
       memory: memory,
       iterations: iterations,
