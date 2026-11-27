@@ -3,6 +3,7 @@ import 'dart:io';
 import 'dart:math';
 
 import 'package:flutter_test/flutter_test.dart';
+import 'package:path/path.dart' as p;
 import 'package:sqlite3/sqlite3.dart';
 
 import 'package:preppsuite_flutter/core/local_database_encryption.dart';
@@ -38,13 +39,22 @@ String _freshKey() {
 
 String _sqlLiteral(String value) => "'${value.replaceAll("'", "''")}'";
 
+/// What the app encrypts with since #419, and what 3.0.3 encrypted with.
+const _chacha20 = 'chacha20';
+const _aes256cbc = 'aes256cbc';
+
 /// A database holding one recognisable row, so that "the household came
 /// back" can be asserted on its contents rather than on a file existing.
-void _writeHousehold(String path, String name, {String? key}) {
+void _writeHousehold(
+  String path,
+  String name, {
+  String? key,
+  String cipher = _chacha20,
+}) {
   final database = sqlite3.open(path);
   try {
     if (key != null) {
-      database.execute("PRAGMA cipher = 'aes256cbc'");
+      database.execute("PRAGMA cipher = '$cipher'");
       database.execute('PRAGMA key = ${_sqlLiteral(key)}');
     }
     database
@@ -55,11 +65,13 @@ void _writeHousehold(String path, String name, {String? key}) {
   }
 }
 
-String _readHousehold(String path, {String? key}) {
+/// Reads with the cipher the file says it was written with, or with
+/// [cipher] where a test wants to know whether that one opens it.
+String _readHousehold(String path, {String? key, String? cipher}) {
   final database = sqlite3.open(path);
   try {
     if (key != null) {
-      database.execute("PRAGMA cipher = 'aes256cbc'");
+      database.execute("PRAGMA cipher = '${cipher ?? _cipherOf(path)}'");
       database.execute('PRAGMA key = ${_sqlLiteral(key)}');
     }
     return database.select('SELECT name FROM household').single['name']
@@ -67,6 +79,76 @@ String _readHousehold(String path, {String? key}) {
   } finally {
     database.close();
   }
+}
+
+/// Byte 20 of the header, which every cipher keeps in the clear: the
+/// space each page keeps free, 32 for chacha20's nonce and tag, none for
+/// aes256cbc.
+String _cipherOf(String path) {
+  final handle = File(path).openSync();
+  try {
+    return handle.readSync(24)[20] == 0 ? _aes256cbc : _chacha20;
+  } finally {
+    handle.closeSync();
+  }
+}
+
+/// Whether the encrypted database at [path] still reads as sound after
+/// one bit of one of its later pages was flipped on the disk.
+bool _changedPageGoesUnnoticed(String path, String key) {
+  final bytes = File(path).readAsBytesSync();
+  expect(bytes.length, greaterThan(4 * 4096), reason: 'needs a few pages');
+  bytes[3 * 4096 + 1000] ^= 0x01;
+  File(path).writeAsBytesSync(bytes, flush: true);
+  final database = sqlite3.open(path, mode: OpenMode.readOnly);
+  try {
+    database.execute("PRAGMA cipher = '${_cipherOf(path)}'");
+    database.execute('PRAGMA key = ${_sqlLiteral(key)}');
+    final check = database.select('PRAGMA integrity_check');
+    database.select('SELECT * FROM pages');
+    return check.length == 1 && check.single.values.first == 'ok';
+  } on SqliteException {
+    return false;
+  } finally {
+    database.close();
+  }
+}
+
+/// Fills a table across several pages.
+void _fillPages(Database database) {
+  database.execute('CREATE TABLE IF NOT EXISTS pages (text TEXT NOT NULL)');
+  for (var i = 0; i < 300; i++) {
+    database.execute(
+      'INSERT INTO pages VALUES (?)',
+      ['Seite $i ${'x' * 120}'],
+    );
+  }
+}
+
+/// Leaves [path] as a crash in the middle of a write leaves it: a database
+/// with pages already changed on the disk, and the hot journal that puts
+/// them back.
+void _leaveHotJournal(String path, String key, String cipher) {
+  final source = '$path.source';
+  final database = sqlite3.open(source);
+  try {
+    database.execute("PRAGMA cipher = '$cipher'");
+    database.execute('PRAGMA key = ${_sqlLiteral(key)}');
+    database.execute('CREATE TABLE household (name TEXT NOT NULL)');
+    database.execute("INSERT INTO household VALUES ('Beispielperson')");
+    _fillPages(database);
+    // A cache too small to hold the transaction spills its pages into the
+    // file before the commit.
+    database.execute('PRAGMA cache_size = 2');
+    database.execute('BEGIN');
+    database.execute("UPDATE pages SET text = 'geaendert'");
+    File(source).copySync(path);
+    File('$source-journal').copySync('$path-journal');
+    database.execute('ROLLBACK');
+  } finally {
+    database.close();
+  }
+  File(source).deleteSync();
 }
 
 bool _looksLikePlaintext(File file) {
@@ -716,6 +798,146 @@ void main() {
     }, skip: noCipher);
   });
 
+  group('the cipher (#419)', () {
+    test('a new database is chacha20, and a changed page is noticed', () async {
+      final encryption = LocalDatabaseEncryption(storage: storage);
+      await encryption.initialize(directory: directory);
+      expect(encryption.mode, LocalDatabaseEncryptionMode.encrypted);
+
+      final database = AppDatabase.forTesting(
+        encryption.open('preppsuite_personal_documents'),
+      );
+      await database.customStatement(
+        'CREATE TABLE pages (text TEXT NOT NULL)',
+      );
+      await database.transaction(() async {
+        for (var i = 0; i < 300; i++) {
+          await database.customStatement('INSERT INTO pages VALUES (?)', [
+            'Seite $i ${'x' * 120}',
+          ]);
+        }
+      });
+      await database.close();
+
+      final path = pathTo('preppsuite_personal_documents');
+      expect(_cipherOf(path), _chacha20);
+      // aes256cbc read the changed page as data, and even
+      // `integrity_check` said ok.
+      expect(_changedPageGoesUnnoticed(path, storage.values[_keyKey]!), false);
+    }, skip: noCipher);
+
+    test('the upgrade of a plain household encrypts with chacha20', () async {
+      final path = pathTo('preppsuite');
+      _writeHousehold(path, 'Beispielperson');
+      final plain = sqlite3.open(path);
+      _fillPages(plain);
+      plain.close();
+
+      final encryption = LocalDatabaseEncryption(storage: storage);
+      await encryption.initialize(directory: directory);
+      await encryption.migrateExistingDatabases();
+
+      final key = storage.values[_keyKey]!;
+      expect(_cipherOf(path), _chacha20);
+      expect(_readHousehold(path, key: key), 'Beispielperson');
+      expect(
+        () => _readHousehold(path, key: key, cipher: _aes256cbc),
+        throwsA(isA<SqliteException>()),
+      );
+      expect(_changedPageGoesUnnoticed(path, key), isFalse);
+    }, skip: noCipher);
+
+    test('what 3.0.3 encrypted with aes256cbc still opens', () async {
+      final key = _freshKey();
+      final household = pathTo('preppsuite');
+      final index = pathTo('preppsuite_knowledge_ab12');
+      _writeHousehold(
+        household,
+        'Beispielperson',
+        key: key,
+        cipher: _aes256cbc,
+      );
+      _writeHousehold(index, 'Wissen', key: key, cipher: _aes256cbc);
+      storage.values[_modeKey] = 'encrypted';
+      storage.values[_keyKey] = key;
+
+      // The background isolate's way in, which never changes a file.
+      final encryption = LocalDatabaseEncryption(storage: storage);
+      await encryption.initialize(
+        directory: directory,
+        repairInterruptedMigration: false,
+      );
+      expect(encryption.mode, LocalDatabaseEncryptionMode.encrypted);
+
+      for (final (name, expected) in [
+        ('preppsuite', 'Beispielperson'),
+        ('preppsuite_knowledge_ab12', 'Wissen'),
+      ]) {
+        final database = AppDatabase.forTesting(encryption.open(name));
+        final rows = await database
+            .customSelect('SELECT name FROM household')
+            .get();
+        await database.close();
+        expect(rows.single.read<String>('name'), expected);
+      }
+      expect(encryption.opensCleanly(File(household)), isTrue);
+      expect(_cipherOf(household), _aes256cbc);
+      expect(_cipherOf(index), _aes256cbc);
+    }, skip: noCipher);
+
+    test('a hot journal is rolled back with the cipher of its file', () async {
+      // The reason the cipher is read from the header and not found out by
+      // trying: a connection set to the wrong one rolls the journal back
+      // through it. aes256cbc on a chacha20 file wrote garbage over the
+      // pages and deleted the journal.
+      for (final cipher in [_chacha20, _aes256cbc]) {
+        final folder = await directory.createTemp(cipher);
+        final path = '${folder.path}/preppsuite.sqlite';
+        final key = _freshKey();
+        _leaveHotJournal(path, key, cipher);
+        final store = _MemoryKeyStorage()
+          ..values[_modeKey] = 'encrypted'
+          ..values[_keyKey] = key;
+
+        final encryption = LocalDatabaseEncryption(storage: store);
+        await encryption.initialize(
+          directory: folder,
+          repairInterruptedMigration: false,
+        );
+        final database = AppDatabase.forTesting(encryption.open('preppsuite'));
+        final changed = await database
+            .customSelect(
+              "SELECT count(*) AS n FROM pages WHERE text = 'geaendert'",
+            )
+            .getSingle();
+        final check = await database
+            .customSelect('PRAGMA integrity_check')
+            .get();
+        await database.close();
+
+        expect(changed.read<int>('n'), 0, reason: cipher);
+        expect(check.single.data.values.single, 'ok', reason: cipher);
+        expect(_readHousehold(path, key: key), 'Beispielperson');
+        expect(File('$path-journal').existsSync(), isFalse);
+      }
+    }, skip: noCipher);
+
+    test('a copy for a carried folder is plain from either cipher', () async {
+      for (final cipher in [_chacha20, _aes256cbc]) {
+        final key = _freshKey();
+        final source = pathTo('preppsuite-$cipher');
+        final target = p.join(directory.path, 'plain-$cipher.sqlite');
+        _writeHousehold(source, 'Beispielperson', key: key, cipher: cipher);
+
+        await copyDatabaseAsPlaintext(source, target, key: key);
+
+        expect(_looksLikePlaintext(File(target)), isTrue, reason: cipher);
+        expect(_readHousehold(target), 'Beispielperson');
+        expect(_cipherOf(source), cipher);
+      }
+    }, skip: noCipher);
+  });
+
   group('a folder that travels', () {
     test('is never encrypted on its own', () async {
       // The key would stay in this machine's keychain while the folder
@@ -801,7 +1023,14 @@ void main() {
     test('what an earlier version encrypted here opens, and nothing new is '
         'encrypted', () async {
       final key = _freshKey();
-      _writeHousehold(pathTo('preppsuite'), 'Beispielperson', key: key);
+      // 3.0.3 encrypted with aes256cbc; a carried folder is never moved
+      // to chacha20 (#419).
+      _writeHousehold(
+        pathTo('preppsuite'),
+        'Beispielperson',
+        key: key,
+        cipher: _aes256cbc,
+      );
       storage.values[_modeKey] = 'encrypted';
       storage.values[_keyKey] = key;
       await carry();

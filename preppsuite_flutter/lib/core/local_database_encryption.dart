@@ -29,6 +29,19 @@ const _sqliteHeader = 'SQLite format 3\u0000';
 const _recoverySuffix = '.plaintext-recovery';
 const _encryptingSuffix = '.encrypting';
 
+/// The cipher every encrypted database is created with (#419).
+///
+/// ChaCha20-Poly1305, SQLite3MultipleCiphers' own default. Every page
+/// carries a tag, so a page that changed on the disk -- a flipped bit, a
+/// torn write -- is reported as damage rather than read as data.
+const _cipher = 'chacha20';
+
+/// What 3.0.3 and earlier encrypted with, still read.
+///
+/// AES-256 in CBC mode keeps no tag: a changed page decrypts to other
+/// contents, and even `PRAGMA integrity_check` said ok.
+const _legacyCipher = 'aes256cbc';
+
 enum LocalDatabaseEncryptionMode { plaintext, encrypted, recoveryRequired }
 
 /// What [LocalDatabaseEncryption.readInstallationKey] found.
@@ -588,7 +601,7 @@ class LocalDatabaseEncryption {
         setup: (database) {
           if (carried) {
             if (_isEncryptedFileSync(File(path))) {
-              _configureCipher(database, key);
+              _configureCipherForFile(database, path, key);
             }
           } else {
             _configureCipherForFile(database, path, key);
@@ -899,7 +912,7 @@ void _copyAsPlaintextSync(String source, String target, String? key) {
   // installation does at its next start anyway.
   final original = sqlite3.open(source, mode: OpenMode.readWrite);
   try {
-    if (encrypted) _configureCipher(original, key!);
+    if (encrypted) _configureCipherForFile(original, source, key!);
     _waitForOtherConnections(original);
     original.execute('VACUUM INTO ${_sqlLiteral(partial.path)}');
   } finally {
@@ -908,11 +921,11 @@ void _copyAsPlaintextSync(String source, String target, String? key) {
 
   try {
     // `VACUUM INTO` keeps the cipher: the copy is as encrypted as its
-    // original until it is rekeyed to nothing.
+    // original, with the same one, until it is rekeyed to nothing.
     if (encrypted) {
       final copy = sqlite3.open(partial.path);
       try {
-        _configureCipher(copy, key!);
+        _configureCipherForFile(copy, partial.path, key!);
         copy.execute("PRAGMA rekey = ''");
       } finally {
         copy.close();
@@ -925,7 +938,7 @@ void _copyAsPlaintextSync(String source, String target, String? key) {
     final from = sqlite3.open(source, mode: OpenMode.readOnly);
     final copy = sqlite3.open(partial.path, mode: OpenMode.readOnly);
     try {
-      if (encrypted) _configureCipher(from, key!);
+      if (encrypted) _configureCipherForFile(from, source, key!);
       _waitForOtherConnections(from);
       if (!_sameRowCounts(_rowCounts(from), _rowCounts(copy))) {
         throw StateError('The copy of $source does not match it.');
@@ -979,7 +992,7 @@ void _encryptFileSync(String path, String key, {void Function()? afterCopy}) {
   // cipher is only selected, and `PRAGMA rekey` does the encrypting.
   final encrypting = sqlite3.open(temporary.path);
   try {
-    encrypting.execute("PRAGMA cipher = 'aes256cbc'");
+    encrypting.execute('PRAGMA cipher = ${_sqlLiteral(_cipher)}');
     encrypting.execute('PRAGMA rekey = ${_sqlLiteral(key)}');
   } finally {
     encrypting.close();
@@ -1007,16 +1020,20 @@ void _encryptFileSync(String path, String key, {void Function()? afterCopy}) {
   }
 }
 
-/// Applies the key to everything except a file that is readable plaintext.
+/// Applies the key to everything except a file that is readable plaintext,
+/// with the cipher that file was written with.
 ///
 /// A `PRAGMA key` on a plaintext database does not leave it readable -- it
 /// fails to open at all.  Deciding per file rather than per installation is
 /// what keeps a half-finished migration harmless: the encrypted files open
 /// with the key, the ones it did not reach yet open without it, and a file
-/// that does not exist yet is created encrypted.
+/// that does not exist yet is created encrypted, with chacha20 (#419). The
+/// cipher is decided per file as well: an aes256cbc file the move to
+/// chacha20 has not reached, a daily copy taken before it, and a knowledge
+/// index from 3.0.3 all still open.
 void _configureCipherForFile(dynamic database, String path, String key) {
   if (_isPlaintextFileSync(File(path))) return;
-  _configureCipher(database, key);
+  _configureCipher(database, key, cipher: _cipherOfFileSync(path));
 }
 
 /// Whether [file] holds a database and it does not start like a plain one.
@@ -1043,7 +1060,7 @@ bool _opensWithKey(String path, String key) {
   try {
     final database = sqlite3.open(path, mode: OpenMode.readOnly);
     try {
-      _configureCipher(database, key);
+      _configureCipherForFile(database, path, key);
       database.select('SELECT count(*) FROM sqlite_master');
       return true;
     } finally {
@@ -1118,11 +1135,48 @@ void _waitForOtherConnections(dynamic database) {
   database.execute('PRAGMA busy_timeout = 5000');
 }
 
-void _configureCipher(dynamic database, String key) {
-  // SQLite3MultipleCiphers uses aes256cbc as its supported default cipher;
-  // setting it explicitly makes a future library default change harmless.
-  database.execute("PRAGMA cipher = 'aes256cbc'");
+/// Selects [cipher] and applies [key], before anything is read.
+///
+/// Always named, never left to the library: its default is chacha20 now,
+/// and 3.0.3 wrote aes256cbc under a comment that called that the default
+/// (#419). A connection set to the wrong one of the two is not merely
+/// refused -- see [_cipherOfFileSync].
+void _configureCipher(dynamic database, String key, {String cipher = _cipher}) {
+  database.execute('PRAGMA cipher = ${_sqlLiteral(cipher)}');
   database.execute('PRAGMA key = ${_sqlLiteral(key)}');
+}
+
+/// The cipher the encrypted database at [path] was written with (#419).
+///
+/// Read from its header, not found out by trying. SQLite3MultipleCiphers
+/// keeps bytes 16 to 23 of the file in the clear under every cipher, so
+/// that SQLite can learn the page size before anything is decrypted, and
+/// byte 20 is the space each page keeps free at its end. chacha20 keeps
+/// 32 bytes there for its nonce and tag; aes256cbc keeps none, which is
+/// also why it cannot tell a changed page.
+///
+/// Trying is what suggests itself, and it can destroy the file. A
+/// read-write connection set to the wrong cipher rolls a hot journal back
+/// through it: an aes256cbc key on a chacha20 file left with a journal by
+/// a crash wrote the journal's pages back as garbage, and deleted the
+/// journal. A read-only try cannot tell either; it stops at the journal.
+///
+/// A file too short for a header is a new one, and gets chacha20. So does
+/// one that keeps a reserve neither cipher keeps: whatever it is, the
+/// cipher with a tag refuses it rather than writing into it.
+String _cipherOfFileSync(String path) {
+  try {
+    final handle = File(path).openSync();
+    try {
+      final header = handle.readSync(24);
+      if (header.length < 24) return _cipher;
+      return header[20] == 0 ? _legacyCipher : _cipher;
+    } finally {
+      handle.closeSync();
+    }
+  } on FileSystemException {
+    return _cipher;
+  }
 }
 
 String _sqlLiteral(String value) => "'${value.replaceAll("'", "''")}'";
