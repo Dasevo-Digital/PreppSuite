@@ -38,9 +38,11 @@ import 'dart:isolate';
 import 'dart:typed_data';
 
 import '../../../core/bounded_input.dart';
+import '../../../core/resource_limits.dart';
 
 import 'package:cryptography/cryptography.dart';
 import 'package:cryptography/dart.dart';
+import 'package:flutter/foundation.dart' show visibleForTesting;
 
 import '../../maps/application/pmtiles_archive.dart' show ByteRangeSource;
 import '../../sharing/application/folder_crypto.dart';
@@ -57,10 +59,16 @@ const _endTag = 0x45; // E
 const _nonceLength = 12;
 const _macLength = 16;
 
-/// The largest header a reader accepts. A household's rows are a few
-/// megabytes; a length beyond this is a damaged or hostile file, and
-/// believing it would mean allocating whatever it claims.
-const _maxHeaderLength = 512 * 1024 * 1024;
+/// The largest header a container may have (#420).
+///
+/// The header is the household's rows and settings, read whole, decoded
+/// and parsed before anything in the file is checked. Up to 3.0.3 it could
+/// claim 512 MiB, and a crafted file could take a telephone's memory with
+/// it. A household is a few megabytes; the shared folder already refuses a
+/// device file of the same rows above [maxSnapshotBytes], and the slack on
+/// top is for the settings and the list of files beside them. The writer
+/// keeps to it as well, so no backup is written that cannot be read back.
+const backupMaxHeaderBytes = maxSnapshotBytes + 8 * 1024 * 1024;
 const _maxTrailerLength = 64 * 1024;
 const _maxChunkLength = backupChunkSize + _nonceLength + _macLength;
 
@@ -119,13 +127,25 @@ class BackupCancellation extends CancellationToken {
 /// Writes a container. One entry at a time, in the order the header
 /// lists them.
 class BackupWriter {
-  BackupWriter(this._out, this._key);
+  BackupWriter(
+    this._out,
+    this._key, {
+    @visibleForTesting this.maxHeaderBytes = backupMaxHeaderBytes,
+  });
 
   final RandomAccessFile _out;
   final FolderKey _key;
 
+  /// [backupMaxHeaderBytes], smaller only in tests.
+  final int maxHeaderBytes;
+
   Future<void> writeHeader(Map<String, Object?> envelope) async {
     final header = utf8.encode(jsonEncode(envelope));
+    if (header.length > maxHeaderBytes) {
+      // Refused here rather than written: a reader would refuse it later,
+      // when the backup is all that is left.
+      throw const BackupFormatException('household too large for a backup');
+    }
     final start = BytesBuilder(copy: false)
       ..add(ascii.encode(_magic))
       ..add(_u16(backupContainerVersion))
@@ -217,7 +237,7 @@ class BackupReader {
       throw const BackupFormatException('unknown container version');
     }
     final length = view.getUint32(_magic.length + 2, Endian.little);
-    if (length > _maxHeaderLength) {
+    if (length > backupMaxHeaderBytes) {
       throw const BackupFormatException('header too large');
     }
     final offset = start.length;

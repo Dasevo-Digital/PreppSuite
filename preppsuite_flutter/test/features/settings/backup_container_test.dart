@@ -5,6 +5,7 @@ import 'dart:typed_data';
 import 'package:drift/drift.dart' show Value;
 import 'package:drift/native.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:preppsuite_flutter/core/resource_limits.dart';
 import 'package:preppsuite_flutter/features/maps/application/pmtiles_archive.dart';
 import 'package:preppsuite_flutter/features/settings/application/backup_container.dart';
 import 'package:preppsuite_flutter/features/settings/application/backup_files.dart';
@@ -701,6 +702,49 @@ void main() {
     );
     await out.close();
   });
+
+  group('a header that claims too much (#420)', () {
+    test('is refused before a byte of it is read', () async {
+      // The length field says one byte more than any backup may have.
+      final start = BytesBuilder()
+        ..add(ascii.encode('PSBACKUP'))
+        ..add([backupContainerVersion, 0])
+        ..add(
+          (ByteData(4)..setUint32(0, backupMaxHeaderBytes + 1, Endian.little))
+              .buffer
+              .asUint8List(),
+        );
+      final source = _CountingSource(start.takeBytes());
+
+      await expectLater(
+        BackupReader.open(source),
+        throwsA(isA<BackupFormatException>()),
+      );
+      expect(source.largestRead, lessThanOrEqualTo(14));
+    });
+
+    test('is not written either', () async {
+      final file = File('${temp.path}/too-large.backup');
+      final out = await file.open(mode: FileMode.write);
+      addTearDown(out.close);
+      final writer = BackupWriter(
+        out,
+        FolderKey(Uint8List.fromList(List.filled(32, 7))),
+        maxHeaderBytes: 64,
+      );
+
+      await expectLater(
+        writer.writeHeader({'rows': 'x' * 100}),
+        throwsA(isA<BackupFormatException>()),
+      );
+      expect(await out.length(), 0);
+    });
+
+    test('leaves room for every household the shared folder takes', () {
+      expect(backupMaxHeaderBytes, greaterThan(maxSnapshotBytes));
+      expect(backupMaxHeaderBytes, lessThanOrEqualTo(128 * 1024 * 1024));
+    });
+  });
 }
 
 /// Where each entry of a container keeps its chunks and its trailer: the
@@ -739,4 +783,23 @@ int _indexOf(List<int> haystack, List<int> needle) {
     return i;
   }
   return -1;
+}
+
+/// Bytes in memory that remember the largest single read asked of them.
+class _CountingSource implements ByteRangeSource {
+  _CountingSource(this.bytes);
+
+  final Uint8List bytes;
+  var largestRead = 0;
+
+  @override
+  Future<Uint8List> read(int offset, int length) async {
+    if (length > largestRead) largestRead = length;
+    if (offset >= bytes.length) return Uint8List(0);
+    final end = offset + length > bytes.length ? bytes.length : offset + length;
+    return Uint8List.sublistView(bytes, offset, end);
+  }
+
+  @override
+  Future<void> close() async {}
 }
